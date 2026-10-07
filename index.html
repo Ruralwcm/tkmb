@@ -477,6 +477,19 @@ tr:hover td { background:#faf9ff; }
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal" style="display:none">
+  <div class="modal-card">
+    <h3>📋 Xác nhận thông tin Mặt Bằng</h3>
+    <div id="confirmBody" style="font-size:12px;line-height:1.8;margin-bottom:14px;background:#f8f9fb;padding:12px;border-radius:8px"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">⚠️ Vui lòng kiểm tra kỹ trước khi gửi. Sau khi gửi sẽ chờ GĐV phê duyệt.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">Hủy</button>
+      <button class="btn btn-success" id="btnConfirmSend" onclick="doSubmitMB()">✅ Đồng ý gửi</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══ DATA ═══
 const STEP_SLA = [
@@ -672,8 +685,10 @@ function onTinhChange() {
   CASCADE_DATA[gdv][qlkv][tinh].forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h; huyenSel.appendChild(o); });
 }
 
-// ═══ SUBMIT MB ═══
-async function submitMB() {
+// ═══ SUBMIT MB (2-step: confirm → gửi) ═══
+let pendingMBData = null;
+
+function submitMB() {
   const gdv = document.getElementById('mbGDV').value;
   const qlkv = document.getElementById('mbQLKV').value;
   const tinh = document.getElementById('mbTinh').value;
@@ -700,42 +715,74 @@ async function submitMB() {
     note: ''
   };
 
-  // Try GAS first, fallback to local
-  if (GAS_URL) {
-    try {
-      const resp = await fetch(GAS_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'text/plain' }
-      });
-      const result = await resp.json();
-      if (result.success) {
-        alert('✅ ' + result.message);
-        return;
-      }
-      alert('⚠️ Lỗi GAS: ' + result.error);
-    } catch (e) {
-      alert('⚠️ Không kết nối được GAS, lưu tạm local');
-    }
-  }
+  // Build confirmation summary
+  const lines = [
+    '<strong>🏪 ' + data.addr + '</strong>',
+    '📍 ' + data.huyen + ', ' + data.tinh,
+    '👤 GĐV: ' + data.gdv + ' · QLKV: ' + data.qlkv,
+  ];
+  if (data.area) lines.push('📐 DT: ' + data.area + 'm² · MT: ' + (data.front||'—') + 'm');
+  if (data.price) lines.push('💰 Giá: ' + data.price + 'tr/th · Cọc: ' + (data.deposit||'—') + 'tr · ' + (data.payment||'—'));
+  if (data.legal) lines.push('📋 Pháp lý: ' + data.legal + ' · Hiện trạng: ' + (data.condition||'—'));
+  if (data.gtName) lines.push('🤝 Người GT: ' + data.gtName + (data.gtMNV ? ' · MNV '+data.gtMNV : ''));
+  if (data.bct) lines.push('🏠 BCT: ' + data.bct + (data.bctPhone ? ' · '+data.bctPhone : ''));
 
-  // Fallback: local storage
-  const mb = {
-    id: 'MB-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*900+100)),
-    ...data,
-    status: 'Chưa duyệt', createdAt: new Date().toISOString(),
-    steps: [
-      {s:1,actor:'QLKV',appr:'GĐV',r:'Pending',date:''},{s:2,actor:'TKMB',appr:'GĐ TKMB',r:'None',date:''},
-      {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},
-      {s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
-    ]
-  };
-  MB_DATA.unshift(mb);
-  alert('✅ Đã gửi MB: ' + mb.id + ' (local)\n→ Chờ GĐV duyệt (B1) · SLA: 24h');
-  renderDash(); renderTienDo(); renderDSMB(); populateChkNSO();
+  document.getElementById('confirmBody').innerHTML = lines.join('<br>');
+  pendingMBData = data;
+  document.getElementById('confirmModal').style.display = 'flex';
 }
 
-// ═══ DASHBOARD ═══
+function closeConfirm() {
+  document.getElementById('confirmModal').style.display = 'none';
+  pendingMBData = null;
+}
+
+async function doSubmitMB() {
+  if (!pendingMBData) return;
+  const btn = document.getElementById('btnConfirmSend');
+  btn.disabled = true; btn.textContent = '⏳ Đang gửi...';
+
+  // Try GAS
+  if (GAS_URL) {
+    try {
+      const resp = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(pendingMBData), headers: { 'Content-Type': 'text/plain' } });
+      const result = await resp.json();
+      if (result.success) { closeConfirm(); showSuccessToast(result.mbId); return; }
+      alert('⚠️ Lỗi: ' + (result.error || 'Không xác định'));
+      btn.disabled = false; btn.textContent = '✅ Đồng ý gửi';
+      return;
+    } catch (e) { alert('⚠️ Không kết nối được GAS, lưu tạm local'); }
+  }
+
+  // Fallback local
+  const mb = { id: 'MB-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*900+100)), ...pendingMBData, status: 'Chưa duyệt', createdAt: new Date().toISOString(),
+    steps: [{s:1,actor:'QLKV',appr:'GĐV',r:'Pending',date:''},{s:2,actor:'TKMB',appr:'GĐ TKMB',r:'None',date:''},{s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}] };
+  MB_DATA.unshift(mb);
+  closeConfirm(); showSuccessToast(mb.id);
+}
+
+function showSuccessToast(mbId) {
+  // Clear form
+  ['mbGDV','mbQLKV','mbTinh','mbHuyen','mbAddr','mbMapLink','mbArea','mbFront','mbPrice','mbPayment','mbDeposit','mbDuration','mbLegal','mbCondition','mbHandover','mbGTName','mbGTMNV','mbBCT','mbBCTPhone'].forEach(id => {
+    const el = document.getElementById(id); if (el) { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }
+  });
+  document.getElementById('mapResult').style.display = 'none';
+  document.getElementById('mbQLKV').disabled = document.getElementById('mbTinh').disabled = document.getElementById('mbHuyen').disabled = true;
+  document.getElementById('mbQLKV').innerHTML = '<option value="">-- Chọn QLKV --</option>';
+  document.getElementById('mbTinh').innerHTML = '<option value="">-- Chọn Tỉnh/TP --</option>';
+  document.getElementById('mbHuyen').innerHTML = '<option value="">-- Chọn Huyện/Quận --</option>';
+  
+  // Show success banner inline
+  const card = document.querySelector('#sec-tkmb .card');
+  const old = document.getElementById('successBanner'); if (old) old.remove();
+  const banner = document.createElement('div');
+  banner.id = 'successBanner';
+  banner.style.cssText = 'background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
+  banner.innerHTML = '<div><strong style="color:#15803d;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#166534">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · SLA: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
+  card.appendChild(banner);
+  
+  renderDash(); renderTienDo(); renderDSMB(); populateChkNSO();
+}
 function renderDash() {
   const total = MB_DATA.length;
   const done = MB_DATA.filter(m=>m.steps[5].r==='Done').length;
