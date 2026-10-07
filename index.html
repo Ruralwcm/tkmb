@@ -221,7 +221,7 @@ tr:hover td { background:#faf9ff; }
 <section class="section" id="sec-tkmb">
   <div class="card">
     <h3>
-      <span class="src-badge">📋 TKMB / Vận hành</span>
+      <span class="src-badge" style="cursor:default">📋 <select id="mbNguon" style="background:none;border:none;color:inherit;font-weight:700;font-size:inherit;cursor:pointer;padding:0;outline:none"><option>TKMB</option><option>Vận hành</option></select></span>
       Tiếp nhận Mặt Bằng
     </h3>
 
@@ -698,7 +698,7 @@ function submitMB() {
   if (!addr) { alert('⚠️ Vui lòng nhập địa chỉ cụ thể'); return; }
 
   const data = {
-    nguon: 'TKMB/Vận hành', gdv, qlkv, tinh, huyen, addr,
+    nguon: document.getElementById('mbNguon').value, gdv, qlkv, tinh, huyen, addr,
     mapLink: document.getElementById('mbMapLink').value,
     area: document.getElementById('mbArea').value, front: document.getElementById('mbFront').value,
     price: document.getElementById('mbPrice').value,
