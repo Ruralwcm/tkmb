@@ -20,7 +20,23 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans
 .topbar { background:linear-gradient(135deg,#4c1d95,#7c3aed); color:#fff; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
 .topbar h1 { font-size:17px; font-weight:700; letter-spacing:-.3px; }
 .topbar .meta { font-size:11px; opacity:.75; margin-top:2px; }
+.topbar .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
 .topbar .user-info { display:flex; gap:8px; align-items:center; font-size:12px; }
+.topbar .user-info button { background:rgba(255,255,255,.15); border:none; color:#fff; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:11px; }
+/* Login */
+.login-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index:9999; }
+.login-card { background:#fff; padding:28px; border-radius:var(--radius); width:340px; box-shadow:0 8px 32px rgba(0,0,0,.2); }
+.login-card .lock-icon { text-align:center; font-size:40px; margin-bottom:8px; }
+.login-card h2 { text-align:center; margin-bottom:20px; color:var(--primary); font-size:18px; }
+.login-card .input-group { margin-bottom:12px; position:relative; }
+.login-card .input-group label { font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px; }
+.login-card input { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px; }
+.login-card input:focus { outline:none; border-color:var(--primary); }
+.login-card .user-found { font-size:12px; color:var(--success); margin-top:4px; min-height:18px; }
+.login-card .user-found.error { color:var(--danger); }
+.login-card button { width:100%; padding:11px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px; }
+.login-card button:hover { background:var(--primary-light); }
+.login-card .error { color:var(--danger); font-size:12px; text-align:center; margin-top:8px; }
 .topbar .user-info select { padding:5px 10px; border-radius:6px; border:none; font-size:12px; cursor:pointer; background:rgba(255,255,255,.15); color:#fff; }
 .topbar .user-info select option { color:#1f2937; }
 
@@ -174,15 +190,30 @@ tr:hover td { background:#faf9ff; }
     <h1>🏪 NSO Miền Bắc v2.0</h1>
     <div class="meta">📅 Cập nhật: 07/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
-  <div class="user-info">
-    <select id="roleSelect" onchange="switchRole()">
-      <option value="GDV">👤 GĐV</option>
-      <option value="TKMB">🔍 TKMB</option>
-      <option value="GD_TKMB">⭐ GĐ TKMB</option>
-      <option value="HĐ">🏛️ HĐ</option>
-      <option value="GDM">👑 GĐM</option>
-    </select>
-    <span id="userName">Phạm Minh Thu</span>
+  <div class="header-right">
+    <div class="user-info">
+      <span id="userDisplay">Chưa đăng nhập</span>
+      <button onclick="doLogout()">Đăng xuất</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="lock-icon">🔐</div>
+    <h2>Đăng nhập</h2>
+    <div class="input-group">
+      <label>Mã nhân viên</label>
+      <input type="text" id="loginCode" placeholder="Nhập mã nhân viên..." oninput="onCodeInput()" autocomplete="off">
+      <div class="user-found" id="userHint"></div>
+    </div>
+    <div class="input-group">
+      <label>Mật khẩu</label>
+      <input type="password" id="loginPass" placeholder="Nhập mật khẩu (SĐT)">
+    </div>
+    <button onclick="doLogin()">Đăng nhập</button>
+    <div class="error" id="loginError"></div>
   </div>
 </div>
 
@@ -560,6 +591,51 @@ let currentQHLat = null, currentQHLng = null;
 
 // ═══ CONFIG ═══
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz-BBkWkq8ye9K-ua-QDWWw2fBbBIXFx4ivvc6ViiBUwIzPizJhD2YT0OQy2o_C1GUl/exec';
+
+// ═══ USERS (đăng nhập) ═══
+const USERS = [
+  {rank:'GĐV',name:'Phạm Minh Thu',code:'928615',phone:'12345678',gdv:'Phạm Minh Thu'},
+  {rank:'GĐV',name:'Lê Thị Hồng Thu',code:'960421',phone:'12345678',gdv:'Lê Thị Hồng Thu'},
+  {rank:'GĐV',name:'Tạ Công Nhận',code:'961088',phone:'12345678',gdv:'Tạ Công Nhận'},
+  {rank:'GĐV',name:'Bùi Thị Thu Nhài',code:'976644',phone:'12345678',gdv:'Bùi Thị Thu Nhài'},
+  {rank:'GĐV',name:'Nguyễn Mạnh Sơn',code:'965799',phone:'12345678',gdv:'Nguyễn Mạnh Sơn'},
+  {rank:'GĐV',name:'Hồ Nam',code:'960668',phone:'12345678',gdv:'Hồ Nam'},
+  {rank:'GĐV',name:'Nguyễn Duy Đoàn',code:'976998',phone:'12345678',gdv:'Nguyễn Duy Đoàn'},
+  {rank:'GĐV',name:'Đặng Văn Dũng',code:'3004544',phone:'12345678',gdv:'Đặng Văn Dũng'},
+  {rank:'GĐV',name:'Dương Tùng',code:'3604641',phone:'12345678',gdv:'Dương Tùng'},
+  {rank:'GĐV',name:'Tạ Quốc Huy',code:'309425',phone:'12345678',gdv:'Tạ Quốc Huy'},
+  {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678',gdv:'Đặng Trần Hảo'}
+];
+let currentUser = null;
+
+// ═══ LOGIN ═══
+function onCodeInput() {
+  const code = document.getElementById('loginCode').value.trim();
+  const hint = document.getElementById('userHint');
+  hint.classList.remove('error');
+  if (!code) { hint.textContent = ''; return; }
+  const u = USERS.find(x => x.code === code);
+  if (u) { hint.textContent = '👋 ' + u.name + ' (' + u.rank + ')'; hint.classList.remove('error'); }
+  else { hint.textContent = '❌ Không tìm thấy mã nhân viên'; hint.classList.add('error'); }
+}
+function doLogin() {
+  const code = document.getElementById('loginCode').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const u = USERS.find(x => x.code === code && x.phone === pass);
+  if (!u) { document.getElementById('loginError').textContent = 'Sai mã NV hoặc mật khẩu!'; return; }
+  currentUser = u;
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
+  document.getElementById('loginError').textContent = '';
+}
+function doLogout() {
+  currentUser = null;
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
+  document.getElementById('loginCode').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('userHint').textContent = '';
+}
 
 // ═══ HELPERS ═══
 function getSLAColor(step, createdDate) {
@@ -940,12 +1016,7 @@ function renderChecklist(){const mbId=document.getElementById('chkNSO').value,co
 function renderDPTable(){document.querySelector('#dpTable tbody').innerHTML=DP_DATA.map(d=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':'⚠️'}</span></td></tr>`).join('');}
 
 // ═══ ROLE SWITCH ═══
-function switchRole() {
-  currentRole = document.getElementById('roleSelect').value;
-  const names = {GDV:'Phạm Minh Thu', TKMB:'Nguyễn Văn A', GD_TKMB:'Trần Thị B', HĐ:'Lê Văn C', GDM:'Đặng Trần Hảo'};
-  document.getElementById('userName').textContent = names[currentRole] || 'User';
-  renderDash(); renderTienDo();
-}
+init();
 
 // ═══ INIT ═══
 function init() {
