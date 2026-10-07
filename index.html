@@ -832,7 +832,8 @@ async function doSubmitMB() {
 
   // Fallback local
   const now = new Date(), yyMM = String(now.getFullYear()).slice(2) + String(now.getMonth()+1).padStart(2,'0');
-  const mb = { id: 'VH/MB-' + yyMM + String(Math.floor(Math.random()*900+100)), ...pendingMBData, status: 'Chưa duyệt', createdAt: now.toISOString(),
+  const mbIdPrefix = (pendingMBData.nguon === 'TKMB' ? 'MB-' : 'VH-') + yyMM;
+  const mb = { id: mbIdPrefix + String(Math.floor(Math.random()*900+100)), ...pendingMBData, status: 'Chưa duyệt', createdAt: now.toISOString(),
     steps: [{s:1,actor:'QLKV',appr:'GĐV',r:'Pending',date:''},{s:2,actor:'TKMB',appr:'GĐ TKMB',r:'None',date:''},{s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}] };
   MB_DATA.unshift(mb);
   closeConfirm(); showSuccessToast(mb.id);
