@@ -624,12 +624,14 @@ function doLogin() {
   const u = USERS.find(x => x.code === code && x.phone === pass);
   if (!u) { document.getElementById('loginError').textContent = 'Sai mã NV hoặc mật khẩu!'; return; }
   currentUser = u;
+  localStorage.setItem('nso_user', JSON.stringify(u));
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
 }
 function doLogout() {
   currentUser = null;
+  localStorage.removeItem('nso_user');
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
   document.getElementById('loginCode').value = '';
@@ -1021,6 +1023,18 @@ init();
 
 // ═══ INIT ═══
 function init() {
+  // Auto-login from localStorage
+  const saved = localStorage.getItem('nso_user');
+  if (saved) {
+    try {
+      const u = JSON.parse(saved);
+      if (USERS.find(x => x.code === u.code && x.phone === u.phone)) {
+        currentUser = u;
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
+      }
+    } catch(e) { localStorage.removeItem('nso_user'); }
+  }
   document.querySelectorAll('.nav button').forEach(b => {
     b.addEventListener('click', function() {
       document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
