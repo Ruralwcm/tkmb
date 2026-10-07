@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TKMB Web App — NSO Miền Bắc v2.0</title>
+<style>
+:root {
+  --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
+  --bg: #f8f9fb; --card: #fff; --text: #1f2937; --muted: #6b7280;
+  --success: #16a34a; --warning: #d97706; --danger: #dc2626;
+  --pending: #2563eb; --border: #e5e7eb; --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+
+/* ─── TOPBAR ─── */
+.topbar { background:linear-gradient(135deg,#4c1d95,#7c3aed); color:#fff; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+.topbar h1 { font-size:17px; font-weight:700; letter-spacing:-.3px; }
+.topbar .meta { font-size:11px; opacity:.75; margin-top:2px; }
+.topbar .user-info { display:flex; gap:8px; align-items:center; font-size:12px; }
+.topbar .user-info select { padding:5px 10px; border-radius:6px; border:none; font-size:12px; cursor:pointer; background:rgba(255,255,255,.15); color:#fff; }
+.topbar .user-info select option { color:#1f2937; }
+
+/* ─── NAV ─── */
+.nav { display:flex; background:#fff; border-bottom:1px solid var(--border); overflow-x:auto; position:sticky; top:56px; z-index:50; gap:0; }
+.nav button { flex-shrink:0; padding:11px 18px; border:none; background:none; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:.15s; white-space:nowrap; letter-spacing:-.1px; }
+.nav button:hover { color:var(--primary); background:#faf8ff; }
+.nav button.active { color:var(--primary); border-bottom-color:var(--primary); background:#faf8ff; }
+.nav button .badge { display:inline-block; background:var(--danger); color:#fff; border-radius:8px; padding:1px 6px; font-size:10px; margin-left:4px; }
+
+/* ─── MAIN ─── */
+.main { max-width:1100px; margin:0 auto; padding:16px; }
+.section { display:none; }
+.section.active { display:block; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── CARD ─── */
+.card { background:var(--card); border-radius:var(--radius); padding:18px; margin-bottom:14px; box-shadow:var(--shadow); border:1px solid #f0edf5; }
+.card h3 { font-size:14px; color:var(--primary); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #f0edf5; display:flex; align-items:center; gap:8px; }
+.card h3 .sub { font-size:11px; color:var(--muted); font-weight:400; margin-left:auto; }
+
+/* ─── KPI ─── */
+.kpi { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+.kpi-card { background:var(--card); border-radius:var(--radius); padding:16px; text-align:center; box-shadow:var(--shadow); cursor:pointer; transition:.2s; border:1px solid #f0edf5; }
+.kpi-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.08); }
+.kpi-num { font-size:30px; font-weight:800; letter-spacing:-.5px; }
+.kpi-label { font-size:11px; color:var(--muted); margin-top:4px; }
+.kpi-num.p { color:var(--primary); } .kpi-num.g { color:var(--success); }
+.kpi-num.o { color:var(--warning); } .kpi-num.r { color:var(--danger); } .kpi-num.b { color:var(--pending); }
+
+.kpi-section { margin-bottom:12px; }
+.kpi-section h4 { font-size:12px; font-weight:700; color:var(--text); margin-bottom:8px; padding-left:8px; border-left:3px solid var(--primary); }
+
+/* ─── FORM ─── */
+.form-section-label { font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:.5px; margin:16px 0 10px; padding-bottom:6px; border-bottom:2px solid #ede9fe; display:flex; align-items:center; gap:6px; }
+.form-section-label:first-child { margin-top:0; }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+.form-grid.col3 { grid-template-columns:1fr 1fr 1fr; }
+.form-full { grid-column:1/-1; }
+.form-half { }
+
+.form-group { display:flex; flex-direction:column; }
+.form-group label { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:3px; text-transform:uppercase; letter-spacing:.3px; }
+.form-group select, .form-group input, .form-group textarea { padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; transition:.15s; background:#fafafa; width:100%; }
+.form-group select:focus, .form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(124,58,237,.08); background:#fff; }
+.form-group select:disabled { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
+.form-group .hint { font-size:10px; color:var(--muted); margin-top:2px; }
+
+/* ─── MAP SECTION ─── */
+.map-box { background:linear-gradient(135deg,#eff6ff,#f0f9ff); border:2px dashed #93c5fd; border-radius:var(--radius); padding:14px 18px; margin:8px 0; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.map-box .map-icon { font-size:32px; flex-shrink:0; }
+.map-box .map-inputs { flex:1; min-width:200px; display:flex; flex-direction:column; gap:8px; }
+.map-box .map-result { background:#fff; border-radius:8px; padding:10px 14px; font-size:12px; min-width:180px; box-shadow:var(--shadow); }
+.map-result .qh-name { font-weight:700; color:var(--primary); font-size:13px; }
+.map-result .qh-dist { font-size:24px; font-weight:800; color:var(--success); }
+.map-result .qh-dist.far { color:var(--warning); }
+.map-result .qh-dist.very-far { color:var(--danger); }
+
+/* ─── TABLE ─── */
+table { width:100%; border-collapse:collapse; font-size:12px; }
+thead th { background:#f8f6ff; padding:9px 10px; text-align:left; font-weight:700; color:var(--primary); border-bottom:2px solid #d8cef0; font-size:11px; white-space:nowrap; }
+td { padding:8px 10px; border-bottom:1px solid #f3f0ff; }
+tr:hover td { background:#faf9ff; }
+
+/* ─── TAGS ─── */
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; letter-spacing:.2px; }
+.tag-g { background:#dcfce7; color:#15803d; } .tag-o { background:#fef3c7; color:#92400e; }
+.tag-p { background:#dbeafe; color:#1d4ed8; } .tag-r { background:#fee2e2; color:#b91c1c; }
+.tag-gray { background:#f3f4f6; color:var(--muted); }
+
+.sla-badge { font-size:9px; padding:1px 5px; border-radius:3px; font-weight:600; }
+.sla-ok { background:#dcfce7; color:#15803d; }
+.sla-warn { background:#fef3c7; color:#92400e; }
+.sla-over { background:#fee2e2; color:#991b1b; }
+
+.mini-bar { height:5px; background:#e5e7eb; border-radius:3px; overflow:hidden; min-width:50px; }
+.mini-fill { height:100%; border-radius:3px; background:var(--success); transition:.3s; }
+.mini-fill.fail { background:var(--danger); }
+.mini-fill.partial { background:var(--warning); }
+
+/* ─── STEP FLOW ─── */
+.step-flow { display:flex; gap:4px; flex-wrap:wrap; margin:8px 0; }
+.step-node { flex:1; min-width:100px; padding:10px 8px; border-radius:8px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; transition:.2s; border:2px solid transparent; position:relative; }
+.step-node:hover { transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,.08); }
+.step-node.None { background:#f3f4f6; color:var(--muted); border-color:#e5e7eb; }
+.step-node.Pending { background:#dbeafe; color:var(--pending); border-color:#93c5fd; }
+.step-node.Done { background:#dcfce7; color:var(--success); border-color:#86efac; }
+.step-node.Fail { background:#fee2e2; color:var(--danger); border-color:#fca5a5; }
+.step-node.\— { background:#f3f4f6; color:#d1d5db; border-color:#e5e7eb; opacity:.5; }
+.step-node .sn { font-size:20px; display:block; margin-bottom:2px; }
+.step-node .sl { font-size:10px; line-height:1.3; }
+.step-node .sa { font-size:9px; color:var(--muted); margin-top:2px; }
+
+/* ─── MODAL ─── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:999; }
+.modal-card { background:#fff; border-radius:var(--radius); padding:22px; width:90%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
+.modal-card h3 { margin-bottom:12px; color:var(--primary); font-size:14px; }
+.modal-card label { font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px; }
+.modal-card select, .modal-card input, .modal-card textarea { width:100%; padding:9px; border:1px solid var(--border); border-radius:7px; font-size:13px; margin-bottom:10px; }
+.modal-card textarea { min-height:60px; resize:vertical; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+
+/* ─── BUTTONS ─── */
+.btn { padding:9px 18px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:.15s; display:inline-flex; align-items:center; gap:6px; }
+.btn:hover { opacity:.9; transform:translateY(-1px); }
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-success { background:var(--success); color:#fff; }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-outline { background:#fff; color:var(--primary); border:1px solid var(--primary); }
+.btn-sm { padding:5px 12px; font-size:11px; }
+.btn-xs { padding:3px 8px; font-size:10px; border-radius:5px; }
+
+/* ─── FILTER ─── */
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+.filter-bar select, .filter-bar input { padding:7px 10px; border:1px solid var(--border); border-radius:7px; font-size:12px; }
+.filter-bar input { flex:1; min-width:160px; background:#fafafa; }
+.filter-bar input:focus { outline:none; border-color:var(--primary-light); }
+
+/* ─── PENDING ALERT ─── */
+.pending-approval { background:#fffbeb; border:1px solid var(--warning); border-radius:8px; padding:10px 14px; margin:12px 0; font-size:11px; color:#92400e; }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px) {
+  .main { padding:10px; }
+  .form-grid, .form-grid.col3 { grid-template-columns:1fr 1fr; }
+  .form-grid[style*="repeat(6)"] { grid-template-columns:1fr 1fr 1fr !important; }
+  .form-grid[style*="repeat(4)"] { grid-template-columns:1fr 1fr !important; }
+  .map-box { flex-direction:column; align-items:stretch; }
+  table { font-size:10px; } thead th, td { padding:5px; }
+  .step-flow { flex-direction:column; }
+  .step-node { min-width:auto; display:flex; align-items:center; gap:8px; text-align:left; padding:8px 12px; }
+  .step-node .sn { font-size:16px; display:inline; }
+  .kpi { grid-template-columns:repeat(2,1fr); }
+  .topbar { padding:10px 14px; }
+  .topbar h1 { font-size:14px; }
+}
+
+/* ─── SOURCE BADGE ─── */
+.src-badge { display:inline-flex; align-items:center; gap:4px; background:#ede9fe; color:var(--primary); padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; }
+
+/* ─── QH INFO ─── */
+.qh-info-mini { font-size:10px; color:var(--muted); margin-top:2px; }
+.qh-link { color:var(--primary); cursor:pointer; text-decoration:underline; font-size:11px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>🏪 NSO Miền Bắc v2.0</h1>
+    <div class="meta">📅 Cập nhật: 07/10/2026 · Nguồn: TKMB/Vận hành</div>
+  </div>
+  <div class="user-info">
+    <select id="roleSelect" onchange="switchRole()">
+      <option value="GDV">👤 GĐV</option>
+      <option value="TKMB">🔍 TKMB</option>
+      <option value="GD_TKMB">⭐ GĐ TKMB</option>
+      <option value="HĐ">🏛️ HĐ</option>
+      <option value="GDM">👑 GĐM</option>
+    </select>
+    <span id="userName">Phạm Minh Thu</span>
+  </div>
+</div>
+
+<div class="nav">
+  <button data-tab="dash" class="active">📊 Dashboard</button>
+  <button data-tab="tkmb">📋 Tiếp nhận MB</button>
+  <button data-tab="tiendo">🔄 Tiến độ MB</button>
+  <button data-tab="scan">🗺 Scan QH</button>
+  <button data-tab="checklist">✅ Checklist NSO</button>
+  <button data-tab="damphan">🏢 Đàm phán</button>
+  <button data-tab="dsmb">📑 Danh sách MB</button>
+</div>
+
+<div class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<section class="section active" id="sec-dash">
+  <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
+  <div class="kpi" id="kpiMB"></div>
+  <div class="card">
+    <h3>📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
+    <div style="overflow-x:auto"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>SLA</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+  </div>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
+  <div class="kpi-section"><h4>🗺 Scan điểm QH</h4></div>
+  <div class="kpi" id="kpiScan"></div>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
+  <div class="kpi-section"><h4>🏢 Đàm phán DTKD</h4></div>
+  <div class="kpi" id="kpiDP"></div>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
+  <div class="kpi-section"><h4>✅ Checklist NSO</h4></div>
+  <div class="kpi" id="kpiChk"></div>
+</section>
+
+<!-- ===== TIẾP NHẬN MB ===== -->
+<section class="section" id="sec-tkmb">
+  <div class="card">
+    <h3>
+      <span class="src-badge">📋 TKMB / Vận hành</span>
+      Tiếp nhận Mặt Bằng
+    </h3>
+
+    <!-- Section 1: Tổ chức (Cross-link cascade) -->
+    <div class="form-section-label">👥 Tổ chức — GĐV → QLKV → Tỉnh → Huyện/Quận</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>GĐV <span style="color:var(--danger)">*</span></label>
+        <select id="mbGDV" onchange="onGDVChange()">
+          <option value="">-- Chọn GĐV --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>QLKV <span style="color:var(--danger)">*</span></label>
+        <select id="mbQLKV" onchange="onQLKVChange()" disabled>
+          <option value="">-- Chọn QLKV --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tỉnh/TP <span style="color:var(--danger)">*</span></label>
+        <select id="mbTinh" onchange="onTinhChange()" disabled>
+          <option value="">-- Chọn Tỉnh/TP --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Huyện/Quận <span style="color:var(--danger)">*</span></label>
+        <select id="mbHuyen" disabled>
+          <option value="">-- Chọn Huyện/Quận --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Section 2: Địa chỉ & thông số MB + Giao dịch (1 hàng) -->
+    <div class="form-section-label">📍 Địa chỉ & Thông số MB · 💰 Thanh toán</div>
+    <div class="form-group form-full" style="margin-bottom:8px">
+      <label>Địa chỉ cụ thể <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="mbAddr" placeholder="VD: Thôn Dục Tú, xã Dục Tú, Đông Anh">
+    </div>
+    <div class="form-grid" style="grid-template-columns:repeat(6,1fr)">
+      <div class="form-group">
+        <label>DT (m²) <span style="font-size:9px;color:var(--muted)">xx.y</span></label>
+        <input type="text" inputmode="decimal" id="mbArea" placeholder="12.5" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>MT (m) <span style="font-size:9px;color:var(--muted)">xx.y</span></label>
+        <input type="text" inputmode="decimal" id="mbFront" placeholder="6.5" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>Giá (tr/th)</label>
+        <input type="text" inputmode="decimal" id="mbPrice" placeholder="15.5" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>Thanh toán</label>
+        <input type="text" id="mbPayment" placeholder="3 tháng/lần">
+      </div>
+      <div class="form-group">
+        <label>Cọc (tr)</label>
+        <input type="text" inputmode="decimal" id="mbDeposit" placeholder="30" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label>Thời hạn</label>
+        <input type="text" id="mbDuration" placeholder="5 năm" maxlength="10">
+      </div>
+    </div>
+
+    <!-- Section 3: Định vị Map + QH -->
+    <div class="form-section-label">🗺 Định vị Map — Tự động detect Điểm QH & Khoảng cách</div>
+    <div class="map-box" style="padding:10px 14px">
+      <div class="map-icon" style="font-size:24px">📍</div>
+      <div class="map-inputs" style="gap:4px">
+        <div class="form-group">
+          <label>Link Google Maps hoặc Tọa độ (lat, lng)</label>
+          <input type="text" id="mbMapLink" placeholder="VD: https://maps.google.com/?q=21.0179,105.9650 hoặc 21.0179, 105.9650" oninput="onMapInput()">
+        </div>
+      </div>
+    </div>
+    <div id="mapResult" style="display:none">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <div class="map-result" style="flex:1;padding:8px 10px">
+          <div style="font-size:9px;color:var(--muted)">📍 Điểm QH gần nhất</div>
+          <div class="qh-name" id="qhName" style="font-size:12px">—</div>
+          <div class="qh-info-mini" id="qhDetail"></div>
+        </div>
+        <div class="map-result" style="flex:1;text-align:center;padding:8px 10px">
+          <div style="font-size:9px;color:var(--muted)">📏 Khoảng cách</div>
+          <div class="qh-dist" id="qhDistance" style="font-size:20px">—</div>
+          <div class="qh-info-mini" id="qhDistLabel"></div>
+        </div>
+        <div class="map-result" style="flex:1;text-align:center;padding:8px 10px">
+          <div style="font-size:9px;color:var(--muted)">🎯 Đánh giá</div>
+          <div style="font-size:12px;font-weight:700" id="qhEval">—</div>
+        </div>
+      </div>
+      <div style="margin-top:4px;font-size:9px;color:var(--muted);text-align:right">
+        <span class="qh-link" onclick="showQHMap()">🗺 Xem trên bản đồ →</span>
+      </div>
+    </div>
+
+    <!-- Section 4: Pháp lý - Hiện trạng - Bàn giao (1 hàng) -->
+    <div class="form-section-label">📋 Pháp lý · Hiện trạng · Bàn giao</div>
+    <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="form-group">
+        <label>Pháp lý</label>
+        <select id="mbLegal">
+          <option value="">-- Chọn --</option>
+          <option>Sổ đỏ chính chủ</option>
+          <option>Sổ đỏ đồng sở hữu</option>
+          <option>Hợp đồng ủy quyền</option>
+          <option>Giấy tờ khác</option>
+          <option>Đang chờ xác minh</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Hiện trạng</label>
+        <select id="mbCondition">
+          <option value="">-- Chọn --</option>
+          <option>Nhà trống</option>
+          <option>Đang kinh doanh</option>
+          <option>Đất trống</option>
+          <option>Đang xây dựng</option>
+          <option>Cần sửa chữa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>TG bàn giao</label>
+        <input type="text" id="mbHandover" placeholder="VD: 15/10 hoặc 2 tuần">
+      </div>
+    </div>
+
+    <!-- Section 5: Người GT & Chủ nhà -->
+    <div class="form-section-label">👤 Người GT & Chủ nhà (BCT)</div>
+    <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="form-group">
+        <label>Người GT</label>
+        <input type="text" id="mbGTName" placeholder="Tên người GT">
+      </div>
+      <div class="form-group">
+        <label>MNV</label>
+        <input type="text" id="mbGTMNV" placeholder="Mã NV" maxlength="10">
+      </div>
+      <div class="form-group">
+        <label>BCT - Tên</label>
+        <input type="text" id="mbBCT" placeholder="Tên chủ nhà">
+      </div>
+      <div class="form-group">
+        <label>BCT - SĐT</label>
+        <input type="text" id="mbBCTPhone" placeholder="SĐT">
+      </div>
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-primary" onclick="submitMB()">📤 Gửi MB — Chờ GĐV duyệt</button>
+      <span style="font-size:11px;color:var(--muted)">SLA B1: 24h</span>
+    </div>
+    <div id="editPendingAlert" style="display:none" class="pending-approval">⚠️ Có chỉnh sửa đang chờ duyệt. Cần <strong id="editApprover"></strong> duyệt thì thông tin mới được lưu.</div>
+  </div>
+</section>
+
+<!-- ===== TIẾN ĐỘ MB ===== -->
+<section class="section" id="sec-tiendo">
+  <div class="card">
+    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ SLA: B1=24h, B2=48h, B3=72h, B4=5ng, B5=7ng</span></h3>
+    <div class="filter-bar">
+      <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
+      <select id="tdGDV" onchange="renderTienDo()"><option value="">Tất cả GĐV</option></select>
+      <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
+    </div>
+    <div id="tienDoList"></div>
+  </div>
+</section>
+
+<!-- ===== SCAN QH ===== -->
+<section class="section" id="sec-scan">
+  <div class="card">
+    <h3>🗺 Scan điểm Quy Hoạch</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>GĐV</label><select id="scanGDV"><option>Phạm Minh Thu</option><option>Lê Thị Hồng Thu</option><option>Tạ Công Nhận</option><option>Hồ Nam</option><option>Đặng Văn Dũng</option></select></div>
+      <div class="form-group"><label>QLKV</label><input type="text" id="scanQLKV"></div>
+      <div class="form-group"><label>Mã điểm QH</label><input type="text" id="scanQHCode"></div>
+      <div class="form-group"><label>Ngày scan</label><input type="date" id="scanDate"></div>
+      <div class="form-full form-group"><label>Tình trạng khu vực</label><input type="text" id="scanArea"></div>
+      <div class="form-full form-group"><label>Có MB tiềm năng?</label><select id="scanHasMB"><option value="">-- Chọn --</option><option value="yes">✅ Có</option><option value="no">❌ Không</option></select></div>
+      <div class="form-full" id="scanDraftMB" hidden>
+        <div class="form-grid" style="margin-top:8px">
+          <div class="form-group"><label>Địa chỉ MB</label><input type="text" id="scanAddr"></div>
+          <div class="form-group"><label>DT (m²)</label><input type="number" id="scanAreaM2"></div>
+          <div class="form-group"><label>MT (m)</label><input type="text" id="scanFront"></div>
+          <div class="form-group"><label>Giá (tr/th)</label><input type="number" id="scanPrice"></div>
+          <div class="form-group"><label>Chủ nhà</label><input type="text" id="scanOwner"></div>
+          <div class="form-group"><label>SĐT</label><input type="text" id="scanOwnerPhone"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="saveScan()">💾 Lưu Scan</button>
+  </div>
+  <div class="card"><h3>📜 Lịch sử Scan</h3>
+    <div style="overflow-x:auto"><table id="scanHistory"><thead><tr><th>Ngày</th><th>Mã QH</th><th>GĐV</th><th>QLKV</th><th>Có MB</th><th>Địa chỉ</th><th>Trạng thái</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ===== CHECKLIST NSO ===== -->
+<section class="section" id="sec-checklist">
+  <div class="card"><h3>✅ Checklist Mở Mới NSO</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Dành cho MB đã đạt B6 (Đã khai trương)</p>
+    <div class="form-group" style="margin-bottom:8px"><label>Chọn NSO</label><select id="chkNSO" onchange="renderChecklist()"><option value="">-- Chọn MB đã KT --</option></select></div>
+    <div id="checklistContent"><div style="text-align:center;color:var(--muted);padding:20px">Chọn MB đã khai trương để xem checklist</div></div>
+  </div>
+</section>
+
+<!-- ===== ĐÀM PHÁN DTKD ===== -->
+<section class="section" id="sec-damphan">
+  <div class="card"><h3>🏢 Đàm phán mở rộng DTKD</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">CH hiện hữu cần đàm phán mở rộng mặt bằng</p>
+    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>SLA</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ===== DANH SÁCH MB ===== -->
+<section class="section" id="sec-dsmb">
+  <div class="card"><h3>📑 Toàn bộ Mặt Bằng</h3>
+    <div class="filter-bar">
+      <input type="text" id="dsSearch" placeholder="🔍 Tìm kiếm..." oninput="renderDSMB()">
+      <select id="dsGDV" onchange="renderDSMB()"><option value="">Tất cả GĐV</option></select>
+      <select id="dsNguon" onchange="renderDSMB()"><option value="">Tất cả nguồn</option><option>TKMB/Vận hành</option></select>
+    </div>
+    <div style="overflow-x:auto"><table id="dsTable"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Địa chỉ</th><th>DT</th><th>Giá</th><th>Tiến độ</th><th>%</th><th>SLA</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+</div>
+
+<!-- ===== STEP MODAL ===== -->
+<div class="modal-overlay" id="stepModal" style="display:none">
+  <div class="modal-card">
+    <h3 id="stepModalTitle"></h3>
+    <div id="stepInfo" style="font-size:12px;color:var(--muted);margin-bottom:10px"></div>
+    <div id="stepSLA" style="font-size:11px;margin-bottom:8px"></div>
+    <label>Kết quả</label>
+    <select id="stepResult" onchange="onStepResultChange()"><option value="None">None</option><option value="Pending">Pending</option><option value="Done">Done</option><option value="Fail">Fail</option></select>
+    <div id="failFields" style="display:none">
+      <label>Lý do không duyệt</label><textarea id="stepFailReason"></textarea>
+      <label>Nhóm nguyên nhân</label>
+      <select id="stepFailGroup"><option value="">Chọn</option>
+        <optgroup label="BCT (Chủ nhà)"><option>Vị trí không phù hợp</option><option>Giá thuê quá cao</option><option>Diện tích/mặt tiền không đạt</option><option>Pháp lý không rõ ràng</option><option>Chủ nhà không hợp tác</option></optgroup>
+        <optgroup label="WCM"><option>Khu vực không tiềm năng</option><option>Không đủ ngân sách</option><option>Vướng quy hoạch</option><option>Thiếu nhân sự</option></optgroup>
+        <optgroup label="Khác"><option>Khác</option></optgroup>
+      </select>
+    </div>
+    <label>Người duyệt</label><input type="text" id="stepApprover" placeholder="Tên người duyệt">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeStepModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveStep()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const STEP_SLA = [
+  { step:1, slaHours:24, slaLabel:'24h', desc:'QLKV/CHT gửi → GĐV duyệt' },
+  { step:2, slaHours:48, slaLabel:'48h', desc:'TKMB khảo sát & lên BBTĐ → GĐ TKMB duyệt' },
+  { step:3, slaHours:72, slaLabel:'72h', desc:'Lên HĐTĐ → HĐ duyệt' },
+  { step:4, slaHours:120, slaLabel:'5 ngày', desc:'Đàm phán & ký HĐ' },
+  { step:5, slaHours:168, slaLabel:'7 ngày', desc:'Phát hành KT' },
+  { step:6, slaHours:9999, slaLabel:'—', desc:'Đã khai trương' },
+];
+
+// Cascade data: GĐV → QLKV → Tỉnh → Huyện (from Storelist live)
+const CASCADE_DATA = {"Bùi Thị Thu Nhài":{"Bùi Thị Thu Nhài":{"TP. Hà Nội":["H. Hoài Đức","H. Đan Phượng"]},"Nguyễn Hữu Huân":{"TP. Hà Nội":["H. Đan Phượng"]},"Nguyễn Thị Hồng":{"TP. Hà Nội":["H. Ba Vì"]},"Nguyễn Thị Thu Hương":{"TP. Hà Nội":["H. Phúc Thọ"]},"Ngô Thị Quỳnh Anh":{"TP. Hà Nội":["H. Hoài Đức"]},"Phan Phúc Tân":{"TP. Hà Nội":["H. Ba Vì","H. Phúc Thọ"]},"Phạm Thị Nhâm":{"TP. Hà Nội":["H. Hoài Đức"]}},"Dương Tùng":{"Bùi Thị Thu Trang":{"TP. Hà Nội":["H. Ứng Hòa"]},"Dương Tùng":{"T. Hoà Bình":["H. Cao Phong","H. Lương Sơn","H. Mai Châu","H. Tân Lạc","TP. Hoà Bình"]},"Nguyễn Thị Dung":{"TP. Hà Nội":["H. Mỹ Đức"]},"Phạm Thị Bưởi":{"T. Hoà Bình":["H. Đà Bắc"]},"Vũ Thị Hương":{"T. Hoà Bình":["H. Lạc Thủy","H. Yên Thủy"]},"Đinh Thị Thu Hiền":{"T. Hoà Bình":["H. Lạc Sơn"]},"Đỗ Thanh Thủy":{"T. Sơn La":["H. Mộc Châu","H. Phù Yên","H. Vân Hồ"]}},"Hồ Nam":{"Bàn Văn Minh":{"T. Phú Thọ":["H. Hạ Hoà"]},"Cấn Văn Hoàn":{"T. Phú Thọ":["H. Thanh Ba"]},"Dương Đức Tài":{"T. Thái Nguyên":["H. Đồng Hỷ"]},"Hoàng Văn Huỳnh":{"T. Tuyên Quang":["H. Chiêm Hoá"]},"Lộc Thị Tươi":{"T. Tuyên Quang":["TP. Tuyên Quang"]},"Lương Văn Thửa":{"T. Thái Nguyên":["H. Phú Lương"]},"Lý Văn Sinh":{"T. Thái Nguyên":["H. Định Hoá"]},"Lê Thị Thu":{"T. Phú Thọ":["H. Thanh Thuỷ"]},"Ma Văn Toàn":{"T. Phú Thọ":["H. Thanh Sơn"]},"Nguyễn Ngọc Tâm":{"T. Phú Thọ":["H. Tam Nông","H. Thanh Sơn"]},"Nguyễn Trọng Hoàng":{"T. Bắc Kạn":["H. Ba Bể"]},"Nguyễn Văn Bình":{"T. Phú Thọ":["H. Yên Lập"]},"Nguyễn Đình Hậu":{"TP. Hà Nội":["H. Ba Vì"]},"Nông Minh Sơn":{"T. Tuyên Quang":["H. Na Hang"]},"Phùng Minh Hoàng":{"T. Tuyên Quang":["H. Sơn Dương"]},"Triệu Đức Thành":{"T. Bắc Kạn":["TP. Bắc Kạn"]},"Trần Trọng Hiếu":{"TP. Hà Nội":["H. Ba Vì"]},"Tạ Quốc Oanh":{"T. Phú Thọ":["H. Cẩm Khê"]},"Tạ Vân Anh":{"TP. Hà Nội":["H. Sơn Tây"]},"Vi Văn Đại":{"T. Phú Thọ":["H. Tân Sơn"]},"Đỗ Hải Võ":{"T. Thái Nguyên":["TP. Thái Nguyên"]}},"Lê Thị Hồng Thu":{"Lê Thị Hồng Thu":{"T. Hải Dương":["H. Nam Sách","TP. Chí Linh","TP. Hải Dương"]},"Nguyễn Thị Thu":{"T. Hải Dương":["H. Cẩm Giàng","H. Kim Thành"]},"Phạm Thị Hải":{"T. Hải Dương":["H. Thanh Hà","TP. Hải Dương"]},"Trần Thị Hoa":{"T. Hải Dương":["H. Kinh Môn"]},"Đào Thị Hường":{"T. Hải Dương":["H. Ninh Giang"]}},"Nguyễn Duy Đoàn":{"Chu Văn Anh":{"T. Hưng Yên":["H. Văn Giang"]},"Dương Thị Hòa":{"T. Hưng Yên":["H. Khoái Châu"]},"Lưu Văn Sơn":{"T. Hưng Yên":["H. Mỹ Hào","H. Văn Lâm"]},"Lê Văn Thao":{"T. Hưng Yên":["TP. Hưng Yên"]},"Nguyễn Văn Luyến":{"T. Hưng Yên":["H. Văn Giang"]},"Nguyễn Đức Lợi":{"T. Bắc Ninh":["H. Thuận Thành","TP. Bắc Ninh"]},"Phạm Văn Huân":{"T. Hưng Yên":["H. Phù Cừ"]}},"Nguyễn Mạnh Sơn":{"Bùi Thị Thanh":{"T. Hà Giang":["H. Quang Bình"]},"Hoàng Xuân Tưởng":{"T. Tuyên Quang":["H. Yên Sơn"]},"Lâm Văn Hà":{"T. Hà Giang":["H. Vị Xuyên","TP. Hà Giang"]},"Mã Ích Dương":{"T. Hà Giang":["H. Quản Bạ","H. Yên Minh"]},"Nông Minh Hòa":{"T. Hà Giang":["H. Bắc Mê","H. Đồng Văn"]},"Phạm Hữu Tài":{"T. Hà Giang":["H. Hoàng Su Phì"]},"Trần Đức Anh":{"T. Hà Giang":["H. Mèo Vạc"]},"Trần Đức Dũng":{"T. Hà Giang":["H. Xín Mần"]},"Đặng Thị Bích Nhi":{"T. Hà Giang":["TP. Hà Giang"]}},"Nguyễn Thị Thu":{"Bùi Ngọc Quỳnh Trang":{"TP. Hà Nội":["H. Mỹ Đức"]},"Mai Thanh Hải":{"T. Thanh Hóa":["H. Nga Sơn"]},"Nguyễn Ngọc Tú":{"T. Thanh Hóa":["H. Hà Trung"]},"Nguyễn Thị Hằng":{"T. Nam Định":["H. Trực Ninh","H. Vụ Bản"]},"Phan Thị Mai":{"T. Nam Định":["H. Hải Hậu","H. Nghĩa Hưng"]},"Phạm Xuân Hùng":{"T. Thanh Hóa":["H. Hậu Lộc"]},"Phạm Đình Kỳ":{"T. Ninh Bình":["H. Hoa Lư","H. Yên Mô"]},"Trần Văn Thao":{"T. Ninh Bình":["H. Kim Sơn","H. Yên Khánh"]},"Vũ Ngọc Toàn":{"T. Nam Định":["H. Ý Yên","TP. Nam Định"]}},"Phạm Minh Thu":{"Bùi Văn Chiến":{"TP. Hà Nội":["H. Mê Linh"]},"Hoàng Thị Thảo":{"T. Vĩnh Phúc":["H. Vĩnh Tường","H. Yên Lạc"]},"Lê Văn Trung":{"T. Vĩnh Phúc":["H. Tam Dương","TP. Vĩnh Yên"]},"Lê Đức Toàn":{"T. Vĩnh Phúc":["H. Bình Xuyên","H. Tam Đảo"]},"Nguyễn Đức Thành":{"T. Vĩnh Phúc":["H. Lập Thạch","H. Sông Lô"]},"Ngô Thị Hà":{"TP. Hà Nội":["H. Sóc Sơn"]},"Trần Thu Trà":{"TP. Hà Nội":["H. Đông Anh","H. Gia Lâm"]},"Trần Văn Bắc":{"TP. Hà Nội":["H. Mê Linh"]},"Đoàn Thị Hương Giang":{"TP. Hà Nội":["H. Đông Anh"]}},"Tạ Công Nhận":{"Hoàng Văn Cường":{"T. Bắc Giang":["H. Lục Ngạn","H. Sơn Động"]},"Hà Văn Nhân":{"T. Bắc Ninh":["H. Quế Võ"]},"Nông Thị Minh Sơn":{"T. Lạng Sơn":["H. Bắc Sơn"]},"Phùng Văn Thịnh":{"T. Bắc Giang":["H. Lạng Giang","H. Yên Dũng"]},"Phạm Bá Quang":{"T. Bắc Ninh":["H. Gia Bình","H. Lương Tài"]},"Thân Văn Tùng":{"T. Bắc Giang":["TP. Bắc Giang"]},"Trần Thị Hợp":{"T. Lạng Sơn":["H. Hữu Lũng"]},"Vi Hoài Nam":{"T. Lạng Sơn":["H. Lộc Bình"]},"Đào Xuân Hải":{"T. Bắc Giang":["H. Tân Yên","H. Yên Thế"]}},"Tạ Quốc Huy":{"Lê Thị Mây":{"T. Hải Dương":["H. Thanh Miện"]},"Nguyễn Quốc Minh":{"T. Bắc Ninh":["H. Tiên Du","H. Yên Phong","TP. Từ Sơn"]},"Phạm Hồng Hải":{"T. Bắc Ninh":["TP. Bắc Ninh"]},"Trần Mạnh Hùng":{"T. Bắc Ninh":["H. Thuận Thành"]},"Vũ Đình Thức":{"T. Hải Dương":["H. Bình Giang"]}},"Đặng Văn Dũng":{"Lương Văn Chỉnh":{"T. Hà Nam":["H. Kim Bảng","H. Thanh Liêm","TP. Phủ Lý"]},"Nguyễn Việt Hùng":{"T. Thái Bình":["H. Quỳnh Phụ","H. Thái Thụy"]},"Nguyễn Đức Hải":{"T. Hà Nam":["H. Bình Lục","H. Duy Tiên","H. Lý Nhân"]},"Phạm Văn Tuân":{"T. Thái Bình":["H. Kiến Xương","H. Tiền Hải"]},"Trịnh Thanh Bình":{"T. Ninh Bình":["H. Gia Viễn","H. Nho Quan","H. Yên Khánh","TP. Ninh Bình","TP. Tam Điệp"]},"Trần Thị Hương":{"T. Hà Nam":["H. Duy Tiên","TP. Phủ Lý"]},"Vũ Đức Vượng":{"T. Thái Bình":["H. Hưng Hà","H. Vũ Thư","TP. Thái Bình"]}}};
+
+// QH points (sample - load from sheet in production)
+const QH_POINTS = [{"code":"HNI_ML23","name":"Điểm QH Mê Linh","lat":21.2,"lng":105.8,"gdv":"Phạm Minh Thu"},{"code":"HNI_DA01","name":"Điểm QH Đông Anh","lat":21.15,"lng":105.83,"gdv":"Phạm Minh Thu"},{"code":"HNI_GL01","name":"Điểm QH Gia Lâm","lat":21.02,"lng":105.94,"gdv":"Phạm Minh Thu"},{"code":"HNI_HD01","name":"Điểm QH Hoài Đức","lat":21.05,"lng":105.7,"gdv":"Bùi Thị Thu Nhài"},{"code":"HNI_ST01","name":"Điểm QH Sơn Tây","lat":21.14,"lng":105.5,"gdv":"Hồ Nam"},{"code":"HNI_BV01","name":"Điểm QH Ba Vì","lat":21.2,"lng":105.4,"gdv":"Bùi Thị Thu Nhài"},{"code":"HBH_TB01","name":"Điểm QH TP Hoà Bình","lat":20.82,"lng":105.34,"gdv":"Dương Tùng"},{"code":"PTO_VT01","name":"Điểm QH Việt Trì","lat":21.32,"lng":105.4,"gdv":"Hồ Nam"},{"code":"BGI_BG01","name":"Điểm QH Bắc Giang","lat":21.28,"lng":106.19,"gdv":"Tạ Công Nhận"},{"code":"BNI_BN01","name":"Điểm QH Bắc Ninh","lat":21.19,"lng":106.08,"gdv":"Tạ Quốc Huy"},{"code":"HDG_HD01","name":"Điểm QH Hải Dương","lat":20.94,"lng":106.33,"gdv":"Lê Thị Hồng Thu"},{"code":"HNA_PL01","name":"Điểm QH Phủ Lý","lat":20.55,"lng":105.91,"gdv":"Đặng Văn Dũng"},{"code":"NBH_NB01","name":"Điểm QH Ninh Bình","lat":20.25,"lng":105.97,"gdv":"Đặng Văn Dũng"},{"code":"HAG_HG01","name":"Điểm QH Hà Giang","lat":22.83,"lng":104.98,"gdv":"Nguyễn Mạnh Sơn"},{"code":"TNG_TN01","name":"Điểm QH Thái Nguyên","lat":21.59,"lng":105.85,"gdv":"Hồ Nam"},{"code":"HYN_HY01","name":"Điểm QH Hưng Yên","lat":20.65,"lng":106.07,"gdv":"Nguyễn Duy Đoàn"},{"code":"NĐH_NĐ01","name":"Điểm QH Nam Định","lat":20.43,"lng":106.18,"gdv":"Nguyễn Thị Thu"},{"code":"THH_TH01","name":"Điểm QH Thanh Hóa","lat":19.81,"lng":105.77,"gdv":"Nguyễn Thị Thu"}];
+
+// MB_DATA, scans, DP_DATA (same as before)
+const MB_DATA = [
+  { id:'MB-1007-001', nguon:'TKMB/Vận hành', gdv:'Phạm Minh Thu', qlkv:'Trần Thu Trà', tinh:'TP. Hà Nội', huyen:'H. Đông Anh', addr:'Thôn Dục Tú, Đông Anh', mapLink:'https://maps.google.com/?q=21.1413,105.8690', area:'12.5', front:'6.0', price:'15.0', payment:'3 tháng/lần', deposit:'45', duration:'5', legal:'Sổ đỏ chính chủ', condition:'Nhà trống', handover:'1 tuần', gtName:'Nguyễn Văn A', gtMNV:'3001291', bct:'Bà Liên', bctPhone:'0912345678', status:'Chưa duyệt', createdAt:'2026-10-07T06:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-10-07T08:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-1007-002', nguon:'TKMB/Vận hành', gdv:'Lê Thị Hồng Thu', qlkv:'Phạm Thị Hải', tinh:'T. Hải Dương', huyen:'TP. Hải Dương', addr:'Ngã tư Máy Sứ, P. Thanh Bình', mapLink:'https://maps.google.com/?q=20.94,106.33', area:'200', front:'10', price:'22', status:'GDV duyet', createdAt:'2026-10-05T09:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-10-05T14:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:'2026-10-06T10:00:00'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'Pending',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-1007-003', nguon:'TKMB/Vận hành', gdv:'Hồ Nam', qlkv:'Ma Văn Toàn', tinh:'T. Phú Thọ', huyen:'H. Thanh Sơn', addr:'Khu đô thị Minh Phương', mapLink:'https://maps.google.com/?q=21.32,105.4', area:'150', front:'8', price:'18', status:'GDM duyet', createdAt:'2026-09-25T08:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-09-26T10:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:'2026-09-28T11:00:00'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'Done',date:'2026-10-01T09:00:00'},
+    {s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'Done',date:'2026-10-03T15:00:00'},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'Pending',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-1007-004', nguon:'TKMB/Vận hành', gdv:'Tạ Công Nhận', qlkv:'Phạm Bá Quang', tinh:'T. Bắc Ninh', huyen:'H. Gia Bình', addr:'Ngã tư Xuân Mai', mapLink:'', area:'180', front:'7', price:'20', status:'Chưa duyệt', createdAt:'2026-09-20T07:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-09-21T09:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Fail',date:'2026-09-23T14:00:00',failReason:'Vị trí khuất, xa khu dân cư',failGroup:'Vị trí không phù hợp'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'—',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'—',date:''},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'—',date:''},{s:6,actor:'System',appr:'—',r:'—',date:''}
+  ]},
+  { id:'MB-1007-005', nguon:'TKMB/Vận hành', gdv:'Đặng Văn Dũng', qlkv:'Trịnh Thanh Bình', tinh:'T. Ninh Bình', huyen:'TP. Ninh Bình', addr:'Đường Lý Thái Tổ, P. Suối Hoa', mapLink:'', area:'160', front:'9', price:'25', status:'GDV duyet', createdAt:'2026-10-06T10:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-10-06T16:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:'2026-10-07T09:00:00'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'Pending',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-1007-006', nguon:'TKMB/Vận hành', gdv:'Nguyễn Mạnh Sơn', qlkv:'Lâm Văn Hà', tinh:'T. Hà Giang', huyen:'TP. Hà Giang', addr:'Đường Nguyễn Trãi, P. Trần Phú', mapLink:'', area:'130', front:'6', price:'12', status:'GDM duyet', createdAt:'2026-08-20T08:00:00', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:'2026-08-21T10:00:00'},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:'2026-08-25T11:00:00'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'Done',date:'2026-08-30T09:00:00'},
+    {s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'Done',date:'2026-09-05T15:00:00'},
+    {s:5,actor:'GĐV',appr:'GĐV',r:'Done',date:'2026-09-15T10:00:00'},
+    {s:6,actor:'System',appr:'—',r:'Done',date:'2026-09-20T08:00:00'}
+  ]},
+];
+let scans = [{date:'2026-10-06',qhCode:'HNI_ML23',gdv:'Phạm Minh Thu',qlkv:'Trần Thu Trà',hasMB:'yes',addr:'Đội 6 Tiên Đài',status:'Đã chuyển MB'}];
+const DP_DATA = [
+  {sap:'6613',ch:'WM+ HNI 35 Đông Khê',gdv:'Bùi Thị Thu Nhài',mt:9.5,dtkd:82,dt:18.22,dg:'DTKD nhỏ',td:'Chưa ĐP',sla:'ok'},
+  {sap:'6486',ch:'WM+ HNI 165 Hồng Hà',gdv:'Bùi Thị Thu Nhài',mt:5.9,dtkd:78,dt:20.1,dg:'MT nhỏ + DTKD nhỏ',td:'Đã liên hệ',sla:'ok'},
+  {sap:'5497',ch:'WM+ HBH 665 Cù Chính Lan',gdv:'Dương Tùng',mt:5.9,dtkd:89.1,dt:21.4,dg:'MT nhỏ + DTKD nhỏ',td:'Đang thương lượng',sla:'warn'},
+];
+let currentRole = 'GDV';
+let currentQHLat = null, currentQHLng = null;
+
+// ═══ CONFIG ═══
+const GAS_URL = ''; // ← Thay bằng URL GAS sau khi deploy
+
+// ═══ HELPERS ═══
+function getSLAColor(step, createdDate) {
+  if (!createdDate) return 'sla-ok';
+  const sla = STEP_SLA[step-1];
+  if (!sla || sla.slaHours > 500) return 'sla-ok';
+  const elapsed = (Date.now() - new Date(createdDate).getTime()) / 3600000;
+  if (elapsed > sla.slaHours * 2) return 'sla-over';
+  if (elapsed > sla.slaHours) return 'sla-warn';
+  return 'sla-ok';
+}
+function getPct(steps) { const done = steps.filter(s=>s.r==='Done').length; return {done,total:6,pct:Math.round(done/6*100)}; }
+function stepClass(r) { return ['None','Pending','Done','Fail'].includes(r) ? r : '—'; }
+
+// ═══ MAP & QH ═══
+function parseCoords(input) {
+  if (!input) return null;
+  let lat, lng;
+  // Google Maps URL patterns
+  const qMatch = input.match(/[?&]q=([-\d.]+),([-\d.]+)/) || input.match(/@([-\d.]+),([-\d.]+)/) || input.match(/\/place\/[^/]+\/@([-\d.]+),([-\d.]+)/);
+  if (qMatch) { lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]); }
+  else {
+    // Plain coordinate format: "21.0179, 105.9650"
+    const cm = input.match(/([-\d.]+)\s*[,;\s]\s*([-\d.]+)/);
+    if (cm) { lat = parseFloat(cm[1]); lng = parseFloat(cm[2]); }
+  }
+  if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) return null;
+  return { lat, lng };
+}
+
+function calcDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // km
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function findNearestQH(lat, lng) {
+  let nearest = null, minDist = Infinity;
+  for (const qh of QH_POINTS) {
+    const d = calcDistance(lat, lng, qh.lat, qh.lng);
+    if (d < minDist) { minDist = d; nearest = qh; }
+  }
+  return { qh: nearest, dist: minDist };
+}
+
+function onMapInput() {
+  const val = document.getElementById('mbMapLink').value.trim();
+  const resultDiv = document.getElementById('mapResult');
+  if (!val) { resultDiv.style.display = 'none'; currentQHLat = null; currentQHLng = null; return; }
+  const coords = parseCoords(val);
+  if (!coords) { resultDiv.style.display = 'none'; return; }
+  currentQHLat = coords.lat; currentQHLng = coords.lng;
+  const { qh, dist } = findNearestQH(coords.lat, coords.lng);
+  if (!qh) { resultDiv.style.display = 'none'; return; }
+
+  const distKm = dist < 1 ? (dist*1000).toFixed(0)+' m' : dist.toFixed(1)+' km';
+  let distClass = ''; let evalText = '';
+  if (dist < 0.5) { distClass = ''; evalText = '🟢 Trong vùng QH'; }
+  else if (dist < 1) { distClass = 'far'; evalText = '🟡 Gần vùng QH'; }
+  else { distClass = 'very-far'; evalText = '🔴 Xa vùng QH'; }
+
+  document.getElementById('qhName').textContent = qh.code + ' — ' + qh.name;
+  document.getElementById('qhDetail').textContent = 'GĐV: ' + qh.gdv + ' · ' + qh.lat.toFixed(4) + ', ' + qh.lng.toFixed(4);
+  document.getElementById('qhDistance').textContent = distKm;
+  document.getElementById('qhDistance').className = 'qh-dist ' + distClass;
+  document.getElementById('qhDistLabel').textContent = '(' + dist.toFixed(3) + ' km)';
+  document.getElementById('qhEval').textContent = evalText;
+  resultDiv.style.display = 'block';
+}
+
+function showQHMap() {
+  if (currentQHLat == null) return;
+  window.open('https://www.google.com/maps?q=' + currentQHLat + ',' + currentQHLng, '_blank');
+}
+
+// ═══ CASCADE ═══
+function populateGDV() {
+  const sel = document.getElementById('mbGDV');
+  const gdvs = Object.keys(CASCADE_DATA).sort();
+  gdvs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+}
+
+function onGDVChange() {
+  const gdv = document.getElementById('mbGDV').value;
+  const qlkvSel = document.getElementById('mbQLKV');
+  const tinhSel = document.getElementById('mbTinh');
+  const huyenSel = document.getElementById('mbHuyen');
+  qlkvSel.innerHTML = '<option value="">-- Chọn QLKV --</option>';
+  tinhSel.innerHTML = '<option value="">-- Chọn Tỉnh/TP --</option>';
+  huyenSel.innerHTML = '<option value="">-- Chọn Huyện/Quận --</option>';
+  qlkvSel.disabled = tinhSel.disabled = huyenSel.disabled = true;
+  if (!gdv || !CASCADE_DATA[gdv]) return;
+  qlkvSel.disabled = false;
+  const qlkvs = Object.keys(CASCADE_DATA[gdv]).sort();
+  qlkvs.forEach(q => { const o = document.createElement('option'); o.value = q; o.textContent = q; qlkvSel.appendChild(o); });
+}
+
+function onQLKVChange() {
+  const gdv = document.getElementById('mbGDV').value;
+  const qlkv = document.getElementById('mbQLKV').value;
+  const tinhSel = document.getElementById('mbTinh');
+  const huyenSel = document.getElementById('mbHuyen');
+  tinhSel.innerHTML = '<option value="">-- Chọn Tỉnh/TP --</option>';
+  huyenSel.innerHTML = '<option value="">-- Chọn Huyện/Quận --</option>';
+  tinhSel.disabled = huyenSel.disabled = true;
+  if (!gdv || !qlkv || !CASCADE_DATA[gdv] || !CASCADE_DATA[gdv][qlkv]) return;
+  tinhSel.disabled = false;
+  const tinhs = Object.keys(CASCADE_DATA[gdv][qlkv]).sort();
+  tinhs.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tinhSel.appendChild(o); });
+}
+
+function onTinhChange() {
+  const gdv = document.getElementById('mbGDV').value;
+  const qlkv = document.getElementById('mbQLKV').value;
+  const tinh = document.getElementById('mbTinh').value;
+  const huyenSel = document.getElementById('mbHuyen');
+  huyenSel.innerHTML = '<option value="">-- Chọn Huyện/Quận --</option>';
+  huyenSel.disabled = true;
+  if (!gdv || !qlkv || !tinh || !CASCADE_DATA[gdv] || !CASCADE_DATA[gdv][qlkv] || !CASCADE_DATA[gdv][qlkv][tinh]) return;
+  huyenSel.disabled = false;
+  CASCADE_DATA[gdv][qlkv][tinh].forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h; huyenSel.appendChild(o); });
+}
+
+// ═══ SUBMIT MB ═══
+async function submitMB() {
+  const gdv = document.getElementById('mbGDV').value;
+  const qlkv = document.getElementById('mbQLKV').value;
+  const tinh = document.getElementById('mbTinh').value;
+  const huyen = document.getElementById('mbHuyen').value;
+  const addr = document.getElementById('mbAddr').value;
+  if (!gdv || !qlkv || !tinh || !huyen) { alert('⚠️ Vui lòng chọn đầy đủ GĐV → QLKV → Tỉnh/TP → Huyện/Quận'); return; }
+  if (!addr) { alert('⚠️ Vui lòng nhập địa chỉ cụ thể'); return; }
+
+  const data = {
+    nguon: 'TKMB/Vận hành', gdv, qlkv, tinh, huyen, addr,
+    mapLink: document.getElementById('mbMapLink').value,
+    area: document.getElementById('mbArea').value, front: document.getElementById('mbFront').value,
+    price: document.getElementById('mbPrice').value,
+    payment: document.getElementById('mbPayment').value,
+    deposit: document.getElementById('mbDeposit').value,
+    duration: document.getElementById('mbDuration').value,
+    legal: document.getElementById('mbLegal').value,
+    condition: document.getElementById('mbCondition').value,
+    handover: document.getElementById('mbHandover').value,
+    qhPoint: document.getElementById('qhName')?.textContent?.replace(/ — .*/,'') || '',
+    qhDistance: document.getElementById('qhDistLabel')?.textContent?.replace(/[() km]/g,'') || '',
+    gtName: document.getElementById('mbGTName').value, gtMNV: document.getElementById('mbGTMNV').value,
+    bct: document.getElementById('mbBCT').value, bctPhone: document.getElementById('mbBCTPhone').value,
+    note: ''
+  };
+
+  // Try GAS first, fallback to local
+  if (GAS_URL) {
+    try {
+      const resp = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      const result = await resp.json();
+      if (result.success) {
+        alert('✅ ' + result.message);
+        return;
+      }
+      alert('⚠️ Lỗi GAS: ' + result.error);
+    } catch (e) {
+      alert('⚠️ Không kết nối được GAS, lưu tạm local');
+    }
+  }
+
+  // Fallback: local storage
+  const mb = {
+    id: 'MB-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*900+100)),
+    ...data,
+    status: 'Chưa duyệt', createdAt: new Date().toISOString(),
+    steps: [
+      {s:1,actor:'QLKV',appr:'GĐV',r:'Pending',date:''},{s:2,actor:'TKMB',appr:'GĐ TKMB',r:'None',date:''},
+      {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},
+      {s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+    ]
+  };
+  MB_DATA.unshift(mb);
+  alert('✅ Đã gửi MB: ' + mb.id + ' (local)\n→ Chờ GĐV duyệt (B1) · SLA: 24h');
+  renderDash(); renderTienDo(); renderDSMB(); populateChkNSO();
+}
+
+// ═══ DASHBOARD ═══
+function renderDash() {
+  const total = MB_DATA.length;
+  const done = MB_DATA.filter(m=>m.steps[5].r==='Done').length;
+  const failMB = MB_DATA.filter(m=>m.steps.some(s=>s.r==='Fail')).length;
+  const pendingMB = total - done - failMB;
+  const overdue = MB_DATA.filter(m=>m.steps.some((s,i)=>{ if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i] && STEP_SLA[i].slaHours<500 && (Date.now()-new Date(m.createdAt).getTime())/3600000 > STEP_SLA[i].slaHours*2; })).length;
+  document.getElementById('kpiMB').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${total}</div><div class="kpi-label">🏢 Tổng MB</div></div>
+    <div class="kpi-card"><div class="kpi-num b">${pendingMB}</div><div class="kpi-label">⏳ Đang xử lý</div></div>
+    <div class="kpi-card"><div class="kpi-num g">${done}</div><div class="kpi-label">✅ Đã KT</div></div>
+    <div class="kpi-card"><div class="kpi-num r">${failMB}</div><div class="kpi-label">❌ Fail</div></div>
+    <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn SLA</div></div>`;
+  document.querySelector('#dashMB tbody').innerHTML = MB_DATA.map(m => {
+    const p = getPct(m.steps); const hasFail = m.steps.some(s=>s.r==='Fail');
+    const lastPending = m.steps.find(s=>s.r==='Pending');
+    const slaCls = lastPending ? getSLAColor(lastPending.s, m.createdAt) : 'sla-ok';
+    const slaText = lastPending ? STEP_SLA[lastPending.s-1].slaLabel : '—';
+    return `<tr style="cursor:pointer" onclick="viewMB('${m.id}')">
+      <td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td>
+      <td>${m.gdv}</td><td>${m.tinh}</td>
+      <td><span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>=3?'tag-p':'tag-o'}">${hasFail?'Fail':p.done>=6?'Done':'Pending'}</span></td>
+      <td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div></td>
+      <td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td>
+      <td><button class="btn btn-xs btn-outline" onclick="event.stopPropagation();editMB('${m.id}')">✏️</button></td></tr>`;
+  }).join('');
+  document.getElementById('kpiScan').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${scans.length}</div><div class="kpi-label">🗺 Tổng Scan</div></div>
+    <div class="kpi-card"><div class="kpi-num g">${scans.filter(s=>s.status==='Đã chuyển MB').length}</div><div class="kpi-label">→ Đã tạo MB</div></div>`;
+  document.getElementById('kpiDP').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${DP_DATA.length}</div><div class="kpi-label">🏢 Cần ĐP</div></div>
+    <div class="kpi-card"><div class="kpi-num b">${DP_DATA.filter(d=>['Đã liên hệ','Đang thương lượng'].includes(d.td)).length}</div><div class="kpi-label">⏳ Đang ĐP</div></div>`;
+  document.getElementById('kpiChk').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${MB_DATA.filter(m=>m.steps[5].r==='Done').length}</div><div class="kpi-label">✅ Đã KT</div></div>`;
+}
+
+// ═══ TIẾN ĐỘ MB ═══
+function populateTDGDV() {
+  const sel = document.getElementById('tdGDV');
+  [...new Set(MB_DATA.map(m=>m.gdv))].forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+}
+function renderTienDo() {
+  const q = (document.getElementById('tdSearch')?.value||'').toLowerCase();
+  const gdvF = document.getElementById('tdGDV')?.value||'';
+  const stF = document.getElementById('tdStatus')?.value||'all';
+  let list = MB_DATA.filter(m => {
+    if (q && !m.id.toLowerCase().includes(q) && !m.addr.toLowerCase().includes(q) && !m.tinh.toLowerCase().includes(q)) return false;
+    if (gdvF && m.gdv !== gdvF) return false;
+    if (stF === 'Pending') return m.steps.some(s=>s.r==='Pending') && !m.steps.some(s=>s.r==='Fail');
+    if (stF === 'Done') return m.steps[5].r === 'Done';
+    if (stF === 'Fail') return m.steps.some(s=>s.r==='Fail');
+    if (stF === 'overdue') return m.steps.some((s,i)=>{if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i]&&STEP_SLA[i].slaHours<500&&(Date.now()-new Date(m.createdAt).getTime())/3600000>STEP_SLA[i].slaHours*2;});
+    return true;
+  });
+  document.getElementById('tienDoList').innerHTML = list.map(m => {
+    const p = getPct(m.steps);
+    let warning = '';
+    m.steps.forEach((s,i) => {
+      if ((s.r==='Pending'||s.r==='None') && STEP_SLA[i].slaHours<500) {
+        const elapsed = (Date.now()-new Date(m.createdAt).getTime())/3600000;
+        if (elapsed > STEP_SLA[i].slaHours*2) warning = '⚠️ QUÁ HẠN SLA nghiêm trọng';
+        else if (elapsed > STEP_SLA[i].slaHours) warning = '⚠️ Sắp quá hạn SLA';
+      }
+    });
+    return `<div class="card" style="padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div><strong>${m.id}</strong><span class="tag tag-p" style="margin-left:8px">${m.nguon}</span><span style="font-size:12px;color:var(--muted);margin-left:8px">${m.gdv} · ${m.tinh} · ${m.huyen||''}</span></div>
+        <div style="font-size:12px;color:var(--muted)">${p.pct}% (${p.done}/6)</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ${m.addr} ${m.area?'· '+m.area+'m²':''} ${m.price?'· '+m.price+'tr/th':''}</div>
+      ${warning ? `<div style="font-size:11px;color:var(--danger);margin-bottom:6px;font-weight:600">${warning}</div>` : ''}
+      <div class="step-flow">${m.steps.map(s => {
+        const cls = stepClass(s.r); const sla = STEP_SLA[s.s-1];
+        const slaCls = (s.r==='Pending'||s.r==='None') ? getSLAColor(s.s,m.createdAt) : '';
+        return `<div class="step-node ${cls}" onclick="openStepModal('${m.id}',${s.s})" title="${s.r==='Fail'&&s.failReason?s.failReason:''}">
+          <span class="sn">${s.r==='Done'?'✓':s.r==='Fail'?'✗':s.r==='Pending'?'●':'—'}</span>
+          <span class="sl">${['','QLKV gửi→GĐV','TKMB KS+BBTĐ','Lên HĐTĐ','ĐP+Ký HĐ','Phát hành KT','Đã KT'][s.s]}</span>
+          <span class="sa">${s.appr} duyệt</span>
+          ${slaCls ? `<span class="sla ${slaCls}">⏱ ${sla.slaLabel}</span>` : ''}
+        </div>`;
+      }).join('')}</div></div>`;
+  }).join('') || '<div class="card" style="text-align:center;color:var(--muted)">Không có MB nào</div>';
+}
+
+// ═══ STEP MODAL ═══
+let currentMBId=null, currentStepNum=null;
+function openStepModal(mbId,step){const mb=MB_DATA.find(m=>m.id===mbId);if(!mb)return;const st=mb.steps[step-1];currentMBId=mbId;currentStepNum=step;
+  document.getElementById('stepModalTitle').textContent=`B${step}: ${['','QLKV/CHT gửi → GĐV duyệt','TKMB KS+BBTĐ → GĐ TKMB duyệt','Lên HĐTĐ → HĐ duyệt','Đàm phán & ký HĐ','Phát hành KT','Đã khai trương'][step]}`;
+  document.getElementById('stepInfo').innerHTML=`MB: <strong>${mbId}</strong> · ${mb.tinh} · Người duyệt: <strong>${st.appr}</strong>`;
+  const sla=STEP_SLA[step-1];document.getElementById('stepSLA').innerHTML=`⏱ SLA: <strong>${sla.slaLabel}</strong> · Quá 2x SLA = cảnh báo đỏ`;
+  document.getElementById('stepResult').value=st.r||'None';document.getElementById('stepFailReason').value=st.failReason||'';document.getElementById('stepFailGroup').value=st.failGroup||'';document.getElementById('stepApprover').value='';
+  document.getElementById('stepModal').style.display='flex';onStepResultChange();}
+function onStepResultChange(){document.getElementById('failFields').style.display=document.getElementById('stepResult').value==='Fail'?'block':'none';}
+function closeStepModal(){document.getElementById('stepModal').style.display='none';}
+function saveStep(){const mb=MB_DATA.find(m=>m.id===currentMBId);if(!mb)return;const st=mb.steps[currentStepNum-1];const result=document.getElementById('stepResult').value;st.r=result;st.date=new Date().toISOString();
+  if(result==='Fail'){st.failReason=document.getElementById('stepFailReason').value;st.failGroup=document.getElementById('stepFailGroup').value;for(let i=currentStepNum;i<6;i++)mb.steps[i].r='—';}
+  else if(result==='Done'&&currentStepNum<6){if(mb.steps[currentStepNum].r==='None'||mb.steps[currentStepNum].r==='—')mb.steps[currentStepNum].r='Pending';}
+  const dc=mb.steps.filter(s=>s.r==='Done').length;if(dc>=6)mb.status='Hoàn thành';else if(dc>=4)mb.status='GDM duyet';else if(dc>=1)mb.status='GDV duyet';
+  closeStepModal();renderDash();renderTienDo();renderDSMB();}
+
+// ═══ DS MB ═══
+function populateDSGDV(){const sel=document.getElementById('dsGDV');[...new Set(MB_DATA.map(m=>m.gdv))].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
+function renderDSMB(){const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),gdvF=document.getElementById('dsGDV')?.value||'',nguonF=document.getElementById('dsNguon')?.value||'';
+  let list=MB_DATA.filter(m=>{if(q&&!m.id.toLowerCase().includes(q)&&!m.addr.toLowerCase().includes(q)&&!m.tinh.toLowerCase().includes(q))return false;if(gdvF&&m.gdv!==gdvF)return false;if(nguonF&&m.nguon!==nguonF)return false;return true;});
+  document.querySelector('#dsTable tbody').innerHTML=list.map(m=>{const p=getPct(m.steps),hasFail=m.steps.some(s=>s.r==='Fail'),lp=m.steps.find(s=>s.r==='Pending'),slaCls=lp?getSLAColor(lp.s,m.createdAt):'sla-ok',slaText=lp?STEP_SLA[lp.s-1].slaLabel:'—';
+    return`<tr><td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td><td>${m.gdv}</td><td>${m.qlkv||'—'}</td><td>${m.tinh}</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}</td><td>${m.area||'—'}</td><td>${m.price||'—'}${m.price?'tr':''}</td><td><span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>=3?'tag-p':'tag-o'}">${hasFail?'Fail':p.done>=6?'Done':'Pending'}</span></td><td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div> ${p.pct}%</td><td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td></tr>`;}).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">Không tìm thấy MB</td></tr>';}
+function viewMB(id){document.querySelector('[data-tab="tiendo"]').click();document.getElementById('tdSearch').value=id;renderTienDo();}
+
+// ═══ EDIT MB ═══
+let editingMBId = null;
+function editMB(mbId) {
+  const mb = MB_DATA.find(m=>m.id===mbId); if(!mb) return;
+  editingMBId = mbId;
+  document.querySelector('[data-tab="tkmb"]').click();
+  // Set GĐV and cascade
+  document.getElementById('mbGDV').value = mb.gdv; onGDVChange();
+  setTimeout(() => {
+    document.getElementById('mbQLKV').value = mb.qlkv||''; onQLKVChange();
+    setTimeout(() => {
+      document.getElementById('mbTinh').value = mb.tinh; onTinhChange();
+      setTimeout(() => {
+        document.getElementById('mbHuyen').value = mb.huyen||'';
+      }, 50);
+    }, 50);
+  }, 50);
+  document.getElementById('mbAddr').value = mb.addr;
+  document.getElementById('mbMapLink').value = mb.mapLink||''; onMapInput();
+  document.getElementById('mbArea').value = mb.area||'';
+  document.getElementById('mbFront').value = mb.front||'';
+  document.getElementById('mbPrice').value = mb.price||'';
+  document.getElementById('mbPayment').value = mb.payment||'';
+  document.getElementById('mbDeposit').value = mb.deposit||'';
+  document.getElementById('mbDuration').value = mb.duration||'';
+  document.getElementById('mbLegal').value = mb.legal||'';
+  document.getElementById('mbCondition').value = mb.condition||'';
+  document.getElementById('mbHandover').value = mb.handover||'';
+  document.getElementById('mbGTName').value = mb.gtName||'';
+  document.getElementById('mbGTMNV').value = mb.gtMNV||'';
+  document.getElementById('mbBCT').value = mb.bct||'';
+  document.getElementById('mbBCTPhone').value = mb.bctPhone||'';
+  alert('⚠️ Đang chỉnh sửa MB ' + mbId + '\nThay đổi sẽ cần duyệt lại từ GĐV.');
+}
+
+// ═══ SCAN ═══
+function saveScan(){scans.unshift({date:document.getElementById('scanDate').value,qhCode:document.getElementById('scanQHCode').value,gdv:document.getElementById('scanGDV').value,qlkv:document.getElementById('scanQLKV').value,hasMB:document.getElementById('scanHasMB').value,addr:document.getElementById('scanAddr').value,status:'Mới'});renderScanHistory();renderDash();alert('✅ Đã lưu scan!');}
+function renderScanHistory(){document.querySelector('#scanHistory tbody').innerHTML=scans.slice(0,10).map(s=>`<tr><td>${s.date}</td><td>${s.qhCode}</td><td>${s.gdv}</td><td>${s.qlkv}</td><td>${s.hasMB==='yes'?'✅':'❌'}</td><td>${s.addr||''}</td><td><span class="tag ${s.status==='Đã chuyển MB'?'tag-g':'tag-o'}">${s.status}</span></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted)">Chưa có scan</td></tr>';}
+
+// ═══ CHECKLIST ═══
+const CHK_TEMPLATE=[{cat:'👥 Nhân sự',items:[{n:'Tiêu chuẩn nhân sự CH KT',t:'D-15'},{n:'Đào tạo NVBH',t:'D-10'}]},{cat:'📦 Hàng hóa',items:[{n:'Đặt hàng Ambiant',t:'D-24'},{n:'Rà soát CTKM',t:'D-14'},{n:'Đặt hàng Fresh',t:'D-7'},{n:'Luân chuyển hàng',t:'D-7'}]},{cat:'📣 Marketing',items:[{n:'Nhóm Zalo KHTT',t:'D-15'},{n:'Cavassing tờ rơi',t:'D-10'},{n:'Roadshow',t:'D-5'},{n:'Treo phướn KT',t:'D-15'}]},{cat:'🏗️ CSVC',items:[{n:'Nhận bàn giao MB',t:'D-9'},{n:'Nhận giá kệ',t:'D-8'},{n:'Camera',t:'D-5'},{n:'Trang trí CH',t:'D-2'}]},{cat:'🎉 Khai trương',items:[{n:'Cổng bóng',t:'D-1'},{n:'Lều + khay',t:'D-1'},{n:'Cúng KT',t:'D-1'},{n:'Nhân sự 8-10 người',t:'D'}]},];
+function populateChkNSO(){const sel=document.getElementById('chkNSO');sel.innerHTML='<option value="">-- Chọn MB đã KT --</option>';MB_DATA.filter(m=>m.steps[5].r==='Done').forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.id+' — '+m.addr+' ('+m.gdv+')';sel.appendChild(o);});}
+function renderChecklist(){const mbId=document.getElementById('chkNSO').value,container=document.getElementById('checklistContent');if(!mbId){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">Chọn MB đã KT để xem checklist</div>';return;}
+  container.innerHTML=CHK_TEMPLATE.map(cat=>`<div class="card" style="padding:0;overflow:hidden;margin-bottom:8px"><div style="background:#ede9fe;color:var(--primary);padding:8px 12px;font-weight:700;font-size:13px">${cat.cat}</div><div>${cat.items.map(it=>`<div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #f3f0ff;font-size:12px;gap:8px"><input type="checkbox" style="width:16px;height:16px;accent-color:var(--success)" onchange="this.parentElement.style.textDecoration=this.checked?'line-through':''"><span style="flex:1">${it.n}</span><span style="font-size:10px;color:var(--muted);min-width:40px;text-align:right">${it.t}</span></div>`).join('')}</div></div>`).join('');}
+
+// ═══ ĐÀM PHÁN ═══
+function renderDPTable(){document.querySelector('#dpTable tbody').innerHTML=DP_DATA.map(d=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':'⚠️'}</span></td></tr>`).join('');}
+
+// ═══ ROLE SWITCH ═══
+function switchRole() {
+  currentRole = document.getElementById('roleSelect').value;
+  const names = {GDV:'Phạm Minh Thu', TKMB:'Nguyễn Văn A', GD_TKMB:'Trần Thị B', HĐ:'Lê Văn C', GDM:'Đặng Trần Hảo'};
+  document.getElementById('userName').textContent = names[currentRole] || 'User';
+  renderDash(); renderTienDo();
+}
+
+// ═══ INIT ═══
+function init() {
+  document.querySelectorAll('.nav button').forEach(b => {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('sec-' + this.dataset.tab).classList.add('active');
+      if (this.dataset.tab === 'dash') renderDash();
+      if (this.dataset.tab === 'tiendo') { renderTienDo(); populateTDGDV(); }
+      if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); }
+      if (this.dataset.tab === 'checklist') populateChkNSO();
+      if (this.dataset.tab === 'damphan') renderDPTable();
+      if (this.dataset.tab === 'scan') renderScanHistory();
+    });
+  });
+  document.getElementById('scanHasMB').addEventListener('change', function() {
+    document.getElementById('scanDraftMB').hidden = this.value !== 'yes';
+  });
+  populateGDV();
+  renderDash();
+}
+
+init();
+</script>
+</body>
+</html>
