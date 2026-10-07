@@ -970,6 +970,8 @@ function init() {
 }
 
 init();
+  // Auto-init sheets on first load
+  if (GAS_URL) { fetch(GAS_URL, { method: 'GET' }).catch(() => {}); }
 </script>
 </body>
 </html>
