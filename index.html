@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>NSO Miền Bắc v2.1</title>
+<title>TKMB Web App — NSO Miền Bắc v2.0</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -190,7 +187,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.1</h1>
+    <h1>🏪 NSO Miền Bắc v2.0</h1>
     <div class="meta">📅 Cập nhật: 07/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -427,32 +424,42 @@ tr:hover td { background:#faf9ff; }
   </div>
 </section>
 
-<!-- ===== SCAN QH ===== -->
+<!-- ===== SCAN QH (GPS) ===== -->
 <section class="section" id="sec-scan">
-  <div class="card">
-    <h3>🗺 Scan điểm Quy Hoạch</h3>
-    <div class="form-grid">
-      <div class="form-group"><label>GĐV</label><select id="scanGDV"><option>Phạm Minh Thu</option><option>Lê Thị Hồng Thu</option><option>Tạ Công Nhận</option><option>Hồ Nam</option><option>Đặng Văn Dũng</option></select></div>
-      <div class="form-group"><label>QLKV</label><input type="text" id="scanQLKV"></div>
-      <div class="form-group"><label>Mã điểm QH</label><input type="text" id="scanQHCode"></div>
-      <div class="form-group"><label>Ngày scan</label><input type="date" id="scanDate"></div>
-      <div class="form-full form-group"><label>Tình trạng khu vực</label><input type="text" id="scanArea"></div>
-      <div class="form-full form-group"><label>Có MB tiềm năng?</label><select id="scanHasMB"><option value="">-- Chọn --</option><option value="yes">✅ Có</option><option value="no">❌ Không</option></select></div>
-      <div class="form-full" id="scanDraftMB" hidden>
-        <div class="form-grid" style="margin-top:8px">
-          <div class="form-group"><label>Địa chỉ MB</label><input type="text" id="scanAddr"></div>
-          <div class="form-group"><label>DT (m²)</label><input type="number" id="scanAreaM2"></div>
-          <div class="form-group"><label>MT (m)</label><input type="text" id="scanFront"></div>
-          <div class="form-group"><label>Giá (tr/th)</label><input type="number" id="scanPrice"></div>
-          <div class="form-group"><label>Chủ nhà</label><input type="text" id="scanOwner"></div>
-          <div class="form-group"><label>SĐT</label><input type="text" id="scanOwnerPhone"></div>
-        </div>
-      </div>
+  <div class="card" style="text-align:center">
+    <h3>📍 Scan điểm Quy Hoạch</h3>
+    <div style="padding:16px 0">
+      <button id="scanBtn" onclick="doScanQH()" style="width:110px;height:110px;border-radius:50%;background:linear-gradient(145deg,#16a34a,#22c55e);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.4);transition:transform .2s;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+        <span style="font-size:32px">📍</span><span>Scan QH</span>
+      </button>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted)" id="scanGpsStatus"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:4px"></span> Sẵn sàng</div>
+      <div style="font-size:10px;color:#aaa" id="scanGpsCoords"></div>
     </div>
-    <button class="btn btn-primary" style="margin-top:12px" onclick="saveScan()">💾 Lưu Scan</button>
+    <div id="scanQHResults"></div>
   </div>
-  <div class="card"><h3>📜 Lịch sử Scan</h3>
-    <div style="overflow-x:auto"><table id="scanHistory"><thead><tr><th>Ngày</th><th>Mã QH</th><th>GĐV</th><th>QLKV</th><th>Có MB</th><th>Địa chỉ</th><th>Trạng thái</th></tr></thead><tbody></tbody></table></div>
+
+  <!-- QH Detail + Form (shown when tapped) -->
+  <div id="scanQHDetail" style="display:none">
+    <button class="btn btn-outline" style="margin-bottom:10px;font-size:12px" onclick="closeScanDetail()">← Quay lại</button>
+    <div class="card" id="scanQHInfo"></div>
+    <div class="card">
+      <h3>📝 Ghi nhận khảo sát</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Ngày KS</label><input type="date" id="scanNgayKS"></div>
+        <div class="form-group"><label>Giá thuê KV (tr/th)</label><input type="number" id="scanGiaKV" placeholder="VD: 12"></div>
+        <div class="form-full form-group"><label>Địa chỉ nhà</label><input type="text" id="scanDiaChi" placeholder="Số nhà, đường, phường/xã"></div>
+        <div class="form-group"><label>Diện tích (m²)</label><input type="number" id="scanDienTich" placeholder="VD: 120"></div>
+        <div class="form-group"><label>Mặt tiền (m)</label><input type="number" id="scanMatTien" placeholder="VD: 8"></div>
+        <div class="form-group"><label>Giá thuê nhà (tr/th)</label><input type="number" id="scanGiaThue" placeholder="VD: 15"></div>
+        <div class="form-group"><label>Cơ hội ghép căn</label><select id="scanGhepCan"><option value="">— Chọn —</option><option value="Có">✅ Có thể ghép</option><option value="Không">❌ Không</option><option value="Cần KS thêm">🔄 Cần KS thêm</option></select></div>
+        <div class="form-full form-group"><label>Ghi chú</label><textarea id="scanGhiChu" rows="2" placeholder="Thông tin thêm..."></textarea></div>
+      </div>
+      <button class="btn btn-success" style="width:100%;margin-top:8px" onclick="saveScanQH()">💾 Lưu khảo sát</button>
+    </div>
+    <div class="card">
+      <h3>📋 Lịch sử khảo sát</h3>
+      <div id="scanTimeline" style="font-size:12px;color:var(--muted);text-align:center">Đang tải...</div>
+    </div>
   </div>
 </section>
 
@@ -538,8 +545,199 @@ const STEP_SLA = [
 // Cascade data: GĐV → QLKV → Tỉnh → Huyện (from Storelist live)
 const CASCADE_DATA = {"Bùi Thị Thu Nhài":{"Bùi Thị Thu Nhài":{"TP. Hà Nội":["H. Hoài Đức","H. Đan Phượng"]},"Nguyễn Hữu Huân":{"TP. Hà Nội":["H. Đan Phượng"]},"Nguyễn Thị Hồng":{"TP. Hà Nội":["H. Ba Vì"]},"Nguyễn Thị Thu Hương":{"TP. Hà Nội":["H. Phúc Thọ"]},"Ngô Thị Quỳnh Anh":{"TP. Hà Nội":["H. Hoài Đức"]},"Phan Phúc Tân":{"TP. Hà Nội":["H. Ba Vì","H. Phúc Thọ"]},"Phạm Thị Nhâm":{"TP. Hà Nội":["H. Hoài Đức"]}},"Dương Tùng":{"Bùi Thị Thu Trang":{"TP. Hà Nội":["H. Ứng Hòa"]},"Dương Tùng":{"T. Hoà Bình":["H. Cao Phong","H. Lương Sơn","H. Mai Châu","H. Tân Lạc","TP. Hoà Bình"]},"Nguyễn Thị Dung":{"TP. Hà Nội":["H. Mỹ Đức"]},"Phạm Thị Bưởi":{"T. Hoà Bình":["H. Đà Bắc"]},"Vũ Thị Hương":{"T. Hoà Bình":["H. Lạc Thủy","H. Yên Thủy"]},"Đinh Thị Thu Hiền":{"T. Hoà Bình":["H. Lạc Sơn"]},"Đỗ Thanh Thủy":{"T. Sơn La":["H. Mộc Châu","H. Phù Yên","H. Vân Hồ"]}},"Hồ Nam":{"Bàn Văn Minh":{"T. Phú Thọ":["H. Hạ Hoà"]},"Cấn Văn Hoàn":{"T. Phú Thọ":["H. Thanh Ba"]},"Dương Đức Tài":{"T. Thái Nguyên":["H. Đồng Hỷ"]},"Hoàng Văn Huỳnh":{"T. Tuyên Quang":["H. Chiêm Hoá"]},"Lộc Thị Tươi":{"T. Tuyên Quang":["TP. Tuyên Quang"]},"Lương Văn Thửa":{"T. Thái Nguyên":["H. Phú Lương"]},"Lý Văn Sinh":{"T. Thái Nguyên":["H. Định Hoá"]},"Lê Thị Thu":{"T. Phú Thọ":["H. Thanh Thuỷ"]},"Ma Văn Toàn":{"T. Phú Thọ":["H. Thanh Sơn"]},"Nguyễn Ngọc Tâm":{"T. Phú Thọ":["H. Tam Nông","H. Thanh Sơn"]},"Nguyễn Trọng Hoàng":{"T. Bắc Kạn":["H. Ba Bể"]},"Nguyễn Văn Bình":{"T. Phú Thọ":["H. Yên Lập"]},"Nguyễn Đình Hậu":{"TP. Hà Nội":["H. Ba Vì"]},"Nông Minh Sơn":{"T. Tuyên Quang":["H. Na Hang"]},"Phùng Minh Hoàng":{"T. Tuyên Quang":["H. Sơn Dương"]},"Triệu Đức Thành":{"T. Bắc Kạn":["TP. Bắc Kạn"]},"Trần Trọng Hiếu":{"TP. Hà Nội":["H. Ba Vì"]},"Tạ Quốc Oanh":{"T. Phú Thọ":["H. Cẩm Khê"]},"Tạ Vân Anh":{"TP. Hà Nội":["H. Sơn Tây"]},"Vi Văn Đại":{"T. Phú Thọ":["H. Tân Sơn"]},"Đỗ Hải Võ":{"T. Thái Nguyên":["TP. Thái Nguyên"]}},"Lê Thị Hồng Thu":{"Lê Thị Hồng Thu":{"T. Hải Dương":["H. Nam Sách","TP. Chí Linh","TP. Hải Dương"]},"Nguyễn Thị Thu":{"T. Hải Dương":["H. Cẩm Giàng","H. Kim Thành"]},"Phạm Thị Hải":{"T. Hải Dương":["H. Thanh Hà","TP. Hải Dương"]},"Trần Thị Hoa":{"T. Hải Dương":["H. Kinh Môn"]},"Đào Thị Hường":{"T. Hải Dương":["H. Ninh Giang"]}},"Nguyễn Duy Đoàn":{"Chu Văn Anh":{"T. Hưng Yên":["H. Văn Giang"]},"Dương Thị Hòa":{"T. Hưng Yên":["H. Khoái Châu"]},"Lưu Văn Sơn":{"T. Hưng Yên":["H. Mỹ Hào","H. Văn Lâm"]},"Lê Văn Thao":{"T. Hưng Yên":["TP. Hưng Yên"]},"Nguyễn Văn Luyến":{"T. Hưng Yên":["H. Văn Giang"]},"Nguyễn Đức Lợi":{"T. Bắc Ninh":["H. Thuận Thành","TP. Bắc Ninh"]},"Phạm Văn Huân":{"T. Hưng Yên":["H. Phù Cừ"]}},"Nguyễn Mạnh Sơn":{"Bùi Thị Thanh":{"T. Hà Giang":["H. Quang Bình"]},"Hoàng Xuân Tưởng":{"T. Tuyên Quang":["H. Yên Sơn"]},"Lâm Văn Hà":{"T. Hà Giang":["H. Vị Xuyên","TP. Hà Giang"]},"Mã Ích Dương":{"T. Hà Giang":["H. Quản Bạ","H. Yên Minh"]},"Nông Minh Hòa":{"T. Hà Giang":["H. Bắc Mê","H. Đồng Văn"]},"Phạm Hữu Tài":{"T. Hà Giang":["H. Hoàng Su Phì"]},"Trần Đức Anh":{"T. Hà Giang":["H. Mèo Vạc"]},"Trần Đức Dũng":{"T. Hà Giang":["H. Xín Mần"]},"Đặng Thị Bích Nhi":{"T. Hà Giang":["TP. Hà Giang"]}},"Nguyễn Thị Thu":{"Bùi Ngọc Quỳnh Trang":{"TP. Hà Nội":["H. Mỹ Đức"]},"Mai Thanh Hải":{"T. Thanh Hóa":["H. Nga Sơn"]},"Nguyễn Ngọc Tú":{"T. Thanh Hóa":["H. Hà Trung"]},"Nguyễn Thị Hằng":{"T. Nam Định":["H. Trực Ninh","H. Vụ Bản"]},"Phan Thị Mai":{"T. Nam Định":["H. Hải Hậu","H. Nghĩa Hưng"]},"Phạm Xuân Hùng":{"T. Thanh Hóa":["H. Hậu Lộc"]},"Phạm Đình Kỳ":{"T. Ninh Bình":["H. Hoa Lư","H. Yên Mô"]},"Trần Văn Thao":{"T. Ninh Bình":["H. Kim Sơn","H. Yên Khánh"]},"Vũ Ngọc Toàn":{"T. Nam Định":["H. Ý Yên","TP. Nam Định"]}},"Phạm Minh Thu":{"Bùi Văn Chiến":{"TP. Hà Nội":["H. Mê Linh"]},"Hoàng Thị Thảo":{"T. Vĩnh Phúc":["H. Vĩnh Tường","H. Yên Lạc"]},"Lê Văn Trung":{"T. Vĩnh Phúc":["H. Tam Dương","TP. Vĩnh Yên"]},"Lê Đức Toàn":{"T. Vĩnh Phúc":["H. Bình Xuyên","H. Tam Đảo"]},"Nguyễn Đức Thành":{"T. Vĩnh Phúc":["H. Lập Thạch","H. Sông Lô"]},"Ngô Thị Hà":{"TP. Hà Nội":["H. Sóc Sơn"]},"Trần Thu Trà":{"TP. Hà Nội":["H. Đông Anh","H. Gia Lâm"]},"Trần Văn Bắc":{"TP. Hà Nội":["H. Mê Linh"]},"Đoàn Thị Hương Giang":{"TP. Hà Nội":["H. Đông Anh"]}},"Tạ Công Nhận":{"Hoàng Văn Cường":{"T. Bắc Giang":["H. Lục Ngạn","H. Sơn Động"]},"Hà Văn Nhân":{"T. Bắc Ninh":["H. Quế Võ"]},"Nông Thị Minh Sơn":{"T. Lạng Sơn":["H. Bắc Sơn"]},"Phùng Văn Thịnh":{"T. Bắc Giang":["H. Lạng Giang","H. Yên Dũng"]},"Phạm Bá Quang":{"T. Bắc Ninh":["H. Gia Bình","H. Lương Tài"]},"Thân Văn Tùng":{"T. Bắc Giang":["TP. Bắc Giang"]},"Trần Thị Hợp":{"T. Lạng Sơn":["H. Hữu Lũng"]},"Vi Hoài Nam":{"T. Lạng Sơn":["H. Lộc Bình"]},"Đào Xuân Hải":{"T. Bắc Giang":["H. Tân Yên","H. Yên Thế"]}},"Tạ Quốc Huy":{"Lê Thị Mây":{"T. Hải Dương":["H. Thanh Miện"]},"Nguyễn Quốc Minh":{"T. Bắc Ninh":["H. Tiên Du","H. Yên Phong","TP. Từ Sơn"]},"Phạm Hồng Hải":{"T. Bắc Ninh":["TP. Bắc Ninh"]},"Trần Mạnh Hùng":{"T. Bắc Ninh":["H. Thuận Thành"]},"Vũ Đình Thức":{"T. Hải Dương":["H. Bình Giang"]}},"Đặng Văn Dũng":{"Lương Văn Chỉnh":{"T. Hà Nam":["H. Kim Bảng","H. Thanh Liêm","TP. Phủ Lý"]},"Nguyễn Việt Hùng":{"T. Thái Bình":["H. Quỳnh Phụ","H. Thái Thụy"]},"Nguyễn Đức Hải":{"T. Hà Nam":["H. Bình Lục","H. Duy Tiên","H. Lý Nhân"]},"Phạm Văn Tuân":{"T. Thái Bình":["H. Kiến Xương","H. Tiền Hải"]},"Trịnh Thanh Bình":{"T. Ninh Bình":["H. Gia Viễn","H. Nho Quan","H. Yên Khánh","TP. Ninh Bình","TP. Tam Điệp"]},"Trần Thị Hương":{"T. Hà Nam":["H. Duy Tiên","TP. Phủ Lý"]},"Vũ Đức Vượng":{"T. Thái Bình":["H. Hưng Hà","H. Vũ Thư","TP. Thái Bình"]}}};
 
-// QH points (sample - load from sheet in production)
-const QH_POINTS = [{"code":"HNI_ML23","name":"Điểm QH Mê Linh","lat":21.2,"lng":105.8,"gdv":"Phạm Minh Thu"},{"code":"HNI_DA01","name":"Điểm QH Đông Anh","lat":21.15,"lng":105.83,"gdv":"Phạm Minh Thu"},{"code":"HNI_GL01","name":"Điểm QH Gia Lâm","lat":21.02,"lng":105.94,"gdv":"Phạm Minh Thu"},{"code":"HNI_HD01","name":"Điểm QH Hoài Đức","lat":21.05,"lng":105.7,"gdv":"Bùi Thị Thu Nhài"},{"code":"HNI_ST01","name":"Điểm QH Sơn Tây","lat":21.14,"lng":105.5,"gdv":"Hồ Nam"},{"code":"HNI_BV01","name":"Điểm QH Ba Vì","lat":21.2,"lng":105.4,"gdv":"Bùi Thị Thu Nhài"},{"code":"HBH_TB01","name":"Điểm QH TP Hoà Bình","lat":20.82,"lng":105.34,"gdv":"Dương Tùng"},{"code":"PTO_VT01","name":"Điểm QH Việt Trì","lat":21.32,"lng":105.4,"gdv":"Hồ Nam"},{"code":"BGI_BG01","name":"Điểm QH Bắc Giang","lat":21.28,"lng":106.19,"gdv":"Tạ Công Nhận"},{"code":"BNI_BN01","name":"Điểm QH Bắc Ninh","lat":21.19,"lng":106.08,"gdv":"Tạ Quốc Huy"},{"code":"HDG_HD01","name":"Điểm QH Hải Dương","lat":20.94,"lng":106.33,"gdv":"Lê Thị Hồng Thu"},{"code":"HNA_PL01","name":"Điểm QH Phủ Lý","lat":20.55,"lng":105.91,"gdv":"Đặng Văn Dũng"},{"code":"NBH_NB01","name":"Điểm QH Ninh Bình","lat":20.25,"lng":105.97,"gdv":"Đặng Văn Dũng"},{"code":"HAG_HG01","name":"Điểm QH Hà Giang","lat":22.83,"lng":104.98,"gdv":"Nguyễn Mạnh Sơn"},{"code":"TNG_TN01","name":"Điểm QH Thái Nguyên","lat":21.59,"lng":105.85,"gdv":"Hồ Nam"},{"code":"HYN_HY01","name":"Điểm QH Hưng Yên","lat":20.65,"lng":106.07,"gdv":"Nguyễn Duy Đoàn"},{"code":"NĐH_NĐ01","name":"Điểm QH Nam Định","lat":20.43,"lng":106.18,"gdv":"Nguyễn Thị Thu"},{"code":"THH_TH01","name":"Điểm QH Thanh Hóa","lat":19.81,"lng":105.77,"gdv":"Nguyễn Thị Thu"}];
+// QH data loaded from external JSON
+let QH_POINTS = [];
+let qhDataLoaded = false;
+let scanGPS = { lat: null, lng: null, watchId: null };
+let scanSelectedQH = null;
+const SCAN_RADIUS = 100; // meters
+
+async function loadQHData() {
+  try {
+    const resp = await fetch('qh_points.json');
+    QH_POINTS = await resp.json();
+    qhDataLoaded = true;
+    console.log('Loaded ' + QH_POINTS.length + ' QH points');
+  } catch(e) {
+    console.error('QH data load failed, using sample data', e);
+    // Keep sample data as fallback
+  }
+}
+
+function startScanGPS() {
+  if (!navigator.geolocation) return;
+  scanGPS.watchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      scanGPS.lat = pos.coords.latitude;
+      scanGPS.lng = pos.coords.longitude;
+      document.getElementById('scanGpsStatus').innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-right:4px"></span> GPS OK (±' + Math.round(pos.coords.accuracy) + 'm)';
+      document.getElementById('scanGpsCoords').textContent = scanGPS.lat.toFixed(6) + ', ' + scanGPS.lng.toFixed(6);
+    },
+    function(err) {
+      document.getElementById('scanGpsStatus').innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:4px"></span> GPS: ' + (err.code===1?'Bị từ chối':err.code===2?'Không tín hiệu':'Lỗi');
+    },
+    { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 }
+  );
+}
+
+function haversineQH(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function doScanQH() {
+  const btn = document.getElementById('scanBtn');
+  const results = document.getElementById('scanQHResults');
+  const detail = document.getElementById('scanQHDetail');
+
+  if (!scanGPS.lat) { alert('⚠️ Đang chờ tín hiệu GPS...'); return; }
+  if (QH_POINTS.length === 0) { alert('⚠️ Chưa tải dữ liệu QH'); return; }
+
+  btn.style.background = 'linear-gradient(145deg,#d97706,#f59e0b)';
+  btn.querySelector('span:last-child').textContent = 'Đang quét...';
+  results.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted)"><div class="spinner" style="display:inline-block;width:24px;height:24px;border:3px solid #e5e7eb;border-top-color:#7c3aed;border-radius:50%;animation:spin .8s linear infinite"></div><div style="margin-top:6px;font-size:12px">Đang quét ' + QH_POINTS.length + ' điểm QH...</div></div>';
+
+  setTimeout(function() {
+    const nearby = [];
+    let nearest = null, nearestDist = Infinity;
+    for (let i = 0; i < QH_POINTS.length; i++) {
+      const p = QH_POINTS[i];
+      const d = haversineQH(scanGPS.lat, scanGPS.lng, p.lat, p.lng);
+      if (d < nearestDist) { nearestDist = d; nearest = p; }
+      if (d <= SCAN_RADIUS) nearby.push({...p, dist: d});
+    }
+    nearby.sort(function(a,b) { return a.dist - b.dist; });
+
+    btn.style.background = 'linear-gradient(145deg,#16a34a,#22c55e)';
+    btn.querySelector('span:last-child').textContent = 'Scan QH';
+
+    if (nearby.length > 0) {
+      detail.style.display = 'none';
+      results.innerHTML = '<div style="font-weight:600;font-size:13px;color:#7c3aed;margin-bottom:6px">✅ Tìm thấy ' + nearby.length + ' điểm QH trong ' + SCAN_RADIUS + 'm</div>' +
+        nearby.map(function(p) {
+          return '<div onclick="openScanDetail(\'' + p.qh + '\')" style="background:#fff;border-radius:8px;padding:12px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;border:1px solid #ede9fe;transition:transform .15s" onmousedown="this.style.transform=\'scale(.98)\'" onmouseup="this.style.transform=\'\'">' +
+            '<div style="font-weight:700;font-size:14px;color:#7c3aed">' + p.qh + '</div>' +
+            '<div style="font-size:11px;color:var(--muted)">📍 ' + [p.x, p.h, p.t].filter(Boolean).join(', ') + '</div>' +
+            '<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">' +
+              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#dcfce7;color:#15803d">📏 ' + Math.round(p.dist) + 'm</span>' +
+              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#ede9fe;color:#7c3aed">' + (p.gdv||'') + '</span>' +
+            '</div></div>';
+        }).join('');
+      if (navigator.vibrate) navigator.vibrate(200);
+    } else {
+      const dist = Math.round(nearestDist);
+      results.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">' +
+        '<div style="font-size:48px;margin-bottom:8px">📭</div>' +
+        '<div style="font-weight:600">Không có điểm QH trong ' + SCAN_RADIUS + 'm</div>' +
+        '<div style="margin-top:4px;font-size:12px">Gần nhất: <b>' + nearest.qh + '</b> cách <b>' + dist + 'm</b></div>' +
+        '<div style="font-size:11px;color:#aaa">' + nearest.t + ' · ' + nearest.h + '</div></div>';
+    }
+  }, 200);
+}
+
+function openScanDetail(maQH) {
+  scanSelectedQH = QH_POINTS.find(function(p) { return p.qh === maQH; });
+  if (!scanSelectedQH) return;
+  const p = scanSelectedQH;
+  document.getElementById('scanQHResults').style.display = 'none';
+  document.getElementById('scanQHDetail').style.display = 'block';
+  document.getElementById('scanQHInfo').innerHTML =
+    '<h3>' + p.qh + '</h3>' +
+    '<div style="font-size:12px;color:var(--muted)">📍 ' + [p.x, p.h, p.t].filter(Boolean).join(', ') + '</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-top:2px">👤 GĐV: ' + (p.gdv||'—') + ' · QLKV: ' + (p.qlkv||'—') + ' · ' + (p.vung||'') + '</div>';
+  document.getElementById('scanNgayKS').value = new Date().toISOString().split('T')[0];
+  document.getElementById('scanGiaKV').value = '';
+  document.getElementById('scanDiaChi').value = '';
+  document.getElementById('scanDienTich').value = '';
+  document.getElementById('scanMatTien').value = '';
+  document.getElementById('scanGiaThue').value = '';
+  document.getElementById('scanGhepCan').value = '';
+  document.getElementById('scanGhiChu').value = '';
+  loadScanHistory(maQH);
+}
+
+function closeScanDetail() {
+  document.getElementById('scanQHDetail').style.display = 'none';
+  document.getElementById('scanQHResults').style.display = 'block';
+  scanSelectedQH = null;
+}
+
+async function saveScanQH() {
+  if (!scanSelectedQH || !GAS_URL) return;
+  const data = {
+    action: 'saveSurvey',
+    maQH: scanSelectedQH.qh,
+    ngayKS: document.getElementById('scanNgayKS').value,
+    giaThueKV: document.getElementById('scanGiaKV').value,
+    diaChiNha: document.getElementById('scanDiaChi').value,
+    dienTich: document.getElementById('scanDienTich').value,
+    matTien: document.getElementById('scanMatTien').value,
+    giaThue: document.getElementById('scanGiaThue').value,
+    coHoiGhepCan: document.getElementById('scanGhepCan').value,
+    ghiChu: document.getElementById('scanGhiChu').value,
+    lat: scanGPS.lat,
+    lng: scanGPS.lng
+  };
+  try {
+    const resp = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data), headers: {'Content-Type':'text/plain'} });
+    const result = await resp.json();
+    if (result.ok) {
+      alert('✅ Đã lưu khảo sát cho ' + scanSelectedQH.qh);
+      loadScanHistory(scanSelectedQH.qh);
+    } else {
+      alert('❌ ' + (result.error || 'Lỗi lưu'));
+    }
+  } catch(e) {
+    // Save locally as fallback
+    scans.unshift({date: data.ngayKS, qhCode: data.maQH, hasMB: 'yes', addr: data.diaChiNha, status: 'Mới (local)'});
+    alert('⚠️ Lưu tạm trên máy (chưa kết nối được server)');
+    loadScanHistoryLocal(scanSelectedQH.qh);
+  }
+}
+
+async function loadScanHistory(maQH) {
+  const el = document.getElementById('scanTimeline');
+  if (!GAS_URL) { loadScanHistoryLocal(maQH); return; }
+  try {
+    const resp = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({action:'getHistory',maQH:maQH}), headers:{'Content-Type':'text/plain'} });
+    const data = await resp.json();
+    renderScanTimeline(data.surveys || [], el);
+  } catch(e) {
+    loadScanHistoryLocal(maQH);
+  }
+}
+
+function loadScanHistoryLocal(maQH) {
+  const el = document.getElementById('scanTimeline');
+  const local = scans.filter(function(s) { return s.qhCode === maQH; });
+  renderScanTimeline(local.map(function(s) { return {ngayKS:s.date,nguoiKS:'—',diaChiNha:s.addr,dienTich:'',matTien:'',giaThue:'',coHoiGhepCan:'',ghiChu:''}; }), el);
+}
+
+function renderScanTimeline(surveys, el) {
+  if (surveys.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa">Chưa có lần khảo sát nào</div>';
+    return;
+  }
+  el.innerHTML = surveys.map(function(s,i) {
+    let h = '<div style="position:relative;padding:0 0 12px 20px;border-left:' + (i<surveys.length-1?'2px solid #ede9fe':'2px solid transparent') + '">';
+    h += '<div style="position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:#7c3aed"></div>';
+    h += '<div style="font-size:10px;color:#aaa">📅 ' + s.ngayKS + ' · ' + (s.nguoiKS||'') + '</div>';
+    if (s.diaChiNha) {
+      h += '<div style="font-size:12px;margin-top:2px">🏠 ' + s.diaChiNha;
+      if (s.dienTich) h += ' · ' + s.dienTich + 'm²';
+      if (s.matTien) h += ' · MT ' + s.matTien + 'm';
+      h += '</div>';
+      h += '<div style="font-size:10px;color:#888">💲 ' + (s.giaThue||'—') + ' tr/th' + (s.giaThueKV?' · KV: '+s.giaThueKV+' tr/th':'') + '</div>';
+    }
+    if (s.coHoiGhepCan) h += '<div style="font-size:10px;color:#888">🔀 ' + s.coHoiGhepCan + '</div>';
+    if (s.ghiChu) h += '<div style="font-size:10px;color:#666">📝 ' + s.ghiChu + '</div>';
+    h += '</div>';
+    return h;
+  }).join('');
+}
 
 // MB_DATA, scans, DP_DATA (same as before)
 const MB_DATA = [
@@ -627,14 +825,12 @@ function doLogin() {
   const u = USERS.find(x => x.code === code && x.phone === pass);
   if (!u) { document.getElementById('loginError').textContent = 'Sai mã NV hoặc mật khẩu!'; return; }
   currentUser = u;
-  localStorage.setItem('nso_user', JSON.stringify(u));
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
 }
 function doLogout() {
   currentUser = null;
-  localStorage.removeItem('nso_user');
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
   document.getElementById('loginCode').value = '';
@@ -1008,9 +1204,7 @@ function editMB(mbId) {
   alert('⚠️ Đang chỉnh sửa MB ' + mbId + '\nThay đổi sẽ cần duyệt lại từ GĐV.');
 }
 
-// ═══ SCAN ═══
-function saveScan(){scans.unshift({date:document.getElementById('scanDate').value,qhCode:document.getElementById('scanQHCode').value,gdv:document.getElementById('scanGDV').value,qlkv:document.getElementById('scanQLKV').value,hasMB:document.getElementById('scanHasMB').value,addr:document.getElementById('scanAddr').value,status:'Mới'});renderScanHistory();renderDash();alert('✅ Đã lưu scan!');}
-function renderScanHistory(){document.querySelector('#scanHistory tbody').innerHTML=scans.slice(0,10).map(s=>`<tr><td>${s.date}</td><td>${s.qhCode}</td><td>${s.gdv}</td><td>${s.qlkv}</td><td>${s.hasMB==='yes'?'✅':'❌'}</td><td>${s.addr||''}</td><td><span class="tag ${s.status==='Đã chuyển MB'?'tag-g':'tag-o'}">${s.status}</span></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted)">Chưa có scan</td></tr>';}
+// ═══ SCAN QH (GPS) — functions defined above ═══
 
 // ═══ CHECKLIST ═══
 const CHK_TEMPLATE=[{cat:'👥 Nhân sự',items:[{n:'Tiêu chuẩn nhân sự CH KT',t:'D-15'},{n:'Đào tạo NVBH',t:'D-10'}]},{cat:'📦 Hàng hóa',items:[{n:'Đặt hàng Ambiant',t:'D-24'},{n:'Rà soát CTKM',t:'D-14'},{n:'Đặt hàng Fresh',t:'D-7'},{n:'Luân chuyển hàng',t:'D-7'}]},{cat:'📣 Marketing',items:[{n:'Nhóm Zalo KHTT',t:'D-15'},{n:'Cavassing tờ rơi',t:'D-10'},{n:'Roadshow',t:'D-5'},{n:'Treo phướn KT',t:'D-15'}]},{cat:'🏗️ CSVC',items:[{n:'Nhận bàn giao MB',t:'D-9'},{n:'Nhận giá kệ',t:'D-8'},{n:'Camera',t:'D-5'},{n:'Trang trí CH',t:'D-2'}]},{cat:'🎉 Khai trương',items:[{n:'Cổng bóng',t:'D-1'},{n:'Lều + khay',t:'D-1'},{n:'Cúng KT',t:'D-1'},{n:'Nhân sự 8-10 người',t:'D'}]},];
@@ -1026,18 +1220,6 @@ init();
 
 // ═══ INIT ═══
 function init() {
-  // Auto-login from localStorage
-  const saved = localStorage.getItem('nso_user');
-  if (saved) {
-    try {
-      const u = JSON.parse(saved);
-      if (USERS.find(x => x.code === u.code && x.phone === u.phone)) {
-        currentUser = u;
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
-      }
-    } catch(e) { localStorage.removeItem('nso_user'); }
-  }
   document.querySelectorAll('.nav button').forEach(b => {
     b.addEventListener('click', function() {
       document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
@@ -1049,14 +1231,17 @@ function init() {
       if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); }
       if (this.dataset.tab === 'checklist') populateChkNSO();
       if (this.dataset.tab === 'damphan') renderDPTable();
-      if (this.dataset.tab === 'scan') renderScanHistory();
+      if (this.dataset.tab === 'scan') {
+        if (!qhDataLoaded) loadQHData();
+        if (!scanGPS.watchId) startScanGPS();
+      }
     });
-  });
-  document.getElementById('scanHasMB').addEventListener('change', function() {
-    document.getElementById('scanDraftMB').hidden = this.value !== 'yes';
   });
   populateGDV();
   renderDash();
+  // Preload QH data + start GPS in background
+  loadQHData();
+  startScanGPS();
 }
 
 init();
