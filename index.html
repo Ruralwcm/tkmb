@@ -214,6 +214,9 @@ tr:hover td { background:#faf9ff; }
     </div>
     <button onclick="doLogin()">Đăng nhập</button>
     <div class="error" id="loginError"></div>
+    <div style="text-align:center;margin-top:12px;font-size:11px">
+      <a href="https://ruralwcm.github.io/portal/" style="color:#7c3aed;text-decoration:none">🔗 Đăng nhập qua Portal</a>
+    </div>
   </div>
 </div>
 
@@ -824,13 +827,33 @@ function doLogin() {
   const pass = document.getElementById('loginPass').value.trim();
   const u = USERS.find(x => x.code === code && x.phone === pass);
   if (!u) { document.getElementById('loginError').textContent = 'Sai mã NV hoặc mật khẩu!'; return; }
+  setCurrentUser(u);
+}
+
+function autoLoginFromPortal() {
+  const pu = localStorage.getItem('portal_user');
+  if (!pu) return false;
+  try {
+    const portalUser = JSON.parse(pu);
+    // Find matching user by name or code
+    let u = USERS.find(x => x.name === portalUser.name);
+    if (!u) u = USERS.find(x => x.code === portalUser.id);
+    if (u) { setCurrentUser(u); return true; }
+  } catch(e) {}
+  return false;
+}
+
+function setCurrentUser(u) {
   currentUser = u;
+  localStorage.setItem('portal_user', JSON.stringify({id:u.code,name:u.name,role:u.rank,gdv:u.gdv||'',ts:Date.now()}));
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
 }
+
 function doLogout() {
   currentUser = null;
+  localStorage.removeItem('portal_user');
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
   document.getElementById('loginCode').value = '';
@@ -1220,6 +1243,11 @@ init();
 
 // ═══ INIT ═══
 function init() {
+  // Auto-login from Portal if available
+  if (!currentUser && autoLoginFromPortal()) {
+    // Already logged in via Portal
+  }
+  
   document.querySelectorAll('.nav button').forEach(b => {
     b.addEventListener('click', function() {
       document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
