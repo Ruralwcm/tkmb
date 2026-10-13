@@ -253,7 +253,7 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== TIẾP NHẬN MB ===== -->
 <section class="section" id="sec-tkmb">
-  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=tkmb" style="width:100%;height:calc(100vh - 100px);border:none;border-radius:8px" allow="geolocation"></iframe>
+  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=tkmb" style="width:100%;min-height:600px;border:none;border-radius:8px" scrolling="no" allow="geolocation" id="iframeTKMB"></iframe>
 </section>
 
 <!-- ===== TIẾN ĐỘ MB ===== -->
@@ -271,7 +271,7 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== SCAN QH (GPS) ===== -->
 <section class="section" id="sec-scan">
-  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=scan" style="width:100%;height:calc(100vh - 100px);border:none;border-radius:8px" allow="geolocation"></iframe>
+  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=scan" style="width:100%;min-height:600px;border:none;border-radius:8px" scrolling="no" allow="geolocation" id="iframeScan"></iframe>
 </section>
 
 <!-- ===== CHECKLIST NSO ===== -->
@@ -603,6 +603,18 @@ let currentQHLat = null, currentQHLng = null;
 
 // ═══ CONFIG ═══
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz-BBkWkq8ye9K-ua-QDWWw2fBbBIXFx4ivvc6ViiBUwIzPizJhD2YT0OQy2o_C1GUl/exec';
+
+// ═══ IFRAME AUTO-RESIZE ═══
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'tkmb-resize' && e.data.height) {
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(function(f) {
+      if (f.contentWindow === e.source) {
+        f.style.height = Math.max(e.data.height + 20, 600) + 'px';
+      }
+    });
+  }
+});
 
 // ═══ USERS (đăng nhập) ═══
 const USERS = [
