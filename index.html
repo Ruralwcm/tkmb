@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.2</title>
+<title>TKMB Web App — NSO Miền Bắc v2.3</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -130,6 +130,16 @@ tr:hover td { background:#faf9ff; }
 .step-node .sn { font-size:20px; display:block; margin-bottom:2px; }
 .step-node .sl { font-size:10px; line-height:1.3; }
 .step-node .sa { font-size:9px; color:var(--muted); margin-top:2px; }
+
+/* ─── COMPACT STEP STRIP ─── */
+.step-strip { display:flex; gap:2px; height:12px; border-radius:6px; overflow:hidden; min-width:90px; }
+.step-seg { flex:1; cursor:pointer; transition:.15s; }
+.step-seg.None { background:#e5e7eb; }
+.step-seg.Pending { background:#93c5fd; }
+.step-seg.Done { background:#4ade80; }
+.step-seg.Fail { background:#f87171; }
+.step-seg:hover { opacity:.75; }
+.warn-tag { display:inline-block; font-size:9px; padding:1px 6px; border-radius:3px; font-weight:700; }
 
 /* ─── MODAL ─── */
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:999; }
@@ -270,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.2</h1>
+    <h1>🏪 NSO Miền Bắc v2.3</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -348,7 +358,10 @@ tr:hover td { background:#faf9ff; }
       <select id="tdGDV" onchange="renderTienDo()"><option value="">Tất cả GĐV</option></select>
       <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
-    <div id="tienDoList"></div>
+    <div style="overflow-x:auto"><table id="tdTable">
+      <thead><tr><th>MB ID</th><th>GĐV</th><th>Khu vực</th><th>Địa chỉ</th><th>Tiến độ (B1–B6)</th><th>%</th><th>Trạng thái</th></tr></thead>
+      <tbody id="tdTbody"></tbody></table>
+    </div>
   </div>
 </section>
 
@@ -1062,34 +1075,33 @@ function renderTienDo() {
     if (stF === 'overdue') return m.steps.some((s,i)=>{if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i]&&STEP_SLA[i].slaHours<500&&(Date.now()-new Date(m.createdAt).getTime())/3600000>STEP_SLA[i].slaHours*2;});
     return true;
   });
-  document.getElementById('tienDoList').innerHTML = list.map(m => {
+  document.querySelector('#tdTbody').innerHTML = list.map(m => {
     const p = getPct(m.steps);
+    const hasFail = m.steps.some(s=>s.r==='Fail');
     let warning = '';
     m.steps.forEach((s,i) => {
       if ((s.r==='Pending'||s.r==='None') && STEP_SLA[i].slaHours<500) {
         const elapsed = (Date.now()-new Date(m.createdAt).getTime())/3600000;
-        if (elapsed > STEP_SLA[i].slaHours*2) warning = '⚠️ QUÁ HẠN nghiêm trọng';
-        else if (elapsed > STEP_SLA[i].slaHours) warning = '⚠️ Sắp quá hạn';
+        if (elapsed > STEP_SLA[i].slaHours*2) warning = 'QUÁ HẠN';
+        else if (elapsed > STEP_SLA[i].slaHours) warning = 'Sắp quá hạn';
       }
     });
-    return `<div class="card" style="padding:14px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-        <div><strong>${m.id}</strong><span class="tag tag-p" style="margin-left:8px">${m.nguon}</span><span style="font-size:12px;color:var(--muted);margin-left:8px">${m.gdv} · ${m.tinh} · ${m.huyen||''}</span></div>
-        <div style="font-size:12px;color:var(--muted)">${p.pct}% (${p.done}/6)</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📍 ${m.addr} ${m.area?'· '+m.area+'m²':''} ${m.price?'· '+m.price+'tr/th':''}</div>
-      ${warning ? `<div style="font-size:11px;color:var(--danger);margin-bottom:6px;font-weight:600">${warning}</div>` : ''}
-      <div class="step-flow">${m.steps.map(s => {
-        const cls = stepClass(s.r); const sla = STEP_SLA[s.s-1];
-        const slaCls = (s.r==='Pending'||s.r==='None') ? getSLAColor(s.s,m.createdAt) : '';
-        return `<div class="step-node ${cls}" onclick="openStepModal('${m.id}',${s.s})" title="${s.r==='Fail'&&s.failReason?s.failReason:''}">
-          <span class="sn">${s.r==='Done'?'✓':s.r==='Fail'?'✗':s.r==='Pending'?'●':'—'}</span>
-          <span class="sl">${['','QLKV gửi→GĐV','TKMB KS+BBTĐ','Lên HĐTĐ','ĐP+Ký HĐ','Phát hành KT','Đã KT'][s.s]}</span>
-          <span class="sa">${s.appr} duyệt</span>
-          ${slaCls ? `<span class="sla ${slaCls}">⏱ ${sla.slaLabel}</span>` : ''}
-        </div>`;
-      }).join('')}</div></div>`;
-  }).join('') || '<div class="card" style="text-align:center;color:var(--muted)">Không có MB nào</div>';
+    const strip = '<div class="step-strip">' + m.steps.map(s => {
+      const f = (s.r==='Fail' && s.failReason) ? ' — ' + s.failReason : '';
+      return `<div class="step-seg ${s.r}" onclick="openStepModal('${m.id}',${s.s})" title="B${s.s}: ${STEP_SLA[s.s-1].desc}${f}"></div>`;
+    }).join('') + '</div>';
+    const statusTag = `<span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>0?'tag-p':'tag-gray'}">${hasFail?'Fail':p.done>=6?'Đã KT':p.done>0?'Đang XL':'Mới'}</span>`;
+    const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef3c7;color:#92400e'}">⚠️ ${warning}</span>` : '';
+    return `<tr>
+      <td><strong>${m.id}</strong><div class="qh-info-mini">${m.nguon}</div></td>
+      <td>${m.gdv}</td>
+      <td>${m.tinh}<div class="qh-info-mini">${m.huyen||''}</div></td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}<div class="qh-info-mini">${m.area?m.area+'m² · ':''}${m.price?m.price+'tr/th':''}</div></td>
+      <td>${strip}</td>
+      <td style="white-space:nowrap">${p.pct}%<div class="qh-info-mini">${p.done}/6</div></td>
+      <td style="white-space:nowrap">${statusTag}${warnBadge?` ${warnBadge}`:''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
 }
 
 
