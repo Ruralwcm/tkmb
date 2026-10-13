@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.0</title>
+<title>TKMB Web App — NSO Miền Bắc v2.1</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -188,7 +188,7 @@ tr:hover td { background:#faf9ff; }
 <div class="topbar">
   <div>
     <h1>🏪 NSO Miền Bắc v2.0</h1>
-    <div class="meta">📅 Cập nhật: 07/10/2026 · Nguồn: TKMB/Vận hành</div>
+    <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
     <div class="user-info">
@@ -238,7 +238,7 @@ tr:hover td { background:#faf9ff; }
   <div class="kpi" id="kpiMB"></div>
   <div class="card">
     <h3>📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
-    <div style="overflow-x:auto"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>SLA</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
   </div>
   <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
   <div class="kpi-section"><h4>🗺 Scan điểm QH</h4></div>
@@ -253,171 +253,13 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== TIẾP NHẬN MB ===== -->
 <section class="section" id="sec-tkmb">
-  <div class="card">
-    <h3>
-      <span class="src-badge" style="cursor:default">📋 <select id="mbNguon" style="background:none;border:none;color:inherit;font-weight:700;font-size:inherit;cursor:pointer;padding:0;outline:none"><option>TKMB</option><option>Vận hành</option></select></span>
-      Tiếp nhận Mặt Bằng
-    </h3>
-
-    <!-- Section 1: Tổ chức (Cross-link cascade) -->
-    <div class="form-section-label">👥 Tổ chức — GĐV → QLKV → Tỉnh → Huyện/Quận</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>GĐV <span style="color:var(--danger)">*</span></label>
-        <select id="mbGDV" onchange="onGDVChange()">
-          <option value="">-- Chọn GĐV --</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>QLKV <span style="color:var(--danger)">*</span></label>
-        <select id="mbQLKV" onchange="onQLKVChange()" disabled>
-          <option value="">-- Chọn QLKV --</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Tỉnh/TP <span style="color:var(--danger)">*</span></label>
-        <select id="mbTinh" onchange="onTinhChange()" disabled>
-          <option value="">-- Chọn Tỉnh/TP --</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Huyện/Quận <span style="color:var(--danger)">*</span></label>
-        <select id="mbHuyen" disabled>
-          <option value="">-- Chọn Huyện/Quận --</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Section 2: Địa chỉ & thông số MB + Giao dịch (1 hàng) -->
-    <div class="form-section-label">📍 Địa chỉ & Thông số MB · 💰 Thanh toán</div>
-    <div class="form-group form-full" style="margin-bottom:8px">
-      <label>Địa chỉ cụ thể <span style="color:var(--danger)">*</span></label>
-      <input type="text" id="mbAddr" placeholder="VD: Thôn Dục Tú, xã Dục Tú, Đông Anh">
-    </div>
-    <div class="form-grid" style="grid-template-columns:repeat(6,1fr)">
-      <div class="form-group">
-        <label>DT (m²) <span style="font-size:9px;color:var(--muted)">xx.y</span></label>
-        <input type="text" inputmode="decimal" id="mbArea" placeholder="12.5" maxlength="4">
-      </div>
-      <div class="form-group">
-        <label>MT (m) <span style="font-size:9px;color:var(--muted)">xx.y</span></label>
-        <input type="text" inputmode="decimal" id="mbFront" placeholder="6.5" maxlength="4">
-      </div>
-      <div class="form-group">
-        <label>Giá (tr/th)</label>
-        <input type="text" inputmode="decimal" id="mbPrice" placeholder="15.5" maxlength="4">
-      </div>
-      <div class="form-group">
-        <label>Thanh toán</label>
-        <input type="text" id="mbPayment" placeholder="3 tháng/lần">
-      </div>
-      <div class="form-group">
-        <label>Cọc (tr)</label>
-        <input type="text" inputmode="decimal" id="mbDeposit" placeholder="30" maxlength="5">
-      </div>
-      <div class="form-group">
-        <label>Thời hạn</label>
-        <input type="text" id="mbDuration" placeholder="5 năm" maxlength="10">
-      </div>
-    </div>
-
-    <!-- Section 3: Định vị Map + QH -->
-    <div class="form-section-label">🗺 Định vị Map — Tự động detect Điểm QH & Khoảng cách</div>
-    <div class="map-box" style="padding:10px 14px">
-      <div class="map-icon" style="font-size:24px">📍</div>
-      <div class="map-inputs" style="gap:4px">
-        <div class="form-group">
-          <label>Link Google Maps hoặc Tọa độ (lat, lng)</label>
-          <input type="text" id="mbMapLink" placeholder="VD: https://maps.google.com/?q=21.0179,105.9650 hoặc 21.0179, 105.9650" oninput="onMapInput()">
-        </div>
-      </div>
-    </div>
-    <div id="mapResult" style="display:none">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-        <div class="map-result" style="flex:1;padding:8px 10px">
-          <div style="font-size:9px;color:var(--muted)">📍 Điểm QH gần nhất</div>
-          <div class="qh-name" id="qhName" style="font-size:12px">—</div>
-          <div class="qh-info-mini" id="qhDetail"></div>
-        </div>
-        <div class="map-result" style="flex:1;text-align:center;padding:8px 10px">
-          <div style="font-size:9px;color:var(--muted)">📏 Khoảng cách</div>
-          <div class="qh-dist" id="qhDistance" style="font-size:20px">—</div>
-          <div class="qh-info-mini" id="qhDistLabel"></div>
-        </div>
-        <div class="map-result" style="flex:1;text-align:center;padding:8px 10px">
-          <div style="font-size:9px;color:var(--muted)">🎯 Đánh giá</div>
-          <div style="font-size:12px;font-weight:700" id="qhEval">—</div>
-        </div>
-      </div>
-      <div style="margin-top:4px;font-size:9px;color:var(--muted);text-align:right">
-        <span class="qh-link" onclick="showQHMap()">🗺 Xem trên bản đồ →</span>
-      </div>
-    </div>
-
-    <!-- Section 4: Pháp lý - Hiện trạng - Bàn giao (1 hàng) -->
-    <div class="form-section-label">📋 Pháp lý · Hiện trạng · Bàn giao</div>
-    <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="form-group">
-        <label>Pháp lý</label>
-        <select id="mbLegal">
-          <option value="">-- Chọn --</option>
-          <option>Sổ đỏ chính chủ</option>
-          <option>Sổ đỏ đồng sở hữu</option>
-          <option>Hợp đồng ủy quyền</option>
-          <option>Giấy tờ khác</option>
-          <option>Đang chờ xác minh</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Hiện trạng</label>
-        <select id="mbCondition">
-          <option value="">-- Chọn --</option>
-          <option>Nhà trống</option>
-          <option>Đang kinh doanh</option>
-          <option>Đất trống</option>
-          <option>Đang xây dựng</option>
-          <option>Cần sửa chữa</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>TG bàn giao</label>
-        <input type="text" id="mbHandover" placeholder="VD: 15/10 hoặc 2 tuần">
-      </div>
-    </div>
-
-    <!-- Section 5: Người GT & Chủ nhà -->
-    <div class="form-section-label">👤 Người GT & Chủ nhà (BCT)</div>
-    <div class="form-grid" style="grid-template-columns:repeat(4,1fr)">
-      <div class="form-group">
-        <label>Người GT</label>
-        <input type="text" id="mbGTName" placeholder="Tên người GT">
-      </div>
-      <div class="form-group">
-        <label>MNV</label>
-        <input type="text" id="mbGTMNV" placeholder="Mã NV" maxlength="10">
-      </div>
-      <div class="form-group">
-        <label>BCT - Tên</label>
-        <input type="text" id="mbBCT" placeholder="Tên chủ nhà">
-      </div>
-      <div class="form-group">
-        <label>BCT - SĐT</label>
-        <input type="text" id="mbBCTPhone" placeholder="SĐT">
-      </div>
-    </div>
-
-    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-      <button class="btn btn-primary" onclick="submitMB()">📤 Gửi MB — Chờ GĐV duyệt</button>
-      <span style="font-size:11px;color:var(--muted)">SLA B1: 24h</span>
-    </div>
-    <div id="editPendingAlert" style="display:none" class="pending-approval">⚠️ Có chỉnh sửa đang chờ duyệt. Cần <strong id="editApprover"></strong> duyệt thì thông tin mới được lưu.</div>
-  </div>
+  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=tkmb" style="width:100%;height:calc(100vh - 100px);border:none;border-radius:8px" allow="geolocation"></iframe>
 </section>
 
 <!-- ===== TIẾN ĐỘ MB ===== -->
 <section class="section" id="sec-tiendo">
   <div class="card">
-    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ SLA: B1=24h, B2=48h, B3=72h, B4=5ng, B5=7ng</span></h3>
+    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h, B2=48h, B3=72h, B4=5ng, B5=7ng</span></h3>
     <div class="filter-bar">
       <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
       <select id="tdGDV" onchange="renderTienDo()"><option value="">Tất cả GĐV</option></select>
@@ -429,41 +271,7 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== SCAN QH (GPS) ===== -->
 <section class="section" id="sec-scan">
-  <div class="card" style="text-align:center">
-    <h3>📍 Scan điểm Quy Hoạch</h3>
-    <div style="padding:16px 0">
-      <button id="scanBtn" onclick="doScanQH()" style="width:110px;height:110px;border-radius:50%;background:linear-gradient(145deg,#16a34a,#22c55e);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.4);transition:transform .2s;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
-        <span style="font-size:32px">📍</span><span>Scan QH</span>
-      </button>
-      <div style="margin-top:10px;font-size:11px;color:var(--muted)" id="scanGpsStatus"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:4px"></span> Sẵn sàng</div>
-      <div style="font-size:10px;color:#aaa" id="scanGpsCoords"></div>
-    </div>
-    <div id="scanQHResults"></div>
-  </div>
-
-  <!-- QH Detail + Form (shown when tapped) -->
-  <div id="scanQHDetail" style="display:none">
-    <button class="btn btn-outline" style="margin-bottom:10px;font-size:12px" onclick="closeScanDetail()">← Quay lại</button>
-    <div class="card" id="scanQHInfo"></div>
-    <div class="card">
-      <h3>📝 Ghi nhận khảo sát</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Ngày KS</label><input type="date" id="scanNgayKS"></div>
-        <div class="form-group"><label>Giá thuê KV (tr/th)</label><input type="number" id="scanGiaKV" placeholder="VD: 12"></div>
-        <div class="form-full form-group"><label>Địa chỉ nhà</label><input type="text" id="scanDiaChi" placeholder="Số nhà, đường, phường/xã"></div>
-        <div class="form-group"><label>Diện tích (m²)</label><input type="number" id="scanDienTich" placeholder="VD: 120"></div>
-        <div class="form-group"><label>Mặt tiền (m)</label><input type="number" id="scanMatTien" placeholder="VD: 8"></div>
-        <div class="form-group"><label>Giá thuê nhà (tr/th)</label><input type="number" id="scanGiaThue" placeholder="VD: 15"></div>
-        <div class="form-group"><label>Cơ hội ghép căn</label><select id="scanGhepCan"><option value="">— Chọn —</option><option value="Có">✅ Có thể ghép</option><option value="Không">❌ Không</option><option value="Cần KS thêm">🔄 Cần KS thêm</option></select></div>
-        <div class="form-full form-group"><label>Ghi chú</label><textarea id="scanGhiChu" rows="2" placeholder="Thông tin thêm..."></textarea></div>
-      </div>
-      <button class="btn btn-success" style="width:100%;margin-top:8px" onclick="saveScanQH()">💾 Lưu khảo sát</button>
-    </div>
-    <div class="card">
-      <h3>📋 Lịch sử khảo sát</h3>
-      <div id="scanTimeline" style="font-size:12px;color:var(--muted);text-align:center">Đang tải...</div>
-    </div>
-  </div>
+  <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=scan" style="width:100%;height:calc(100vh - 100px);border:none;border-radius:8px" allow="geolocation"></iframe>
 </section>
 
 <!-- ===== CHECKLIST NSO ===== -->
@@ -479,7 +287,7 @@ tr:hover td { background:#faf9ff; }
 <section class="section" id="sec-damphan">
   <div class="card"><h3>🏢 Đàm phán mở rộng DTKD</h3>
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">CH hiện hữu cần đàm phán mở rộng mặt bằng</p>
-    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>SLA</th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
 
@@ -491,7 +299,7 @@ tr:hover td { background:#faf9ff; }
       <select id="dsGDV" onchange="renderDSMB()"><option value="">Tất cả GĐV</option></select>
       <select id="dsNguon" onchange="renderDSMB()"><option value="">Tất cả nguồn</option><option>TKMB/Vận hành</option></select>
     </div>
-    <div style="overflow-x:auto"><table id="dsTable"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Địa chỉ</th><th>DT</th><th>Giá</th><th>Tiến độ</th><th>%</th><th>SLA</th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto"><table id="dsTable"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Địa chỉ</th><th>DT</th><th>Giá</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
 </div>
@@ -1080,7 +888,7 @@ function showSuccessToast(mbId) {
   const banner = document.createElement('div');
   banner.id = 'successBanner';
   banner.style.cssText = 'background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
-  banner.innerHTML = '<div><strong style="color:#15803d;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#166534">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · SLA: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
+  banner.innerHTML = '<div><strong style="color:#15803d;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#166534">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · Hạn: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
   card.appendChild(banner);
   
   renderDash(); renderTienDo(); renderDSMB(); populateChkNSO();
@@ -1096,7 +904,7 @@ function renderDash() {
     <div class="kpi-card"><div class="kpi-num b">${pendingMB}</div><div class="kpi-label">⏳ Đang xử lý</div></div>
     <div class="kpi-card"><div class="kpi-num g">${done}</div><div class="kpi-label">✅ Đã KT</div></div>
     <div class="kpi-card"><div class="kpi-num r">${failMB}</div><div class="kpi-label">❌ Fail</div></div>
-    <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn SLA</div></div>`;
+    <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn</div></div>`;
   document.querySelector('#dashMB tbody').innerHTML = MB_DATA.map(m => {
     const p = getPct(m.steps); const hasFail = m.steps.some(s=>s.r==='Fail');
     const lastPending = m.steps.find(s=>s.r==='Pending');
@@ -1144,8 +952,8 @@ function renderTienDo() {
     m.steps.forEach((s,i) => {
       if ((s.r==='Pending'||s.r==='None') && STEP_SLA[i].slaHours<500) {
         const elapsed = (Date.now()-new Date(m.createdAt).getTime())/3600000;
-        if (elapsed > STEP_SLA[i].slaHours*2) warning = '⚠️ QUÁ HẠN SLA nghiêm trọng';
-        else if (elapsed > STEP_SLA[i].slaHours) warning = '⚠️ Sắp quá hạn SLA';
+        if (elapsed > STEP_SLA[i].slaHours*2) warning = '⚠️ QUÁ HẠN nghiêm trọng';
+        else if (elapsed > STEP_SLA[i].slaHours) warning = '⚠️ Sắp quá hạn';
       }
     });
     return `<div class="card" style="padding:14px 16px">
@@ -1173,7 +981,7 @@ let currentMBId=null, currentStepNum=null;
 function openStepModal(mbId,step){const mb=MB_DATA.find(m=>m.id===mbId);if(!mb)return;const st=mb.steps[step-1];currentMBId=mbId;currentStepNum=step;
   document.getElementById('stepModalTitle').textContent=`B${step}: ${['','QLKV/CHT gửi → GĐV duyệt','TKMB KS+BBTĐ → GĐ TKMB duyệt','Lên HĐTĐ → HĐ duyệt','Đàm phán & ký HĐ','Phát hành KT','Đã khai trương'][step]}`;
   document.getElementById('stepInfo').innerHTML=`MB: <strong>${mbId}</strong> · ${mb.tinh} · Người duyệt: <strong>${st.appr}</strong>`;
-  const sla=STEP_SLA[step-1];document.getElementById('stepSLA').innerHTML=`⏱ SLA: <strong>${sla.slaLabel}</strong> · Quá 2x SLA = cảnh báo đỏ`;
+  const sla=STEP_SLA[step-1];document.getElementById('stepSLA').innerHTML=`⏱ Hạn: <strong>${sla.slaLabel}</strong> · Quá 2x hạn = cảnh báo đỏ`;
   document.getElementById('stepResult').value=st.r||'None';document.getElementById('stepFailReason').value=st.failReason||'';document.getElementById('stepFailGroup').value=st.failGroup||'';document.getElementById('stepApprover').value='';
   document.getElementById('stepModal').style.display='flex';onStepResultChange();}
 function onStepResultChange(){document.getElementById('failFields').style.display=document.getElementById('stepResult').value==='Fail'?'block':'none';}
