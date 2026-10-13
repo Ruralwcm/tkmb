@@ -1119,6 +1119,18 @@ function initChkChecklist() {
       steps: m.steps || []
     }));
   }
+  // Sample NSO for demo (fallback khi chưa có data thật)
+  if (!chkNSOList.length) {
+    chkNSOList = [{
+      id: 'MB05638', siteCode: '2B52', addr: 'WM+ HNI Xóm 5, Liệp Mai',
+      gdv: 'Phạm Minh Thu', qlkv: 'Lê Văn Khánh', tinh: 'TP. Hà Nội',
+      handover: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
+    }, {
+      id: 'MB05763', siteCode: '2B79', addr: 'WM+ HNI Thôn 2, Thạch Hòa',
+      gdv: 'Tạ Công Nhận', qlkv: 'Bùi Thị Thu Nhài', tinh: 'TP. Hà Nội',
+      handover: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0]
+    }];
+  }
   renderChkDashboard();
 }
 
