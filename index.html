@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.4</title>
+<title>TKMB Web App — NSO Miền Bắc v2.5</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.4</h1>
+    <h1>🏪 NSO Miền Bắc v2.5</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -1137,11 +1137,11 @@ function initChkChecklist() {
     chkNSOList = [{
       id: 'MB05638', siteCode: '2B52', addr: 'WM+ HNI Xóm 5, Liệp Mai',
       gdv: 'Phạm Minh Thu', qlkv: 'Lê Văn Khánh', tinh: 'TP. Hà Nội',
-      handover: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
+      handover: new Date(Date.now() + 45 * 86400000).toISOString().split('T')[0]
     }, {
       id: 'MB05763', siteCode: '2B79', addr: 'WM+ HNI Thôn 2, Thạch Hòa',
       gdv: 'Tạ Công Nhận', qlkv: 'Bùi Thị Thu Nhài', tinh: 'TP. Hà Nội',
-      handover: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0]
+      handover: new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0]
     }];
   }
   renderChkDashboard();
@@ -1213,7 +1213,7 @@ function renderChkDashboard() {
       '<td>' + (m.handover || '-') + '</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:#e5e7eb;border-radius:3px"><div style="width:' + pct + '%;height:100%;background:' + pctColor + ';border-radius:3px"></div></div><span style="font-size:11px;font-weight:600">' + done + '/' + totalItems + '</span></div></td>' +
       '<td>' + statusHtml + '</td></tr>';
-  }).filter(Boolean).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Chưa có NSO nào đạt B6 (Khai trương).</td></tr>';
+  }).filter(Boolean).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Không có NSO phù hợp với bộ lọc hiện tại.</td></tr>';
 
   // KPI cards
   const fb = list.filter(m => {
