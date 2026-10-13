@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.3</title>
+<title>TKMB Web App — NSO Miền Bắc v2.4</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.3</h1>
+    <h1>🏪 NSO Miền Bắc v2.4</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -875,6 +875,7 @@ function showQHMap() {
 }
 
 // ═══ CASCADE ═══
+const CASCADE = CASCADE_DATA;
 function populateGDV() {
   const sel = document.getElementById('mbGDV');
   const gdvs = Object.keys(CASCADE_DATA).sort();
