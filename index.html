@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.1</title>
+<title>TKMB Web App — NSO Miền Bắc v2.2</title>
 <style>
 :root {
+  if(t==='checklist')initChkChecklist();
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
   --bg: #f8f9fb; --card: #fff; --text: #1f2937; --muted: #6b7280;
   --success: #16a34a; --warning: #d97706; --danger: #dc2626;
@@ -181,13 +182,96 @@ tr:hover td { background:#faf9ff; }
 /* ─── QH INFO ─── */
 .qh-info-mini { font-size:10px; color:var(--muted); margin-top:2px; }
 .qh-link { color:var(--primary); cursor:pointer; text-decoration:underline; font-size:11px; }
+/* ═══ CHECKLIST NSO ═══ */
+.chk-view { display:none; }
+.chk-view.active { display:block; }
+
+/* Dashboard table */
+.chk-filter-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
+.chk-filter-row select { padding:7px 10px; border:1px solid var(--border); border-radius:7px; font-size:12px; background:#fafafa; min-width:120px; }
+.chk-filter-row select:focus { outline:none; border-color:var(--primary-light); }
+.chk-filter-row input { padding:7px 10px; border:1px solid var(--border); border-radius:7px; font-size:12px; background:#fafafa; flex:1; min-width:140px; }
+.chk-filter-row input:focus { outline:none; border-color:var(--primary-light); }
+.chk-filter-row .chk-filter-label { font-size:11px; font-weight:600; color:var(--muted); white-space:nowrap; }
+
+.chk-dash-table { width:100%; border-collapse:collapse; font-size:12px; }
+.chk-dash-table thead th { background:#f8f6ff; padding:9px 10px; text-align:left; font-weight:700; color:var(--primary); border-bottom:2px solid #d8cef0; font-size:11px; white-space:nowrap; position:sticky; top:0; z-index:1; }
+.chk-dash-table td { padding:8px 10px; border-bottom:1px solid #f3f0ff; }
+.chk-dash-table tbody tr { cursor:pointer; transition:background .15s; }
+.chk-dash-table tbody tr:hover { background:#faf8ff; }
+.chk-dash-table .chk-site { font-weight:700; color:var(--primary); font-size:11.5px; }
+.chk-dash-table .chk-name { font-size:12px; }
+.chk-dash-table .chk-date { font-size:11px; white-space:nowrap; }
+
+/* Progress bar in dashboard */
+.chk-progress { display:flex; align-items:center; gap:6px; min-width:120px; }
+.chk-progress .chk-progress-bar { flex:1; height:6px; background:#e5e7eb; border-radius:3px; overflow:hidden; }
+.chk-progress .chk-progress-fill { height:100%; border-radius:3px; transition:.3s; }
+.chk-progress .chk-progress-txt { font-size:10px; color:var(--muted); white-space:nowrap; }
+
+/* Status badges */
+.chk-status-ok { background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+.chk-status-overdue { background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+.chk-status-warn { background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+
+/* Detail view */
+.chk-detail-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding:14px 16px; background:#f5f3ff; border-radius:var(--radius); }
+.chk-detail-header h2 { font-size:16px; color:var(--primary); margin:0; }
+.chk-detail-header .chk-detail-meta { font-size:12px; color:var(--muted); }
+.chk-detail-header .btn-back { padding:7px 14px; }
+
+.chk-detail-table-wrap { overflow-x:auto; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); }
+.chk-detail-table { width:100%; border-collapse:collapse; font-size:11.5px; }
+.chk-detail-table thead th { background:#f8f6ff; padding:8px 8px; text-align:left; font-weight:700; color:var(--primary); border-bottom:2px solid #d8cef0; font-size:10.5px; white-space:nowrap; position:sticky; top:0; z-index:1; }
+.chk-detail-table td { padding:7px 8px; border-bottom:1px solid #f3f0ff; vertical-align:top; }
+.chk-detail-table .chk-dau-muc { font-weight:700; color:var(--primary); font-size:11px; }
+.chk-detail-table .chk-cong-viec { font-weight:600; }
+.chk-detail-table .chk-chi-tiet { font-size:10px; color:var(--muted); max-width:280px; line-height:1.4; }
+.chk-detail-table .chk-deadline { font-size:10.5px; text-align:center; white-space:nowrap; font-weight:600; }
+.chk-detail-table .chk-deadline-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; }
+.chk-deadline-duhan { background:#dcfce7; color:#15803d; }
+.chk-deadline-hom-nay { background:#fef3c7; color:#92400e; }
+.chk-deadline-quahan { background:#fee2e2; color:#b91c1c; }
+.chk-deadline-future { background:#dbeafe; color:#1d4ed8; }
+
+.chk-detail-table .chk-status-sel { padding:4px 6px; border:1px solid var(--border); border-radius:5px; font-size:10.5px; background:#fafafa; cursor:pointer; }
+.chk-detail-table .chk-status-sel.done { background:#dcfce7; border-color:#86efac; color:#15803d; }
+.chk-detail-table .chk-status-sel.pending { background:#fff; border-color:#d1d5db; }
+.chk-detail-table .chk-status-sel.na { background:#f3f4f6; border-color:#d1d5db; color:#9ca3af; }
+
+.chk-summary { margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.chk-summary-item { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; }
+.chk-summary-done { background:#dcfce7; color:#15803d; }
+.chk-summary-pending { background:#fef3c7; color:#92400e; }
+.chk-summary-na { background:#f3f4f6; color:#6b7280; }
+
+/* Category group in detail */
+.chk-cat-header td { background:#ede9fe !important; color:var(--primary) !important; font-weight:700; font-size:12px; padding:8px 8px !important; }
+
+/* No data state */
+.chk-empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.chk-empty .chk-empty-icon { font-size:48px; margin-bottom:8px; }
+
+/* Responsive */
+@media(max-width:768px) {
+  .chk-filter-row { flex-direction:column; }
+  .chk-filter-row select, .chk-filter-row input { width:100%; }
+  .chk-dash-table { font-size:10px; }
+  .chk-dash-table td, .chk-dash-table th { padding:5px 4px; }
+  .chk-detail-table { font-size:10px; }
+  .chk-detail-table td, .chk-detail-table th { padding:4px 3px; }
+  .chk-detail-table .chk-chi-tiet { max-width:120px; font-size:9px; }
+  .chk-detail-header h2 { font-size:14px; }
+}
+
+/* ═══ END CHECKLIST NSO ═══ */
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.0</h1>
+    <h1>🏪 NSO Miền Bắc v2.2</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -276,15 +360,36 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== CHECKLIST NSO ===== -->
 <section class="section" id="sec-checklist">
-  <div class="card"><h3>✅ Checklist Mở Mới NSO</h3>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Dành cho MB đã đạt B6 (Đã khai trương)</p>
-    <div class="form-group" style="margin-bottom:8px"><label>Chọn NSO</label><select id="chkNSO" onchange="renderChecklist()"><option value="">-- Chọn MB đã KT --</option></select></div>
-    <div id="checklistContent"><div style="text-align:center;color:var(--muted);padding:20px">Chọn MB đã khai trương để xem checklist</div></div>
+  <div id="chkDashboard">
+    <div class="card">
+      <h3>✅ Checklist Khai Trương NSO <span class="sub" id="chkCount"></span></h3>
+      <div class="filter-bar">
+        <select id="chkFilterGDV" onchange="onChkGDVChange()"><option value="">Tất cả GĐV</option></select>
+        <select id="chkFilterQLKV" onchange="renderChkDashboard()" disabled><option value="">Tất cả QLKV</option></select>
+        <select id="chkFilterMien" onchange="onChkMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+        <select id="chkFilterTinh" onchange="renderChkDashboard()" disabled><option value="">Tất cả Tỉnh</option></select>
+        <select id="chkFilterStatus" onchange="renderChkDashboard()"><option value="all">Tất cả</option><option value="ok">🟢 Đúng hạn</option><option value="warn">🟡 Sắp hết</option><option value="overdue">🔴 Quá hạn</option></select>
+      </div>
+      <div style="overflow-x:auto"><table id="chkTable">
+        <thead><tr><th>Mã Site</th><th>Tên NSO</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Ngày KT</th><th>Tiến độ</th><th>Trạng thái</th></tr></thead>
+        <tbody id="chkTbody"></tbody></table>
+      </div>
+      <div id="chkKPI" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"></div>
+    </div>
   </div>
-</section>
 
-<!-- ===== ĐÀM PHÁN DTKD ===== -->
-<section class="section" id="sec-damphan">
+  <div id="chkDetail" style="display:none">
+    <button class="btn btn-outline" style="margin-bottom:10px;font-size:12px" onclick="closeChkDetail()">← Quay lại Dashboard</button>
+    <div class="card">
+      <h3 id="chkDetailTitle"></h3>
+      <div id="chkDetailMeta" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+      <div style="overflow-x:auto"><table id="chkDetailTable">
+        <thead><tr><th>Đầu mục</th><th>Công việc</th><th>Tiêu chuẩn cần đạt</th><th>Hạn</th><th>Trạng thái</th></tr></thead>
+        <tbody id="chkDetailTbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</section><section class="section" id="sec-damphan">
   <div class="card"><h3>🏢 Đàm phán mở rộng DTKD</h3>
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">CH hiện hữu cần đàm phán mở rộng mặt bằng</p>
     <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
@@ -987,6 +1092,196 @@ function renderTienDo() {
       }).join('')}</div></div>`;
   }).join('') || '<div class="card" style="text-align:center;color:var(--muted)">Không có MB nào</div>';
 }
+
+
+// ═══ CHECKLIST NSO ═══
+const CHK_TEMPLATE = [{"dauMuc":"Nhân sự","congViec":"Tiêu chuẩn nhân sự CH khai trương","chiTiet":"- CHT : CHT cũ Chuyển sang KT(CHP/CHP TS nhận CH cũ), CHT nhận CH NSO QLKV trình GĐV PD","deadline":"D-15"},{"dauMuc":"","congViec":"Hàng hóa","chiTiet":"Đặt hàng Ambiant theo đơn hàng mẫu NSO của vùng( Target Stock GĐV quyết định dựa vào catchment MB và doanh thu kỳ vọng ngày KT)\nDựa theo sức bán CH thiếu hàng có thể FC thêm","deadline":"D-24"},{"dauMuc":"","congViec":"Nhận hàng & Nhập kho","chiTiet":"Nhận hàng từ kho DC","deadline":"D-7"},{"dauMuc":"Đánh giá tiến độ","congViec":"Hoạt náo","chiTiet":"Liên hệ các NCC để có hàng và nhân sự hỗ trợ hoạt náo: Yakul, kiaora, Sapo, Nguyễn Sơn, Masan, kem kido","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Nhóm Zalo KHTT","chiTiet":"Tạo nhóm KHTT Zalo","deadline":"D-15"},{"dauMuc":"Đánh giá tiến độ","congViec":"Hội viên WIN","chiTiet":"Triển khai mở mới HV Win","deadline":"D-15"},{"dauMuc":"Đánh giá tiến độ","congViec":"Voucher","chiTiet":"In tối thiểu 1000 Voucher giảm giá rau/thịt","deadline":"D-15"},{"dauMuc":"Đánh giá tiến độ","congViec":"Cavassing","chiTiet":"Phát tờ rơi: \n'- Phát tờ rơi đến từng nhà, từng ngõ trong bán kính 500-1km\n- Chợ truyển thống (phát giờ cao điểm ), \n- Trường mầm non, Tiểu học (trường tư thục, phát giờ tan học): Gần CH có những trườ","deadline":"D-10"},{"dauMuc":"Đánh giá tiến độ","congViec":"Nhận diện","chiTiet":"- Trang trí Cửa Hàng","deadline":"D-2"},{"dauMuc":"Đánh giá tiến độ","congViec":"Mặt bằng","chiTiet":"Nhận bàn giao từ mặt bằng\nĐảm bảo ANAT với đầy đủ chìa khóa","deadline":"D-9"},{"dauMuc":"Đánh giá tiến độ","congViec":"Giá kệ","chiTiet":"Nhận bàn giao hệ thống giá kệ hàng, kệ kho","deadline":"D-8"},{"dauMuc":"Đánh giá tiến độ","congViec":"TTB IT","chiTiet":"Chuẩn bị POS thu ngân phụ để IT cài cùng POS chính","deadline":"D-7"},{"dauMuc":"Đánh giá tiến độ","congViec":"VTTH","chiTiet":"Nhận từ NCC","deadline":"D-7"},{"dauMuc":"Đánh giá tiến độ","congViec":"Petty cash","chiTiet":"Làm thủ tục tạm ứng và nhận tiền petty cash từ kế toán","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Camera","chiTiet":"Nhận bàn giao hệ thống camera từ NCC","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"TTB IT","chiTiet":"Máy POS , Máy tính , Bàn cân ,….","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Tủ kem","chiTiet":"Nhận từ NCC (CH có 2 tủ kem)","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Tủ mát","chiTiet":"Layout GĐV/GĐM PD có thêm 01 tủ mát 3 cánh","deadline":"D-30"},{"dauMuc":"Đánh giá tiến độ","congViec":"POSM , tờ rơi , phướn , công cụ từ MKT","chiTiet":"Nhận từ NCC/HUB","deadline":"D-3"},{"dauMuc":"Đánh giá tiến độ","congViec":"Máy payoo, POS ngân hàng","chiTiet":"Nhận bàn giao thiết bị từ NCC","deadline":"D-3"},{"dauMuc":"Đánh giá tiến độ","congViec":"User","chiTiet":"Gửi IT cấp User CH NSO","deadline":"D-15"},{"dauMuc":"Đánh giá tiến độ","congViec":"Pos Phụ KT","chiTiet":"Bổ sung Pos Phụ cho ngày KT lắp ở ngoài mặt tiền để phục vụ khách( có pd GĐM/It hỗ trợ cài)","deadline":"D-4"},{"dauMuc":"Đánh giá tiến độ","congViec":"Pos","chiTiet":"CH doanh thu cao > 25tr bổ sung thêm 1 pos","deadline":"D+7"},{"dauMuc":"Đánh giá tiến độ","congViec":"Hạng mục khác","chiTiet":"Kiểm tra các vấn đề về hạ tầng, xây dựng\nKiểm tra các vấn đề về thấm dột, lỗ chuột","deadline":"D-9"},{"dauMuc":"Đánh giá tiến độ","congViec":"NSO","chiTiet":"CH Nhận diện kém, thêm biển nhận diện trên nóc\nCH đèn biển, gầm biển tối, tăng thêm đèn chiếu sáng","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Up hàng","chiTiet":"- In layout ngành hàng => dán lên từng kệ hàng\n- In POG từng kệ hàng và YC tuân thủ tb đúng POG \n- Up hàng theo tiến độ hàng về.","deadline":"D-4"},{"dauMuc":"Đánh giá tiến độ","congViec":"Tem giá","chiTiet":"Bắn tem, làm đầy đủ tem giá thường, khuyến mại","deadline":"D-2"},{"dauMuc":"Đánh giá tiến độ","congViec":"Cổng bóng","chiTiet":"Cổng bóng full mặt tiền cửa hàng","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Lều","chiTiet":"Trưng bày đảm bảo 80% chiều dài mặt tiền","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Khay","chiTiet":"Tối thiểu 80 khay","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Bóng bay","chiTiet":"Tối thiểu 200 - 300 quả phát cho khách","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Bàn File","chiTiet":"Bàn File cá hồi","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Loa","chiTiet":"Phát CTKM & Nhạc sôi động","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"Làn xách tay","chiTiet":"Mượn CH giỏ sách từ 10-20 giỏ","deadline":"D-3"},{"dauMuc":"Đánh giá tiến độ","congViec":"MC","chiTiet":"Mỗi hub 1 MC (dùng cho KT, hội chợ, hoạt náo)","deadline":"D-3"},{"dauMuc":"Đánh giá tiến độ","congViec":"Tâm linh","chiTiet":"+ Lý lịch thửa đất (đất trước là ao hồ, đình chùa, bất thường khác)\n+ Thắp hương KT\n- Thầy cúng, bài cúng , giờ cúng \n- Người mở hàng \n-  Đồ cúng: Hương , hoa , vàng mã , rượu , bia , nước, xôi, giò, ","deadline":"D-1"},{"dauMuc":"Đánh giá tiến độ","congViec":"Nhân sự","chiTiet":"Nhân sự : 8-10 NS / ca","deadline":"D"},{"dauMuc":"Đánh giá tiến độ","congViec":"Thu ngân","chiTiet":"4 nhân viên thu ngân/2 POS","deadline":"D"},{"dauMuc":"Đánh giá tiến độ","congViec":"Tư vấn bán hàng","chiTiet":"1 nhân sự tư vấn add nhóm KHTT","deadline":"D"},{"dauMuc":"Đánh giá tiến độ","congViec":"Phân công mở thẻ","chiTiet":"2 nhân sự chuyên mở thẻ HV WIN , KHTT zalo , TCB","deadline":"D"},{"dauMuc":"Đánh giá tiến độ","congViec":"Bán hàng hoạt náo","chiTiet":"4 nhân sự","deadline":"D"},{"dauMuc":"Đánh giá tiến độ","congViec":"Kiểm soát hàng hóa ngày khai trương","chiTiet":"Bố trí 1 NS đứng ngoài cửa kiểm soát bill","deadline":"D"},{"dauMuc":"Sau khai trương","congViec":"W+1","chiTiet":"- kiểm tra kho hàng,  full hàng trong kho ra kệ","deadline":"D+3"},{"dauMuc":"Sau khai trương","congViec":"W+2","chiTiet":"- Rà soát từng nhóm ngành hàng MCH3","deadline":"D+10"},{"dauMuc":"Đánh giá tiến độ","congViec":"W+1","chiTiet":"Hoạt náo","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"W+2","chiTiet":"Hoạt náo","deadline":"D-5"},{"dauMuc":"Đánh giá tiến độ","congViec":"W+3","chiTiet":"Hoạt náo","deadline":"D-5"}];
+let chkNSOList = [];
+let chkProgress = {};
+let chkSelectedNSO = null;
+
+function initChkChecklist() {
+  const sel = document.getElementById('chkFilterGDV');
+  const gdvs = [...new Set(Object.keys(CASCADE))].sort();
+  gdvs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+  if (typeof MB_DATA !== 'undefined' && MB_DATA.length) {
+    // Filter MBs that reached B6 or are near completion
+    chkNSOList = MB_DATA.filter(m => {
+      const pct = getPct(m.steps);
+      return pct >= 80 || (m.steps && m.steps.some(s => s.s === 6 && (s.r === 'Done' || s.r === 'Pending')));
+    }).map(m => ({
+      id: m.id || '',
+      siteCode: m.siteCode || '',
+      addr: m.addr || '',
+      gdv: m.gdv || '',
+      qlkv: m.qlkv || '',
+      tinh: m.tinh || '',
+      handover: m.handover || '',
+      steps: m.steps || []
+    }));
+  }
+  renderChkDashboard();
+}
+
+function onChkGDVChange() {
+  const gdv = document.getElementById('chkFilterGDV').value;
+  const qlkvSel = document.getElementById('chkFilterQLKV');
+  qlkvSel.innerHTML = '<option value="">Tất cả QLKV</option>';
+  qlkvSel.disabled = !gdv;
+  if (gdv && CASCADE[gdv]) {
+    Object.keys(CASCADE[gdv]).sort().forEach(q => {
+      const o = document.createElement('option'); o.value = q; o.textContent = q; qlkvSel.appendChild(o);
+    });
+  }
+  renderChkDashboard();
+}
+
+function onChkMienChange() { renderChkDashboard(); }
+
+function renderChkDashboard() {
+  const gdvF = document.getElementById('chkFilterGDV').value;
+  const qlkvF = document.getElementById('chkFilterQLKV').value;
+  const stF = document.getElementById('chkFilterStatus').value;
+
+  let list = [...chkNSOList];
+  if (gdvF) list = list.filter(m => m.gdv === gdvF);
+  if (qlkvF) list = list.filter(m => m.qlkv === qlkvF);
+
+  document.getElementById('chkCount').textContent = list.length + ' NSO';
+
+  const totalItems = CHK_TEMPLATE.length;
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  document.getElementById('chkTbody').innerHTML = list.map(m => {
+    const done = chkProgress[m.id] ? Object.values(chkProgress[m.id]).filter(v => v === 'done').length : 0;
+    const pct = totalItems > 0 ? Math.round(done / totalItems * 100) : 0;
+
+    // Check for overdue deadlines
+    let overdue = false, warn = false;
+    if (m.handover) {
+      const ktDate = new Date(m.handover); ktDate.setHours(0,0,0,0);
+      CHK_TEMPLATE.forEach(item => {
+        if (!item.deadline || (chkProgress[m.id] && chkProgress[m.id][item.congViec] === 'done')) return;
+        const dlMatch = item.deadline.match(/D-(\d+)/);
+        if (!dlMatch) return;
+        const dlDate = new Date(ktDate.getTime() - parseInt(dlMatch[1]) * 86400000);
+        if (today.getTime() > dlDate.getTime()) { overdue = true; return; }
+        if ((dlDate.getTime() - today.getTime()) / 86400000 < 1) warn = true;
+      });
+    }
+
+    // Filter by status
+    if (stF === 'overdue' && !overdue) return '';
+    if (stF === 'warn' && !warn) return '';
+    if (stF === 'ok' && (overdue || warn)) return '';
+
+    const pctColor = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+    const statusHtml = overdue ? '<span style="color:#dc2626;font-weight:700">🔴 Quá hạn</span>'
+      : warn ? '<span style="color:#d97706;font-weight:700">🟡 Sắp hết</span>'
+      : '<span style="color:#16a34a;font-weight:700">🟢 Đúng hạn</span>';
+
+    return '<tr onclick="openChkDetail(\'' + escJS(m.id) + '\')" style="cursor:pointer" class="chk-row">' +
+      '<td>' + (m.siteCode || '-') + '</td>' +
+      '<td><b>' + (m.addr || '-') + '</b></td>' +
+      '<td>' + (m.gdv || '-') + '</td>' +
+      '<td>' + (m.qlkv || '-') + '</td>' +
+      '<td>' + (m.tinh || '-') + '</td>' +
+      '<td>' + (m.handover || '-') + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:#e5e7eb;border-radius:3px"><div style="width:' + pct + '%;height:100%;background:' + pctColor + ';border-radius:3px"></div></div><span style="font-size:11px;font-weight:600">' + done + '/' + totalItems + '</span></div></td>' +
+      '<td>' + statusHtml + '</td></tr>';
+  }).filter(Boolean).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Chưa có NSO nào đạt B6 (Khai trương).</td></tr>';
+
+  // KPI cards
+  const fb = list.filter(m => {
+    if (!m.handover) return false;
+    const ktDate = new Date(m.handover); ktDate.setHours(0,0,0,0);
+    return CHK_TEMPLATE.some(item => {
+      if (!item.deadline || (chkProgress[m.id] && chkProgress[m.id][item.congViec] === 'done')) return false;
+      const dlMatch = item.deadline.match(/D-(\d+)/);
+      if (!dlMatch) return false;
+      const dlDate = new Date(ktDate.getTime() - parseInt(dlMatch[1]) * 86400000);
+      return today.getTime() > dlDate.getTime();
+    });
+  }).length;
+
+  const allDone = list.length > 0 ? Math.round(list.reduce((s,m) => s + (chkProgress[m.id] ? Object.values(chkProgress[m.id]).filter(v=>v==='done').length : 0), 0) / Math.max(list.length * totalItems, 1) * 100) : 0;
+
+  document.getElementById('chkKPI').innerHTML =
+    '<div class="kpi-card" style="flex:1;min-width:100px"><div class="kpi-num g">' + list.length + '</div><div class="kpi-label">NSO theo dõi</div></div>' +
+    '<div class="kpi-card" style="flex:1;min-width:100px"><div class="kpi-num p">' + allDone + '%</div><div class="kpi-label">TB hoàn thành</div></div>' +
+    '<div class="kpi-card" style="flex:1;min-width:100px"><div class="kpi-num r">' + fb + '</div><div class="kpi-label">🔴 Quá hạn</div></div>';
+}
+
+function openChkDetail(nsoId) {
+  const m = chkNSOList.find(x => x.id === nsoId);
+  if (!m) return;
+  chkSelectedNSO = m;
+  document.getElementById('chkDashboard').style.display = 'none';
+  document.getElementById('chkDetail').style.display = 'block';
+  document.getElementById('chkDetailTitle').textContent = '📋 ' + (m.addr || m.tinh || nsoId);
+  
+  const ktDate = m.handover ? new Date(m.handover) : new Date();
+  document.getElementById('chkDetailMeta').innerHTML = 'GĐV: <b>' + (m.gdv || '-') + '</b> · QLKV: <b>' + (m.qlkv || '-') + '</b> · Tỉnh: <b>' + (m.tinh || '-') + '</b> · Ngày KT: <b>' + (m.handover || 'Chưa có') + '</b>';
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  let currentDauMuc = '';
+
+  document.getElementById('chkDetailTbody').innerHTML = CHK_TEMPLATE.map((item, i) => {
+    let dauMucRow = '';
+    if (item.dauMuc && item.dauMuc !== currentDauMuc) {
+      dauMucRow = '<tr style="background:#f5f3ff"><td colspan="5" style="font-weight:700;color:var(--primary);padding:8px 12px;font-size:12px">📂 ' + item.dauMuc + '</td></tr>';
+      currentDauMuc = item.dauMuc;
+    }
+
+    const status = (chkProgress[nsoId] && chkProgress[nsoId][item.congViec]) || 'pending';
+    let statusHtml, statusColor;
+    if (status === 'done') { statusHtml = '✅ Đã xong'; statusColor = '#16a34a'; }
+    else if (status === 'na') { statusHtml = '❌ KAD'; statusColor = '#6b7280'; }
+    else {
+      let dlBadge = '';
+      if (item.deadline && m.handover) {
+        const dlMatch = item.deadline.match(/D-(\d+)/);
+        if (dlMatch) {
+          const dlDate = new Date(ktDate.getTime() - parseInt(dlMatch[1]) * 86400000);
+          if (today.getTime() > dlDate.getTime()) dlBadge = ' 🔴 Quá hạn';
+          else if ((dlDate.getTime() - today.getTime()) / 86400000 < 1) dlBadge = ' 🟡 Hôm nay';
+          else dlBadge = ' 🟢 Đúng hạn';
+        }
+      }
+      statusHtml = '⏳ Chưa' + dlBadge;
+      statusColor = (dlBadge && dlBadge.includes('Quá hạn')) ? '#dc2626' : '#d97706';
+    }
+
+    return dauMucRow + '<tr onclick="toggleChkItem(\'' + escJS(nsoId) + '\',\'' + escJS(item.congViec) + '\')" style="cursor:pointer" class="chk-row">' +
+      '<td style="font-size:10px;color:var(--muted)"></td>' +
+      '<td style="font-weight:600;font-size:12px">' + item.congViec + '</td>' +
+      '<td style="font-size:11px;color:var(--muted);max-width:300px">' + (item.chiTiet || '').substring(0, 150) + '</td>' +
+      '<td style="font-size:11px;font-weight:600;white-space:nowrap">' + (item.deadline || '-') + '</td>' +
+      '<td style="font-size:13px;text-align:center;color:' + statusColor + ';font-weight:600">' + statusHtml + '</td></tr>';
+  }).join('');
+
+  document.getElementById('chkDetail').scrollIntoView({behavior:'smooth'});
+}
+
+function closeChkDetail() {
+  document.getElementById('chkDetail').style.display = 'none';
+  document.getElementById('chkDashboard').style.display = 'block';
+  renderChkDashboard();
+}
+
+function toggleChkItem(nsoId, congViec) {
+  if (!chkProgress[nsoId]) chkProgress[nsoId] = {};
+  const cur = chkProgress[nsoId][congViec];
+  const next = cur === 'done' ? 'pending' : cur === 'pending' ? 'na' : 'done';
+  chkProgress[nsoId][congViec] = next;
+  localStorage.setItem('tkmb_chk_progress', JSON.stringify(chkProgress));
+  openChkDetail(nsoId);
+}
+
+// Load saved progress
+(function() {
+  try { chkProgress = JSON.parse(localStorage.getItem('tkmb_chk_progress') || '{}'); } catch(e) { chkProgress = {}; }
+})();
 
 // ═══ STEP MODAL ═══
 let currentMBId=null, currentStepNum=null;
