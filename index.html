@@ -6,7 +6,6 @@
 <title>TKMB Web App — NSO Miền Bắc v2.2</title>
 <style>
 :root {
-  if(t==='checklist')initChkChecklist();
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
   --bg: #f8f9fb; --card: #fff; --text: #1f2937; --muted: #6b7280;
   --success: #16a34a; --warning: #d97706; --danger: #dc2626;
@@ -1008,7 +1007,7 @@ function showSuccessToast(mbId) {
   banner.innerHTML = '<div><strong style="color:#15803d;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#166534">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · Hạn: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
   card.appendChild(banner);
   
-  renderDash(); renderTienDo(); renderDSMB(); populateChkNSO();
+  renderDash(); renderTienDo(); renderDSMB();
 }
 function renderDash() {
   const total = MB_DATA.length;
@@ -1372,7 +1371,7 @@ function init() {
       if (this.dataset.tab === 'dash') renderDash();
       if (this.dataset.tab === 'tiendo') { renderTienDo(); populateTDGDV(); }
       if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); }
-      if (this.dataset.tab === 'checklist') populateChkNSO();
+      if (this.dataset.tab === 'checklist') initChkChecklist();
       if (this.dataset.tab === 'damphan') renderDPTable();
       if (this.dataset.tab === 'scan') {
         if (!qhDataLoaded) loadQHData();
