@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.9</title>
+<title>TKMB Web App — NSO Miền Bắc v2.10</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.9</h1>
+    <h1>🏪 NSO Miền Bắc v2.10</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -355,7 +355,10 @@ tr:hover td { background:#faf9ff; }
     <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h, B2=48h, B3=72h, B4=5ng, B5=7ng</span></h3>
     <div class="filter-bar">
       <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
-      <select id="tdGDV" onchange="renderTienDo()"><option value="">Tất cả GĐV</option></select>
+      <select id="tdMien" onchange="onTDMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+      <select id="tdTinh" onchange="renderTienDo()" disabled><option value="">Tất cả Tỉnh</option></select>
+      <select id="tdGDV" onchange="onTDGDVChange()"><option value="">Tất cả GĐV</option></select>
+      <select id="tdQLKV" onchange="renderTienDo()" disabled><option value="">Tất cả QLKV</option></select>
       <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
     <div style="overflow-x:auto"><table id="tdTable">
@@ -1311,17 +1314,53 @@ function renderDash() {
 }
 
 // ═══ TIẾN ĐỘ MB ═══
+function getMien(tinh) {
+  const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+  const bac = ['Hà Nội','Hải Phòng','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Điện Biên','Lai Châu','Sơn La','Yên Bái','Hòa Bình','Hoà Bình','Thái Nguyên','Lạng Sơn','Quảng Ninh','Bắc Giang','Phú Thọ','Vĩnh Phúc','Bắc Ninh','Hải Dương','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình'];
+  if (bac.includes(t)) return 'Miền Bắc';
+  const trung = ['Thanh Hóa','Nghệ An','Hà Tĩnh','Quảng Bình','Quảng Trị','Thừa Thiên - Huế','Thừa Thiên Huế','Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên','Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng'];
+  if (trung.includes(t)) return 'Miền Trung';
+  return 'Miền Nam';
+}
+function populateTDTinh() {
+  const sel = document.getElementById('tdTinh');
+  const mienF = document.getElementById('tdMien')?.value || '';
+  const tinhs = [...new Set(MB_DATA.map(m=>m.tinh).filter(t => !mienF || getMien(t) === mienF))].sort();
+  sel.innerHTML = '<option value="">Tất cả Tỉnh</option>';
+  tinhs.forEach(t => { const o = document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+  sel.disabled = false;
+}
+function onTDMienChange() { populateTDTinh(); renderTienDo(); }
+function onTDGDVChange() {
+  const gdv = document.getElementById('tdGDV').value;
+  const sel = document.getElementById('tdQLKV');
+  sel.innerHTML = '<option value="">Tất cả QLKV</option>';
+  sel.disabled = !gdv;
+  if (gdv) {
+    [...new Set(MB_DATA.filter(m=>m.gdv===gdv).map(m=>m.qlkv))].sort().forEach(q => {
+      const o = document.createElement('option'); o.value=q; o.textContent=q; sel.appendChild(o);
+    });
+  }
+  renderTienDo();
+}
 function populateTDGDV() {
   const sel = document.getElementById('tdGDV');
-  [...new Set(MB_DATA.map(m=>m.gdv))].forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  [...new Set(MB_DATA.map(m=>m.gdv))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  populateTDTinh();
 }
 function renderTienDo() {
   const q = (document.getElementById('tdSearch')?.value||'').toLowerCase();
+  const mienF = document.getElementById('tdMien')?.value||'';
+  const tinhF = document.getElementById('tdTinh')?.value||'';
   const gdvF = document.getElementById('tdGDV')?.value||'';
+  const qlkvF = document.getElementById('tdQLKV')?.value||'';
   const stF = document.getElementById('tdStatus')?.value||'all';
   let list = MB_DATA.filter(m => {
     if (q && !m.id.toLowerCase().includes(q) && !m.addr.toLowerCase().includes(q) && !m.tinh.toLowerCase().includes(q)) return false;
+    if (mienF && getMien(m.tinh) !== mienF) return false;
+    if (tinhF && m.tinh !== tinhF) return false;
     if (gdvF && m.gdv !== gdvF) return false;
+    if (qlkvF && m.qlkv !== qlkvF) return false;
     if (stF === 'Pending') return m.steps.some(s=>s.r==='Pending') && !m.steps.some(s=>s.r==='Fail');
     if (stF === 'Done') return m.steps[5].r === 'Done';
     if (stF === 'Fail') return m.steps.some(s=>s.r==='Fail');
