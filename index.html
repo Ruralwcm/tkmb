@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.12</title>
+<title>TKMB Web App — NSO Miền Bắc v2.13</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.12</h1>
+    <h1>🏪 NSO Miền Bắc v2.13</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -1344,7 +1344,7 @@ function renderDash() {
     return `<tr style="cursor:pointer" onclick="viewMB('${m.id}')">
       <td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td>
       <td>${m.gdv}</td><td>${m.tinh}</td>
-      <td><span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>=3?'tag-p':'tag-o'}">${hasFail?'Fail':p.done>=6?'Done':'Pending'}</span></td>
+      <td>${statusTagHtml(m)}</td>
       <td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div></td>
       <td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td>
       <td><button class="btn btn-xs btn-outline" onclick="event.stopPropagation();editMB('${m.id}')">✏️</button></td></tr>`;
@@ -1408,6 +1408,18 @@ function populateTDGDV() {
   [...new Set(MB_DATA.map(m=>m.gdv))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
   populateTDTinh();
 }
+const STEP_STATUS = ['', 'Chờ GĐV duyệt', 'Chờ GĐ TKMB duyệt', 'Chờ HĐTĐ duyệt', 'Chờ ký HĐ', 'Chờ phát hành KT', 'Đã khai trương'];
+function getStatusLabel(m) {
+  if (m.steps.some(s=>s.r==='Fail')) return 'Fail';
+  if (m.steps[5].r === 'Done') return 'Đã khai trương';
+  const cur = m.steps.find(s=>s.r==='Pending');
+  return cur ? STEP_STATUS[cur.s] : 'Mới';
+}
+function statusTagHtml(m) {
+  const hasFail = m.steps.some(s=>s.r==='Fail');
+  const cls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
+  return `<span class="tag ${cls}">${getStatusLabel(m)}</span>`;
+}
 function renderTienDo() {
   const q = (document.getElementById('tdSearch')?.value||'').toLowerCase();
   const mienF = document.getElementById('tdMien')?.value||'';
@@ -1442,7 +1454,7 @@ function renderTienDo() {
       const f = (s.r==='Fail' && s.failReason) ? ' — ' + s.failReason : '';
       return `<div class="step-seg ${s.r}" onclick="openStepModal('${m.id}',${s.s})" title="B${s.s}: ${STEP_SLA[s.s-1].desc}${f}"></div>`;
     }).join('') + '</div>';
-    const statusTag = `<span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>0?'tag-p':'tag-gray'}">${hasFail?'Fail':p.done>=6?'Đã KT':p.done>0?'Đang XL':'Mới'}</span>`;
+    const statusTag = statusTagHtml(m);
     const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef3c7;color:#92400e'}">⚠️ ${warning}</span>` : '';
     return `<tr>
       <td><strong>${m.id}</strong><div class="qh-info-mini">${m.nguon}</div></td>
@@ -1679,7 +1691,7 @@ function populateDSGDV(){const sel=document.getElementById('dsGDV');[...new Set(
 function renderDSMB(){const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),gdvF=document.getElementById('dsGDV')?.value||'',nguonF=document.getElementById('dsNguon')?.value||'';
   let list=MB_DATA.filter(m=>{if(q&&!m.id.toLowerCase().includes(q)&&!m.addr.toLowerCase().includes(q)&&!m.tinh.toLowerCase().includes(q))return false;if(gdvF&&m.gdv!==gdvF)return false;if(nguonF&&m.nguon!==nguonF)return false;return true;});
   document.querySelector('#dsTable tbody').innerHTML=list.map(m=>{const p=getPct(m.steps),hasFail=m.steps.some(s=>s.r==='Fail'),lp=m.steps.find(s=>s.r==='Pending'),slaCls=lp?getSLAColor(lp.s,m.createdAt):'sla-ok',slaText=lp?STEP_SLA[lp.s-1].slaLabel:'—';
-    return`<tr><td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td><td>${m.gdv}</td><td>${m.qlkv||'—'}</td><td>${m.tinh}</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}</td><td>${m.area||'—'}</td><td>${m.price||'—'}${m.price?'tr':''}</td><td><span class="tag ${hasFail?'tag-r':p.done>=6?'tag-g':p.done>=3?'tag-p':'tag-o'}">${hasFail?'Fail':p.done>=6?'Done':'Pending'}</span></td><td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div> ${p.pct}%</td><td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td></tr>`;}).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">Không tìm thấy MB</td></tr>';}
+    return`<tr><td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td><td>${m.gdv}</td><td>${m.qlkv||'—'}</td><td>${m.tinh}</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}</td><td>${m.area||'—'}</td><td>${m.price||'—'}${m.price?'tr':''}</td><td>${statusTagHtml(m)}</td><td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div> ${p.pct}%</td><td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td></tr>`;}).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">Không tìm thấy MB</td></tr>';}
 function viewMB(id){document.querySelector('[data-tab="tiendo"]').click();document.getElementById('tdSearch').value=id;renderTienDo();}
 
 // ═══ EDIT MB ═══
