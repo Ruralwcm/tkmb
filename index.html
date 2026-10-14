@@ -2318,11 +2318,7 @@ async function loadLiveData(){
     }
   }catch(e){ console.warn('loadLiveData failed:', e);
   const ds = document.getElementById('dataStatus');
-  ds.textContent = '⚠️ Dữ liệu mẫu — Sheet chưa publish?';
-  ds.style.color = '#fca5a5';
-  // Fallback: render hardcoded data
-  if(typeof populateDashGDV==='function') populateDashGDV();
-  if(typeof renderDash==='function') renderDash();
+  if(ds){ ds.textContent = '⚠️ Offline — dữ liệu mẫu'; ds.style.color = '#fca5a5'; }
 }
 }
 
@@ -2625,9 +2621,8 @@ function init() {
     });
   });
   populateGDV();
-  // Don't render hardcoded data — wait for live data
-  document.getElementById('dataStatus').textContent = '⏳ Đang tải dữ liệu...';
-  document.getElementById('dataStatus').style.color = '#fbbf24';
+  populateDashGDV();
+  renderDash();
   // Preload QH data + start GPS in background
   loadQHData();
   startScanGPS();
