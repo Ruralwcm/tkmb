@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.27</title>
+<title>TKMB Web App — NSO Miền Bắc v2.28</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.27</h1>
+    <h1>🏪 NSO Miền Bắc v2.28</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -403,7 +403,7 @@ tr:hover td { background:#faf9ff; }
       <span id="qmImportMsg" style="font-size:11px;color:var(--muted);align-self:center"></span>
     </div>
     <div style="overflow-x:auto"><table id="qmTable">
-      <thead><tr><th>Mã QH</th><th>Tỉnh/TP</th><th>Huyện/Quận</th><th>Xã/Phường</th><th>GĐV</th><th>QLKV</th><th>Tình trạng</th><th>Thao tác</th></tr></thead>
+      <thead><tr><th>Mã QH</th><th>Tỉnh/TP</th><th>Huyện/Quận</th><th>Xã/Phường</th><th>GĐV</th><th>QLKV</th><th>Tình trạng</th><th>Đội TKMB VH</th><th>Thao tác</th></tr></thead>
       <tbody id="qmTbody"></tbody></table>
     </div>
   </div>
@@ -557,7 +557,7 @@ tr:hover td { background:#faf9ff; }
       <div class="form-group"><label>GĐV</label><input type="text" id="qhGdv"></div>
       <div class="form-group"><label>QLKV</label><input type="text" id="qhQlkv"></div>
       <div class="form-group"><label>Tình trạng</label><select id="qhStatus"><option value="">Chưa rà soát</option><option>Ưu tiên 1</option><option>Ưu tiên 2</option><option>Ưu tiên</option><option>Chưa ưu tiên</option><option>Bỏ điểm QH</option><option>Treo điểm QH</option><option>Backup</option></select></div>
-      <div class="form-group"><label>Cửa hàng</label><input type="text" id="qhCh"></div>
+      <div class="form-group"><label>Đội TKMB VH</label><input type="text" id="qhDoi"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" id="qhDeleteBtn" style="display:none" onclick="deleteQHPoint()">🗑 Xóa</button>
@@ -2220,7 +2220,7 @@ async function loadQHManageData() {
         qh: mq, tinh: r[idx['Tỉnh/TP']] || '', huyen: r[idx['Huyện/Quận']] || '',
         xa: r[idx['Xã/Phường']] || '', gdv: r[idx['GĐV']] || '', qlkv: r[idx['QLKV']] || '',
         lat: r[idx['Lat']] || '', lng: r[idx['Lng']] || '', vung: r[idx['Vùng']] || '',
-        status: r[idx['Tình trạng']] || '', ch: r[idx['Cửa hàng']] || ''
+        status: r[idx['Tình trạng']] || '', doiTKMB: r[idx['Đội TKMB VH']] || ''
       });
     }
     qmLoaded = true;
@@ -2287,9 +2287,10 @@ function renderQHManage() {
       <td>${q.gdv}</td>
       <td>${q.qlkv}</td>
       <td><span class="tag ${stCls}">${q.status || '—'}</span></td>
+      <td>${q.doiTKMB || '—'}</td>
       <td style="white-space:nowrap"><button class="btn btn-xs btn-outline" onclick="openQHEdit('${q.qh}')">✏️</button></td>
     </tr>`;
-  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Không có điểm QH nào</td></tr>';
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Không có điểm QH nào</td></tr>';
 }
 
 let editingQh = null;
@@ -2307,7 +2308,7 @@ function openQHEdit(qh) {
   document.getElementById('qhGdv').value = q ? q.gdv : '';
   document.getElementById('qhQlkv').value = q ? q.qlkv : '';
   document.getElementById('qhStatus').value = q ? (q.status || '') : '';
-  document.getElementById('qhCh').value = q ? q.ch : '';
+  document.getElementById('qhDoi').value = q ? (q.doiTKMB || '') : '';
   document.getElementById('qhDeleteBtn').style.display = q ? 'inline-block' : 'none';
   document.getElementById('qhModal').style.display = 'flex';
 }
@@ -2325,7 +2326,7 @@ async function saveQHPoint() {
     gdv: document.getElementById('qhGdv').value.trim(),
     qlkv: document.getElementById('qhQlkv').value.trim(),
     tinhTrang: document.getElementById('qhStatus').value,
-    ch: document.getElementById('qhCh').value.trim()
+    doiTKMB: document.getElementById('qhDoi').value.trim()
   };
   if (!d.qh) { alert('Chưa nhập Mã QH'); return; }
   try {
@@ -2397,9 +2398,9 @@ function parseQHImportRows(rows) {
 }
 
 function qhDownloadTemplate() {
-  const csv = 'Mã QH,Tỉnh/TP,Huyện/Quận,Xã/Phường,GĐV,QLKV,Lat,Lng,Tình trạng,Cửa hàng\nQH-HN001,Hà Nội,Hoàn Kiếm,Hàng Bông,,21.030,105.850,Chưa rà soát,\n';
-  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'QH_Points_Template.csv'; a.click();
+  const xls = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>QH_Points</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table><tr><th>Mã QH</th><th>Xã/Phường</th><th>Huyện/Quận</th><th>Tỉnh/TP</th><th>GĐV</th><th>QLKV</th><th>Lat</th><th>Lng</th><th>Ghi chú</th><th>Ngày cập nhật Phòng QH</th><th>Vùng</th><th>Tình trạng</th><th>Đội TKMB VH</th></tr><tr><td>QH-HN001</td><td>Hàng Bông</td><td>Hoàn Kiếm</td><td>Hà Nội</td><td></td><td></td><td>21.030</td><td>105.850</td><td></td><td></td><td></td><td>Chưa rà soát</td><td></td></tr></table></body></html>';
+  const blob = new Blob(['\uFEFF'+xls], { type: 'application/vnd.ms-excel' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'QH_Points_Template.xls'; a.click();
 }
 
 async function qhSyncStoreslist() {
