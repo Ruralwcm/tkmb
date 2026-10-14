@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.16</title>
+<title>TKMB Web App — NSO Miền Bắc v2.17</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.16</h1>
+    <h1>🏪 NSO Miền Bắc v2.17</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -368,7 +368,7 @@ tr:hover td { background:#faf9ff; }
       <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
     <div style="overflow-x:auto"><table id="tdTable">
-      <thead><tr><th data-key="id" onclick="sortTD('id')" style="cursor:pointer">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')" style="cursor:pointer">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')" style="cursor:pointer">Khu vực<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')" style="cursor:pointer">Địa chỉ<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">Tiến độ (B1–B6)<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">%<span class="sarr"></span></th><th data-key="status" onclick="sortTD('status')" style="cursor:pointer">Trạng thái<span class="sarr"></span></th></tr></thead>
+      <thead><tr><th data-key="id" onclick="sortTD('id')" style="cursor:pointer">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')" style="cursor:pointer">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')" style="cursor:pointer">Khu vực<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')" style="cursor:pointer">Địa chỉ<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">Tiến độ (B1–B6)<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">%<span class="sarr"></span></th><th data-key="status" onclick="sortTD('status')" style="cursor:pointer">Trạng thái<span class="sarr"></span></th><th style="text-align:center">👁</th></tr></thead>
       <tbody id="tdTbody"></tbody></table>
     </div>
   </div>
@@ -464,6 +464,17 @@ tr:hover td { background:#faf9ff; }
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeConfirm()">Hủy</button>
       <button class="btn btn-success" id="btnConfirmSend" onclick="doSubmitMB()">✅ Đồng ý gửi</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKLOG MODAL -->
+<div class="modal-overlay" id="tracklogModal" style="display:none">
+  <div class="modal-card" style="max-width:560px">
+    <h3>👁 Tracklog Mặt Bằng — <span id="tracklogTitle"></span></h3>
+    <div id="tracklogBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeTracklog()">Đóng</button>
     </div>
   </div>
 </div>
@@ -1528,8 +1539,9 @@ function renderTienDo() {
       <td>${strip}</td>
       <td style="white-space:nowrap">${p.pct}%<div class="qh-info-mini">${p.done}/6</div></td>
       <td style="white-space:nowrap">${statusTag}${warnBadge?` ${warnBadge}`:''}</td>
+      <td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openTracklog('${m.id}')" title="Xem tracklog">👁</button></td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
 }
 
 
@@ -1750,6 +1762,37 @@ function saveStep(){const mb=MB_DATA.find(m=>m.id===currentMBId);if(!mb)return;c
   const dc=mb.steps.filter(s=>s.r==='Done').length;if(dc>=6)mb.status='Hoàn thành';else if(dc>=4)mb.status='GDM duyet';else if(dc>=1)mb.status='GDV duyet';
   closeStepModal();renderDash();renderTienDo();renderDSMB();}
 
+// ═══ TRACKLOG (xem chi tiết từng bước) ═══
+function openTracklog(mbId){
+  const mb=MB_DATA.find(m=>m.id===mbId); if(!mb) return;
+  document.getElementById('tracklogTitle').textContent=mbId+' · '+(mb.gdv||'')+' · '+(mb.tinh||'');
+  const tl=mb.tracklog||{};
+  const lbl={None:'— Chưa đến',Pending:'⏳ Đang xử lý',Done:'✅ Đã xong',Fail:'❌ Fail'};
+  const tagCls={Done:'tag-g',Fail:'tag-r',Pending:'tag-p',None:'tag-gray'};
+  let html='';
+  for(let s=1;s<=6;s++){
+    const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
+    const step=mb.steps[s-1]||{};
+    const r=step.r||'None';
+    html+=`<div style="border:1px solid #ede9fe;border-radius:8px;padding:9px 11px;margin-bottom:6px;background:${r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'#fafafa'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <strong style="color:var(--primary);font-size:12.5px">B${s}: ${STEP_SLA[s-1].desc}</strong>
+        <span class="tag ${tagCls[r]||'tag-gray'}" style="white-space:nowrap">${lbl[r]||r}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.65">
+        ${info.thoiGian?`🗓 Ngày: ${info.thoiGian}<br>`:''}
+        ${info.nguoiThucHien?`👤 Người thực hiện: ${info.nguoiThucHien}<br>`:''}
+        ${info.nguoiDuyet?`✅ Người duyệt: ${info.nguoiDuyet}<br>`:''}
+        ${info.sla?`⏱ SLA: ${info.sla}<br>`:''}
+        ${info.vanDe?`⚠️ Vấn đề: ${info.vanDe}<br>`:''}
+      </div>
+    </div>`;
+  }
+  document.getElementById('tracklogBody').innerHTML=html;
+  document.getElementById('tracklogModal').style.display='flex';
+}
+function closeTracklog(){ document.getElementById('tracklogModal').style.display='none'; }
+
 // ═══ DS MB ═══
 function populateDSGDV(){const sel=document.getElementById('dsGDV');[...new Set(MB_DATA.map(m=>m.gdv))].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
 function renderDSMB(){const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),gdvF=document.getElementById('dsGDV')?.value||'',nguonF=document.getElementById('dsNguon')?.value||'';
@@ -1842,13 +1885,22 @@ async function loadLiveData(){
     const td={};
     if(trows.length>1){
       const ti={}; trows[0].forEach((h,i)=>ti[h.replace(/^\uFEFF/,'')]=i);
+      const g=(r,k)=>ti[k]!==undefined?(r[ti[k]]||''):'';
       for(let i=1;i<trows.length;i++){
         const t=trows[i]; const mid=t[ti['MB ID']]||'';
         if(!mid) continue;
         const bn=(t[ti['Bước']]||'').replace(/\D/g,'');
         if(!bn) continue;
         if(!td[mid]) td[mid]={};
-        td[mid][bn]=t[ti['Trạng thái']]||'';
+        td[mid][bn]={
+          status:g(t,'Trạng thái'),
+          ten:g(t,'Tên bước'),
+          nguoiThucHien:g(t,'Người thực hiện'),
+          nguoiDuyet:g(t,'Người duyệt'),
+          thoiGian:g(t,'Thời gian'),
+          sla:g(t,'SLA'),
+          vanDe:g(t,'Vấn đề / Ghi chú')||g(t,'Vấn đề/Ghi chú')
+        };
       }
     }
     const out=[]; const seen={};
@@ -1857,8 +1909,9 @@ async function loadLiveData(){
       if(!mid||seen[mid]) continue; seen[mid]=1;
       const steps=[];
       for(let s=1;s<=6;s++){
-        const st=(td[mid]||{})[s]||'';
-        steps.push({s, actor:ACTOR_ARR[s-1][0], appr:ACTOR_ARR[s-1][1], r:toR(st), date:''});
+        const info=(td[mid]||{})[s]||{};
+        const st=(typeof info==='string')?info:(info.status||'');
+        steps.push({s, actor:ACTOR_ARR[s-1][0], appr:ACTOR_ARR[s-1][1], r:toR(st), date:info.thoiGian||''});
       }
       out.push({
         id:mid, nguon:r[idx['Nguồn']]||'', gdv:r[idx['GĐV']]||'', qlkv:r[idx['QLKV']]||'',
@@ -1869,7 +1922,7 @@ async function loadLiveData(){
         legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'',
         gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'',
         status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]),
-        steps
+        steps, tracklog:td[mid]||{}
       });
     }
     if(out.length){
