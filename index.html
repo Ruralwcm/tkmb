@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.7</title>
+<title>TKMB Web App — NSO Miền Bắc v2.8</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.7</h1>
+    <h1>🏪 NSO Miền Bắc v2.8</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: TKMB/Vận hành</div>
   </div>
   <div class="header-right">
@@ -668,7 +668,7 @@ function renderScanTimeline(surveys, el) {
 }
 
 // MB_DATA, scans, DP_DATA (same as before)
-const MB_DATA = [
+let MB_DATA = [
   { id:'MB-20261002-508', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Điện Biên', huyen:'H. Mường Chà', addr:'sn 03, tổ 2, Na Sang', mapLink:'21.7622402, 103.0937102', area:'260', front:'13', price:'17', payment:'Thỏa thuận', deposit:'Thỏa thuận', duration:'8 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Phương Văn Tình', gtMNV:'6054148', bct:'Nguyễn Ngọc Phát', bctPhone:'829920578', status:'GDV duyet', createdAt:'2026-10-02T17:33:28', steps:[
     {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
     {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
@@ -1625,6 +1625,90 @@ function editMB(mbId) {
 // ═══ ĐÀM PHÁN ═══
 function renderDPTable(){document.querySelector('#dpTable tbody').innerHTML=DP_DATA.map(d=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':'⚠️'}</span></td></tr>`).join('');}
 
+// ═══ LIVE DATA từ Google Sheet (MB_Data + MB_Tiendo) ═══
+const SHEET_LIVE_ID = '1jac8uf8eeB57C-zZ85Lg_l-UwpPxOTPkcoQ2mywMZyw';
+const ACTOR_ARR = [['QLKV','GĐV'],['TKMB','GĐ TKMB'],['TKMB','HĐ'],['GĐV/TKMB','GĐV/TKMB'],['GĐV','GĐV'],['System','—']];
+function csvParse(text){
+  const rows=[]; let row=[], cur='', inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
+    else if(c==='"') inQ=true;
+    else if(c===','){ row.push(cur); cur=''; }
+    else if(c==='\n'){ row.push(cur); cur=''; rows.push(row); row=[]; }
+    else if(c==='\r'){ if(text[i+1]==='\n')i++; row.push(cur); cur=''; rows.push(row); row=[]; }
+    else cur+=c;
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+function normDate(s){
+  if(!s) return '';
+  const m=(s+'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m){ const dd=m[1],mo=m[2],yy=m[3],hh=m[4]||'00',mi=m[5]||'00',ss=m[6]||'00';
+    return yy+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0')+'T'+hh.padStart(2,'0')+':'+mi.padStart(2,'0')+':'+ss.padStart(2,'0'); }
+  return s;
+}
+function toR(st){
+  if(!st) return 'None';
+  const s=(st+'').toLowerCase();
+  if(s.includes('fail')||s.includes('từ chối')||s.includes('loại')) return 'Fail';
+  if(s.includes('đã')||s.includes('xong')||s.includes('duyệt')||s.includes('done')||s.includes('gửi')||s.includes('hoàn thành')) return 'Done';
+  if(s.includes('chờ')||s.includes('đang')||s.includes('pending')) return 'Pending';
+  return 'Pending';
+}
+async function loadLiveData(){
+  try{
+    const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
+    const [a,b]=await Promise.all([fetch(url('MB_Data')).then(r=>r.text()), fetch(url('MB_Tiendo')).then(r=>r.text())]);
+    const mrows=csvParse(a), trows=csvParse(b);
+    if(mrows.length<2) return;
+    const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
+    const td={};
+    if(trows.length>1){
+      const ti={}; trows[0].forEach((h,i)=>ti[h.replace(/^\uFEFF/,'')]=i);
+      for(let i=1;i<trows.length;i++){
+        const t=trows[i]; const mid=t[ti['MB ID']]||'';
+        if(!mid) continue;
+        const bn=(t[ti['Bước']]||'').replace(/\D/g,'');
+        if(!bn) continue;
+        if(!td[mid]) td[mid]={};
+        td[mid][bn]=t[ti['Trạng thái']]||'';
+      }
+    }
+    const out=[]; const seen={};
+    for(let i=1;i<mrows.length;i++){
+      const r=mrows[i]; const mid=r[idx['MB ID']]||'';
+      if(!mid||seen[mid]) continue; seen[mid]=1;
+      const steps=[];
+      for(let s=1;s<=6;s++){
+        const st=(td[mid]||{})[s]||'';
+        steps.push({s, actor:ACTOR_ARR[s-1][0], appr:ACTOR_ARR[s-1][1], r:toR(st), date:''});
+      }
+      out.push({
+        id:mid, nguon:r[idx['Nguồn']]||'', gdv:r[idx['GĐV']]||'', qlkv:r[idx['QLKV']]||'',
+        tinh:r[idx['Tỉnh/TP']]||'', huyen:r[idx['Huyện/Quận']]||'', addr:r[idx['Địa chỉ']]||'',
+        mapLink:r[idx['Map Link']]||'', lat:r[idx['Lat']]||'', lng:r[idx['Lng']]||'',
+        area:r[idx['DT (m²)']]||'', front:r[idx['MT (m)']]||'', price:r[idx['Giá (tr/th)']]||'',
+        payment:r[idx['Thanh toán']]||'', deposit:r[idx['Cọc (tr)']]||'', duration:r[idx['Thời hạn']]||'',
+        legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'',
+        gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'',
+        status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]),
+        steps
+      });
+    }
+    if(out.length){
+      MB_DATA = out;
+      if(typeof renderDash==='function') renderDash();
+      if(typeof renderTienDo==='function') renderTienDo();
+      if(typeof renderDSMB==='function') renderDSMB();
+      if(typeof populateTDGDV==='function') populateTDGDV();
+      if(typeof populateDSGDV==='function') populateDSGDV();
+      console.log('✅ Live data loaded:', out.length, 'MBs');
+    }
+  }catch(e){ console.warn('loadLiveData failed:', e); }
+}
+
 // ═══ ROLE SWITCH ═══
 init();
 
@@ -1657,6 +1741,7 @@ function init() {
   // Preload QH data + start GPS in background
   loadQHData();
   startScanGPS();
+  loadLiveData();
 }
 
 init();
