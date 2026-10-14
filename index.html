@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.31</title>
+<title>TKMB Web App — NSO Miền Bắc v2.32</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.31</h1>
+    <h1>🏪 NSO Miền Bắc v2.32</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -483,15 +483,26 @@ tr:hover td { background:#faf9ff; }
 
 <!-- ===== DANH SÁCH MB ===== -->
 <section class="section" id="sec-dsmb">
-  <div class="card"><h3>📑 Toàn bộ Mặt Bằng</h3>
+  <div class="card"><h3>📑 Danh sách MB đã ký HĐ</h3>
     <div class="filter-bar">
       <input type="text" id="dsSearch" placeholder="🔍 Tìm kiếm..." oninput="renderDSMB()">
-      <select id="dsGDV" onchange="renderDSMB()"><option value="">Tất cả GĐV</option></select>
-      <select id="dsNguon" onchange="renderDSMB()"><option value="">Tất cả nguồn</option><option>VH</option><option>TKMB</option></select>
+      <select id="dsMien" onchange="onDSMienChange()"><option value="">Tất cả Miền</option></select>
+      <select id="dsTinh" onchange="onDSTinhChange()" disabled><option value="">Tất cả Tỉnh</option></select>
+      <select id="dsGDV" onchange="onDSGDVChange()"><option value="">Tất cả GĐV</option></select>
+      <select id="dsQLKV" onchange="renderDSMB()" disabled><option value="">Tất cả QLKV</option></select>
+      <select id="dsTT" onchange="renderDSMB()"><option value="">Tất cả trạng thái</option><option>Đang hiệu lực</option><option>Sắp hết hạn</option><option>Đã hết hạn</option><option>Chờ ký</option></select>
     </div>
-    <div style="overflow-x:auto"><table id="dsTable"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Địa chỉ</th><th>DT</th><th>Giá</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto"><table id="dsTable"><thead><tr><th>Mã Site</th><th>Tên Site</th><th>Địa chỉ</th><th>Miền</th><th>GĐV</th><th>MT(m)</th><th>DT thuê</th><th>DTKD</th><th>Giá thuê</th><th>Ngày ký</th><th>Hết hạn</th><th>Trạng thái</th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
+
+<!-- ===== DSMB DETAIL MODAL ===== -->
+<div class="modal-overlay" id="dsDetailModal" style="display:none">
+  <div class="modal-card"><h3 id="dsDetailTitle">Chi tiết MB đã ký</h3>
+    <div id="dsDetailBody" style="font-size:13px;line-height:1.8"></div>
+    <div style="margin-top:14px"><button class="btn btn-outline" onclick="document.getElementById('dsDetailModal').style.display='none'">Đóng</button></div>
+  </div>
+</div>
 </div>
 
 <!-- ===== STEP MODAL ===== -->
@@ -1919,11 +1930,88 @@ function closeTracklog(){ document.getElementById('tracklogModal').style.display
 
 // ═══ DS MB ═══
 function populateDSGDV(){const sel=document.getElementById('dsGDV');sel.innerHTML='<option value="">Tất cả GĐV</option>';[...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
-function renderDSMB(){const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),gdvF=document.getElementById('dsGDV')?.value||'',nguonF=document.getElementById('dsNguon')?.value||'';
-  let list=MB_DATA.filter(m=>{if(q&&!m.id.toLowerCase().includes(q)&&!m.addr.toLowerCase().includes(q)&&!m.tinh.toLowerCase().includes(q))return false;if(gdvF&&m.gdv!==gdvF)return false;if(nguonF&&m.nguon!==nguonF)return false;return true;});
-  document.querySelector('#dsTable tbody').innerHTML=list.map(m=>{const p=getPct(m.steps),hasFail=m.steps.some(s=>s.r==='Fail'),lp=m.steps.find(s=>s.r==='Pending'),slaCls=lp?getSLAColor(m,lp.s):'sla-ok',slaText=lp?STEP_SLA[lp.s-1].slaLabel:'—';
-    return`<tr><td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td><td>${m.gdv}</td><td>${m.qlkv||'—'}</td><td>${m.tinh}</td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}</td><td>${m.area||'—'}</td><td>${m.price||'—'}${m.price?'tr':''}</td><td>${statusTagHtml(m)}</td><td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div> ${p.pct}%</td><td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td></tr>`;}).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">Không tìm thấy MB</td></tr>';}
-function viewMB(id){document.querySelector('[data-tab="tiendo"]').click();document.getElementById('tdSearch').value=id;renderTienDo();}
+let KYHD_DATA = [];
+function loadKyHDData(){
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('MB_KyHD'))
+    .then(r=>r.text()).then(txt=>{
+      const rows=csvParse(txt);
+      if(rows.length<2) return;
+      const h=rows[0],i={};h.forEach((x,j)=>i[x.replace(/^\uFEFF/,'')]=j);
+      KYHD_DATA=[];
+      for(let j=1;j<rows.length;j++){
+        const r=rows[j];if(!r[i['Mã Site']])continue;
+        KYHD_DATA.push({
+          sap:r[i['Mã Site']]||'',ten:r[i['Tên Site']]||'',addr:r[i['Địa chỉ']]||'',
+          mien:r[i['Miền']]||'',tinh:r[i['Tỉnh/TP']]||'',huyen:r[i['Huyện/Quận']]||'',
+          gdv:r[i['GĐV']]||'',qlkv:r[i['QLKV']]||'',
+          mt:r[i['MT (m)']]||'',dtThue:r[i['DT thuê (m²)']]||'',dtkd:r[i['DTKD (m²)']]||'',
+          gia:r[i['Giá thuê (tr/th)']]||'',dieuChinh:r[i['Các lần điều chỉnh giá']]||'',
+          bct:r[i['BCT Tên']]||'',bctPhone:r[i['BCT SĐT']]||'',
+          ngayKy:r[i['Ngày ký HĐ']]||'',ngayHetHan:r[i['Ngày hết hạn HĐ']]||'',
+          ttHD:r[i['Trạng thái HĐ']]||'',ghiChu:r[i['Ghi chú']]||''
+        });
+      }
+      populateDSGDV();populateDSMien();renderDSMB();
+    });
+}
+function populateDSMien(){
+  const sel=document.getElementById('dsMien');
+  sel.innerHTML='<option value="">Tất cả Miền</option>'+MIEN_LIST.map(m=>`<option>${m}</option>`).join('');
+}
+function populateDSGDV(){
+  const sel=document.getElementById('dsGDV');
+  sel.innerHTML='<option value="">Tất cả GĐV</option>';
+  [...new Set(KYHD_DATA.map(d=>d.gdv).filter(Boolean))].sort().forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});
+}
+function onDSMienChange(){
+  const sel=document.getElementById('dsTinh'),mienF=document.getElementById('dsMien').value;
+  sel.innerHTML='<option value="">Tất cả Tỉnh</option>';
+  sel.disabled=!mienF;
+  if(mienF){[...new Set(KYHD_DATA.map(d=>d.tinh).filter(t=>getMien(t)===mienF))].sort().forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});}
+  renderDSMB();
+}
+function onDSTinhChange(){renderDSMB();}
+function onDSGDVChange(){
+  const sel=document.getElementById('dsQLKV'),gdv=document.getElementById('dsGDV').value;
+  sel.innerHTML='<option value="">Tất cả QLKV</option>';sel.disabled=!gdv;
+  if(gdv){[...new Set(KYHD_DATA.filter(d=>d.gdv===gdv).map(d=>d.qlkv))].sort().forEach(q=>{const o=document.createElement('option');o.value=q;o.textContent=q;sel.appendChild(o);});}
+  renderDSMB();
+}
+function renderDSMB(){
+  const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),
+    mienF=document.getElementById('dsMien')?.value||'',
+    tinhF=document.getElementById('dsTinh')?.value||'',
+    gdvF=document.getElementById('dsGDV')?.value||'',
+    qlkvF=document.getElementById('dsQLKV')?.value||'',
+    ttF=document.getElementById('dsTT')?.value||'';
+  let list=KYHD_DATA.filter(d=>{
+    if(q&&!d.sap.toLowerCase().includes(q)&&!d.ten.toLowerCase().includes(q)&&!d.addr.toLowerCase().includes(q))return false;
+    if(mienF&&d.mien!==mienF)return false;
+    if(tinhF&&d.tinh!==tinhF)return false;
+    if(gdvF&&d.gdv!==gdvF)return false;
+    if(qlkvF&&d.qlkv!==qlkvF)return false;
+    if(ttF&&d.ttHD!==ttF)return false;
+    return true;
+  });
+  document.querySelector('#dsTable tbody').innerHTML=list.map(d=>{
+    const ttCls=d.ttHD==='Đang hiệu lực'?'tag-g':d.ttHD==='Sắp hết hạn'?'tag-o':d.ttHD==='Đã hết hạn'?'tag-r':'tag-p';
+    return `<tr><td><strong>${d.sap}</strong></td><td>${d.ten}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.addr}</td><td>${d.mien}</td><td>${d.gdv}</td><td>${d.mt||'—'}</td><td>${d.dtThue||'—'}m²</td><td>${d.dtkd||'—'}m²</td><td>${d.gia||'—'}${d.gia?'tr/th':''}</td><td>${d.ngayKy||'—'}</td><td>${d.ngayHetHan||'—'}</td><td><span class="tag ${ttCls}">${d.ttHD||'Chưa rõ'}</span></td><td><button class="btn btn-xs btn-outline" onclick="viewKyHDDetail(${list.indexOf(d)})">👁 Xem</button></td></tr>`;
+  }).join('')||'<tr><td colspan="13" style="text-align:center;color:var(--muted);padding:20px">Chưa có dữ liệu. Vui lòng nhập dữ liệu vào sheet MB_KyHD.</td></tr>';
+}
+function viewKyHDDetail(idx){
+  const d=KYHD_DATA[idx];if(!d)return;
+  document.getElementById('dsDetailTitle').textContent=d.sap+' — '+d.ten;
+  document.getElementById('dsDetailBody').innerHTML=
+    '<b>Mã Site:</b> '+d.sap+'<br><b>Tên Site:</b> '+d.ten+'<br><b>Địa chỉ:</b> '+d.addr+'<br>'+
+    '<b>Miền:</b> '+(d.mien||'—')+' · <b>Tỉnh:</b> '+(d.tinh||'—')+' · <b>Huyện:</b> '+(d.huyen||'—')+'<br>'+
+    '<b>GĐV:</b> '+(d.gdv||'—')+' · <b>QLKV:</b> '+(d.qlkv||'—')+'<br>'+
+    '<hr><b>MT:</b> '+(d.mt||'—')+'m · <b>DT thuê:</b> '+(d.dtThue||'—')+'m² · <b>DTKD:</b> '+(d.dtkd||'—')+'m²<br>'+
+    '<b>Giá thuê:</b> '+(d.gia||'—')+' tr/th<br><b>Các lần điều chỉnh giá:</b> '+(d.dieuChinh||'—')+'<br>'+
+    '<hr><b>BCT:</b> '+(d.bct||'—')+' · <b>SĐT:</b> '+(d.bctPhone||'—')+'<br>'+
+    '<b>Ngày ký HĐ:</b> '+(d.ngayKy||'—')+' · <b>Ngày hết hạn:</b> '+(d.ngayHetHan||'—')+'<br>'+
+    '<b>Trạng thái HĐ:</b> '+(d.ttHD||'—')+'<br><b>Ghi chú:</b> '+(d.ghiChu||'—');
+  document.getElementById('dsDetailModal').style.display='flex';
+}
 
 // ═══ EDIT MB ═══
 let editingMBId = null;
@@ -2499,7 +2587,7 @@ function init() {
       document.getElementById('sec-' + this.dataset.tab).classList.add('active');
       if (this.dataset.tab === 'dash') renderDash();
       if (this.dataset.tab === 'tiendo') { renderTienDo(); populateTDGDV(); }
-      if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); }
+      if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); if(!KYHD_DATA.length) loadKyHDData(); }
       if (this.dataset.tab === 'checklist') initChkChecklist();
       if (this.dataset.tab === 'damphan') { renderDPTable(); populateDPGDV(); }
       if (this.dataset.tab === 'scan') {
