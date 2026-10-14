@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.11</title>
+<title>TKMB Web App — NSO Miền Bắc v2.12</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.11</h1>
+    <h1>🏪 NSO Miền Bắc v2.12</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -329,7 +329,7 @@ tr:hover td { background:#faf9ff; }
 <section class="section active" id="sec-dash">
   <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
   <div class="filter-bar">
-    <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+    <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Bắc Bộ</option><option>Tây Bắc Bộ</option><option>Đồng bằng sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
     <select id="dashTinh" onchange="renderDash()" disabled><option value="">Tất cả Tỉnh</option></select>
     <select id="dashGDV" onchange="onDashGDVChange()"><option value="">Tất cả GĐV</option></select>
     <select id="dashQLKV" onchange="renderDash()" disabled><option value="">Tất cả QLKV</option></select>
@@ -361,7 +361,7 @@ tr:hover td { background:#faf9ff; }
     <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h, B2=48h, B3=72h, B4=5ng, B5=7ng</span></h3>
     <div class="filter-bar">
       <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
-      <select id="tdMien" onchange="onTDMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+      <select id="tdMien" onchange="onTDMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Bắc Bộ</option><option>Tây Bắc Bộ</option><option>Đồng bằng sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
       <select id="tdTinh" onchange="renderTienDo()" disabled><option value="">Tất cả Tỉnh</option></select>
       <select id="tdGDV" onchange="onTDGDVChange()"><option value="">Tất cả GĐV</option></select>
       <select id="tdQLKV" onchange="renderTienDo()" disabled><option value="">Tất cả QLKV</option></select>
@@ -387,7 +387,7 @@ tr:hover td { background:#faf9ff; }
       <div class="filter-bar">
         <select id="chkFilterGDV" onchange="onChkGDVChange()"><option value="">Tất cả GĐV</option></select>
         <select id="chkFilterQLKV" onchange="renderChkDashboard()" disabled><option value="">Tất cả QLKV</option></select>
-        <select id="chkFilterMien" onchange="onChkMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+        <select id="chkFilterMien" onchange="onChkMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Bắc Bộ</option><option>Tây Bắc Bộ</option><option>Đồng bằng sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
         <select id="chkFilterTinh" onchange="renderChkDashboard()" disabled><option value="">Tất cả Tỉnh</option></select>
         <select id="chkFilterStatus" onchange="renderChkDashboard()"><option value="all">Tất cả</option><option value="ok">🟢 Đúng hạn</option><option value="warn">🟡 Sắp hết</option><option value="overdue">🔴 Quá hạn</option></select>
       </div>
@@ -1362,11 +1362,25 @@ function renderDash() {
 // ═══ TIẾN ĐỘ MB ═══
 function getMien(tinh) {
   const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
-  const bac = ['Hà Nội','Hải Phòng','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Điện Biên','Lai Châu','Sơn La','Yên Bái','Hòa Bình','Hoà Bình','Thái Nguyên','Lạng Sơn','Quảng Ninh','Bắc Giang','Phú Thọ','Vĩnh Phúc','Bắc Ninh','Hải Dương','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình'];
-  if (bac.includes(t)) return 'Miền Bắc';
-  const trung = ['Thanh Hóa','Nghệ An','Hà Tĩnh','Quảng Bình','Quảng Trị','Thừa Thiên - Huế','Thừa Thiên Huế','Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên','Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng'];
-  if (trung.includes(t)) return 'Miền Trung';
-  return 'Miền Nam';
+  const map = {
+    'Hà Nội':'Hà Nội',
+    'Điện Biên':'Tây Bắc Bộ','Lai Châu':'Tây Bắc Bộ','Sơn La':'Tây Bắc Bộ','Hòa Bình':'Tây Bắc Bộ','Hoà Bình':'Tây Bắc Bộ','Yên Bái':'Tây Bắc Bộ','Lào Cai':'Tây Bắc Bộ',
+    'Hà Giang':'Đông Bắc Bộ','Cao Bằng':'Đông Bắc Bộ','Bắc Kạn':'Đông Bắc Bộ','Tuyên Quang':'Đông Bắc Bộ','Lạng Sơn':'Đông Bắc Bộ','Quảng Ninh':'Đông Bắc Bộ','Bắc Giang':'Đông Bắc Bộ','Thái Nguyên':'Đông Bắc Bộ','Phú Thọ':'Đông Bắc Bộ',
+    'Hải Phòng':'Đồng bằng sông Hồng','Hưng Yên':'Đồng bằng sông Hồng','Hải Dương':'Đồng bằng sông Hồng','Bắc Ninh':'Đồng bằng sông Hồng','Vĩnh Phúc':'Đồng bằng sông Hồng','Thái Bình':'Đồng bằng sông Hồng','Nam Định':'Đồng bằng sông Hồng','Hà Nam':'Đồng bằng sông Hồng','Ninh Bình':'Đồng bằng sông Hồng',
+    'Thanh Hóa':'Bắc Trung Bộ','Nghệ An':'Bắc Trung Bộ','Hà Tĩnh':'Bắc Trung Bộ','Quảng Bình':'Bắc Trung Bộ','Quảng Trị':'Bắc Trung Bộ','Thừa Thiên - Huế':'Bắc Trung Bộ','Thừa Thiên Huế':'Bắc Trung Bộ',
+    'Đà Nẵng':'Nam Trung Bộ','Quảng Nam':'Nam Trung Bộ','Quảng Ngãi':'Nam Trung Bộ','Bình Định':'Nam Trung Bộ','Phú Yên':'Nam Trung Bộ','Khánh Hòa':'Nam Trung Bộ','Ninh Thuận':'Nam Trung Bộ','Bình Thuận':'Nam Trung Bộ',
+    'Kon Tum':'Tây Nguyên','Gia Lai':'Tây Nguyên','Đắk Lắk':'Tây Nguyên','Đắk Nông':'Tây Nguyên','Lâm Đồng':'Tây Nguyên',
+    'Hồ Chí Minh':'Đông Nam Bộ','Bình Phước':'Đông Nam Bộ','Tây Ninh':'Đông Nam Bộ','Bình Dương':'Đông Nam Bộ','Đồng Nai':'Đông Nam Bộ','Bà Rịa - Vũng Tàu':'Đông Nam Bộ',
+    'Long An':'ĐBSCL','Tiền Giang':'ĐBSCL','Bến Tre':'ĐBSCL','Trà Vinh':'ĐBSCL','Vĩnh Long':'ĐBSCL','Đồng Tháp':'ĐBSCL','An Giang':'ĐBSCL','Kiên Giang':'ĐBSCL','Cần Thơ':'ĐBSCL','Hậu Giang':'ĐBSCL','Sóc Trăng':'ĐBSCL','Bạc Liêu':'ĐBSCL','Cà Mau':'ĐBSCL'
+  };
+  return map[t] || 'Khác';
+}
+const MIEN_LIST = ['Hà Nội','Đông Bắc Bộ','Tây Bắc Bộ','Đồng bằng sông Hồng','Bắc Trung Bộ','Nam Trung Bộ','Tây Nguyên','Đông Nam Bộ','ĐBSCL'];
+function fillMienOptions(selId) {
+  const sel = document.getElementById(selId);
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Tất cả Miền</option>' + MIEN_LIST.map(m=>`<option>${m}</option>`).join('');
+  sel.value = cur;
 }
 function populateTDTinh() {
   const sel = document.getElementById('tdTinh');
