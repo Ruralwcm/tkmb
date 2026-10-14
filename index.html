@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.34</title>
+<title>TKMB Web App — NSO Miền Bắc v2.35</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,8 +282,8 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.34</h1>
-    <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
+    <h1>🏪 NSO Miền Bắc v2.35</h1>
+    <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
     <div class="user-info">
@@ -2279,6 +2279,9 @@ async function loadLiveData(){
       if(typeof renderDSMB==='function') renderDSMB();
       if(typeof populateTDGDV==='function') populateTDGDV();
       if(typeof populateDSGDV==='function') populateDSGDV();
+      const ds = document.getElementById('dataStatus');
+      ds.textContent = '🟢 Live · ' + out.length + ' MB';
+      ds.style.color = '#86efac';
       console.log('✅ Live data loaded:', out.length, 'MBs');
     }
     // Load DP data from DamPhan tab
@@ -2313,7 +2316,14 @@ async function loadLiveData(){
         }
       }
     }
-  }catch(e){ console.warn('loadLiveData failed:', e); }
+  }catch(e){ console.warn('loadLiveData failed:', e);
+  const ds = document.getElementById('dataStatus');
+  ds.textContent = '⚠️ Dữ liệu mẫu — Sheet chưa publish?';
+  ds.style.color = '#fca5a5';
+  // Fallback: render hardcoded data
+  if(typeof populateDashGDV==='function') populateDashGDV();
+  if(typeof renderDash==='function') renderDash();
+}
 }
 
 // ═══ QUẢN LÝ ĐIỂM QUY HOẠCH ═══
@@ -2615,8 +2625,9 @@ function init() {
     });
   });
   populateGDV();
-  populateDashGDV();
-  renderDash();
+  // Don't render hardcoded data — wait for live data
+  document.getElementById('dataStatus').textContent = '⏳ Đang tải dữ liệu...';
+  document.getElementById('dataStatus').style.color = '#fbbf24';
   // Preload QH data + start GPS in background
   loadQHData();
   startScanGPS();
