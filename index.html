@@ -1641,7 +1641,6 @@ function renderTienDo() {
     const statusTag = statusTagHtml(m);
     const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef3c7;color:#92400e'}">⚠️ ${warning}</span>` : '';
     // Simple status: P/D/F tag only
-    const hasFail = m.steps.some(s=>s.r==='Fail');
     const stCls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
     const stShort = hasFail ? 'Fail' : (m.steps[5].r==='Done' ? 'Done' : 'Pending');
     return `<tr>
