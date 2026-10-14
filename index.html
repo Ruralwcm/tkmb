@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.17</title>
+<title>TKMB Web App — NSO Miền Bắc v2.18</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.17</h1>
+    <h1>🏪 NSO Miền Bắc v2.18</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -1360,7 +1360,8 @@ function onDashGDVChange() {
 }
 function populateDashGDV() {
   const sel = document.getElementById('dashGDV');
-  [...new Set(MB_DATA.map(m=>m.gdv))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  sel.innerHTML = '<option value="">Tất cả GĐV</option>';
+  [...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
   populateDashTinh();
 }
 function renderDash() {
@@ -1445,7 +1446,8 @@ function onTDGDVChange() {
 }
 function populateTDGDV() {
   const sel = document.getElementById('tdGDV');
-  [...new Set(MB_DATA.map(m=>m.gdv))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  sel.innerHTML = '<option value="">Tất cả GĐV</option>';
+  [...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
   populateTDTinh();
 }
 const STEP_STATUS = ['', 'Chờ GĐV duyệt', 'Chờ TN TKMB khảo sát', 'Chờ GĐ TKMB duyệt BBTĐ', 'Chờ lên HĐTĐ', 'Chờ đàm phán + ký HĐ', 'Chờ phát hành KT'];
@@ -1794,7 +1796,7 @@ function openTracklog(mbId){
 function closeTracklog(){ document.getElementById('tracklogModal').style.display='none'; }
 
 // ═══ DS MB ═══
-function populateDSGDV(){const sel=document.getElementById('dsGDV');[...new Set(MB_DATA.map(m=>m.gdv))].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
+function populateDSGDV(){const sel=document.getElementById('dsGDV');sel.innerHTML='<option value="">Tất cả GĐV</option>';[...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
 function renderDSMB(){const q=(document.getElementById('dsSearch')?.value||'').toLowerCase(),gdvF=document.getElementById('dsGDV')?.value||'',nguonF=document.getElementById('dsNguon')?.value||'';
   let list=MB_DATA.filter(m=>{if(q&&!m.id.toLowerCase().includes(q)&&!m.addr.toLowerCase().includes(q)&&!m.tinh.toLowerCase().includes(q))return false;if(gdvF&&m.gdv!==gdvF)return false;if(nguonF&&m.nguon!==nguonF)return false;return true;});
   document.querySelector('#dsTable tbody').innerHTML=list.map(m=>{const p=getPct(m.steps),hasFail=m.steps.some(s=>s.r==='Fail'),lp=m.steps.find(s=>s.r==='Pending'),slaCls=lp?getSLAColor(m,lp.s):'sla-ok',slaText=lp?STEP_SLA[lp.s-1].slaLabel:'—';
@@ -1927,6 +1929,7 @@ async function loadLiveData(){
     }
     if(out.length){
       MB_DATA = out;
+      if(typeof populateDashGDV==='function') populateDashGDV();
       if(typeof renderDash==='function') renderDash();
       if(typeof renderTienDo==='function') renderTienDo();
       if(typeof renderDSMB==='function') renderDSMB();
