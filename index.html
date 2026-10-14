@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.19</title>
+<title>TKMB Web App — NSO Miền Bắc v2.20</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -276,12 +276,13 @@ tr:hover td { background:#faf9ff; }
 
 /* ═══ END CHECKLIST NSO ═══ */
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.19</h1>
+    <h1>🏪 NSO Miền Bắc v2.20</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -319,6 +320,7 @@ tr:hover td { background:#faf9ff; }
   <button data-tab="tkmb">📋 Tiếp nhận MB</button>
   <button data-tab="tiendo">🔄 Tiến độ MB</button>
   <button data-tab="scan">🗺 Scan QH</button>
+  <button data-tab="qhmanage">🗂 Quản lý điểm QH</button>
   <button data-tab="checklist">✅ Checklist NSO</button>
   <button data-tab="damphan">🏢 Đàm phán</button>
   <button data-tab="dsmb">📑 Danh sách MB</button>
@@ -378,6 +380,30 @@ tr:hover td { background:#faf9ff; }
 <!-- ===== SCAN QH (GPS) ===== -->
 <section class="section" id="sec-scan">
   <iframe src="https://ruralwcm.github.io/tkmb-field/?embed=1&tab=scan" style="width:100%;min-height:600px;border:none;border-radius:8px" scrolling="no" allow="geolocation" id="iframeScan"></iframe>
+</section>
+
+<!-- ===== QUẢN LÝ ĐIỂM QUY HOẠCH ===== -->
+<section class="section" id="sec-qhmanage">
+  <div class="card">
+    <h3>🗂 Quản lý điểm Quy hoạch <span class="sub" id="qmCount"></span></h3>
+    <div class="filter-bar">
+      <select id="qmMien" onchange="onQMMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
+      <select id="qmTinh" onchange="renderQHManage()" disabled><option value="">Tất cả Tỉnh</option></select>
+      <select id="qmGDV" onchange="onQMGDVChange()"><option value="">Tất cả GĐV</option></select>
+      <select id="qmQLKV" onchange="renderQHManage()" disabled><option value="">Tất cả QLKV</option></select>
+      <select id="qmStatus" onchange="renderQHManage()"><option value="">Tất cả tình trạng</option></select>
+    </div>
+    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openQHEdit()">➕ Thêm điểm QH</button>
+      <button class="btn btn-outline" onclick="document.getElementById('qmImportFile').click()">📥 Upload hàng loạt</button>
+      <input type="file" id="qmImportFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleQMImport(this)">
+      <span id="qmImportMsg" style="font-size:11px;color:var(--muted);align-self:center"></span>
+    </div>
+    <div style="overflow-x:auto"><table id="qmTable">
+      <thead><tr><th>Mã QH</th><th>Tỉnh/TP</th><th>Huyện/Quận</th><th>Xã/Phường</th><th>GĐV</th><th>QLKV</th><th>Tình trạng</th><th>Thao tác</th></tr></thead>
+      <tbody id="qmTbody"></tbody></table>
+    </div>
+  </div>
 </section>
 
 <!-- ===== CHECKLIST NSO ===== -->
@@ -476,6 +502,30 @@ tr:hover td { background:#faf9ff; }
     <div id="tracklogBody"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeTracklog()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- QH EDIT MODAL -->
+<div class="modal-overlay" id="qhModal" style="display:none">
+  <div class="modal-card">
+    <h3 id="qhModalTitle">Điểm Quy hoạch</h3>
+    <div class="form-grid col2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
+      <div class="form-group"><label>Mã QH</label><input type="text" id="qhMq" placeholder="VD: BKN_BK1"></div>
+      <div class="form-group"><label>Tỉnh/TP</label><input type="text" id="qhTinh" placeholder="VD: T. Bắc Kạn"></div>
+      <div class="form-group"><label>Huyện/Quận</label><input type="text" id="qhHuyen"></div>
+      <div class="form-group"><label>Xã/Phường</label><input type="text" id="qhXa"></div>
+      <div class="form-group"><label>Lat</label><input type="text" id="qhLat"></div>
+      <div class="form-group"><label>Lng</label><input type="text" id="qhLng"></div>
+      <div class="form-group"><label>GĐV</label><input type="text" id="qhGdv"></div>
+      <div class="form-group"><label>QLKV</label><input type="text" id="qhQlkv"></div>
+      <div class="form-group"><label>Tình trạng</label><select id="qhStatus"><option value="">Chưa rà soát</option><option>Ưu tiên 1</option><option>Ưu tiên 2</option><option>Ưu tiên</option><option>Chưa ưu tiên</option><option>Bỏ điểm QH</option><option>Treo điểm QH</option><option>Backup</option></select></div>
+      <div class="form-group"><label>Cửa hàng</label><input type="text" id="qhCh"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="qhDeleteBtn" style="display:none" onclick="deleteQHPoint()">🗑 Xóa</button>
+      <button class="btn btn-outline" onclick="closeQHEdit()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveQHPoint()">💾 Lưu</button>
     </div>
   </div>
 </div>
@@ -1941,6 +1991,203 @@ async function loadLiveData(){
   }catch(e){ console.warn('loadLiveData failed:', e); }
 }
 
+// ═══ QUẢN LÝ ĐIỂM QUY HOẠCH ═══
+let QH_DATA = [];
+let qmLoaded = false;
+
+async function loadQHManageData() {
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_LIVE_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('QH_Points');
+    const txt = await fetch(url).then(r => r.text());
+    const rows = csvParse(txt);
+    if (rows.length < 2) return;
+    const hdr = rows[0]; const idx = {};
+    hdr.forEach((h, i) => idx[h.replace(/^\uFEFF/, '')] = i);
+    QH_DATA = [];
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      const mq = r[idx['Mã QH']] || '';
+      if (!mq) continue;
+      QH_DATA.push({
+        qh: mq, tinh: r[idx['Tỉnh/TP']] || '', huyen: r[idx['Huyện/Quận']] || '',
+        xa: r[idx['Xã/Phường']] || '', gdv: r[idx['GĐV']] || '', qlkv: r[idx['QLKV']] || '',
+        lat: r[idx['Lat']] || '', lng: r[idx['Lng']] || '', vung: r[idx['Vùng']] || '',
+        status: r[idx['Tình trạng']] || '', ch: r[idx['Cửa hàng']] || ''
+      });
+    }
+    qmLoaded = true;
+    populateQMFilters();
+    renderQHManage();
+  } catch (e) { console.warn('loadQHManageData failed:', e); }
+}
+
+function populateQMFilters() {
+  const mienF = document.getElementById('qmMien').value;
+  const tinhSel = document.getElementById('qmTinh');
+  const tinhs = [...new Set(QH_DATA.map(q => q.tinh).filter(t => !mienF || getMien(t) === mienF))].sort();
+  tinhSel.innerHTML = '<option value="">Tất cả Tỉnh</option>';
+  tinhs.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tinhSel.appendChild(o); });
+  tinhSel.disabled = false;
+
+  const gdvSel = document.getElementById('qmGDV');
+  const gdvs = [...new Set(QH_DATA.map(q => q.gdv).filter(Boolean))].sort();
+  gdvSel.innerHTML = '<option value="">Tất cả GĐV</option>';
+  gdvs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; gdvSel.appendChild(o); });
+
+  const stSel = document.getElementById('qmStatus');
+  const sts = [...new Set(QH_DATA.map(q => q.status).filter(Boolean))].sort();
+  stSel.innerHTML = '<option value="">Tất cả tình trạng</option>';
+  sts.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; stSel.appendChild(o); });
+}
+
+function onQMMienChange() { populateQMFilters(); renderQHManage(); }
+function onQMGDVChange() {
+  const gdv = document.getElementById('qmGDV').value;
+  const sel = document.getElementById('qmQLKV');
+  sel.innerHTML = '<option value="">Tất cả QLKV</option>';
+  sel.disabled = !gdv;
+  if (gdv) {
+    [...new Set(QH_DATA.filter(q => q.gdv === gdv).map(q => q.qlkv).filter(Boolean))].sort().forEach(q => {
+      const o = document.createElement('option'); o.value = q; o.textContent = q; sel.appendChild(o);
+    });
+  }
+  renderQHManage();
+}
+
+function renderQHManage() {
+  const mienF = document.getElementById('qmMien').value;
+  const tinhF = document.getElementById('qmTinh').value;
+  const gdvF = document.getElementById('qmGDV').value;
+  const qlkvF = document.getElementById('qmQLKV').value;
+  const stF = document.getElementById('qmStatus').value;
+  let list = QH_DATA.filter(q => {
+    if (mienF && getMien(q.tinh) !== mienF) return false;
+    if (tinhF && q.tinh !== tinhF) return false;
+    if (gdvF && q.gdv !== gdvF) return false;
+    if (qlkvF && q.qlkv !== qlkvF) return false;
+    if (stF && q.status !== stF) return false;
+    return true;
+  });
+  document.getElementById('qmCount').textContent = list.length + ' / ' + QH_DATA.length + ' điểm';
+  document.getElementById('qmTbody').innerHTML = list.map(q => {
+    const stCls = q.status.includes('Ưu tiên 1') ? 'tag-g' : q.status.includes('Ưu tiên 2') ? 'tag-o' : (q.status.includes('Bỏ') || q.status.includes('Treo')) ? 'tag-r' : 'tag-p';
+    return `<tr>
+      <td><strong>${q.qh}</strong></td>
+      <td>${q.tinh}</td>
+      <td>${q.huyen}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.xa}</td>
+      <td>${q.gdv}</td>
+      <td>${q.qlkv}</td>
+      <td><span class="tag ${stCls}">${q.status || '—'}</span></td>
+      <td style="white-space:nowrap"><button class="btn btn-xs btn-outline" onclick="openQHEdit('${q.qh}')">✏️</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Không có điểm QH nào</td></tr>';
+}
+
+let editingQh = null;
+function openQHEdit(qh) {
+  editingQh = qh || null;
+  const q = qh ? QH_DATA.find(x => x.qh === qh) : null;
+  document.getElementById('qhModalTitle').textContent = q ? '✏️ Chỉnh sửa: ' + qh : '➕ Thêm điểm QH mới';
+  document.getElementById('qhMq').value = q ? q.qh : '';
+  document.getElementById('qhMq').disabled = !!q;
+  document.getElementById('qhTinh').value = q ? q.tinh : '';
+  document.getElementById('qhHuyen').value = q ? q.huyen : '';
+  document.getElementById('qhXa').value = q ? q.xa : '';
+  document.getElementById('qhLat').value = q ? q.lat : '';
+  document.getElementById('qhLng').value = q ? q.lng : '';
+  document.getElementById('qhGdv').value = q ? q.gdv : '';
+  document.getElementById('qhQlkv').value = q ? q.qlkv : '';
+  document.getElementById('qhStatus').value = q ? (q.status || '') : '';
+  document.getElementById('qhCh').value = q ? q.ch : '';
+  document.getElementById('qhDeleteBtn').style.display = q ? 'inline-block' : 'none';
+  document.getElementById('qhModal').style.display = 'flex';
+}
+function closeQHEdit() { document.getElementById('qhModal').style.display = 'none'; }
+
+async function saveQHPoint() {
+  const d = {
+    action: 'saveQHPoint',
+    qh: document.getElementById('qhMq').value.trim(),
+    t: document.getElementById('qhTinh').value.trim(),
+    h: document.getElementById('qhHuyen').value.trim(),
+    x: document.getElementById('qhXa').value.trim(),
+    lat: parseFloat(document.getElementById('qhLat').value) || 0,
+    lng: parseFloat(document.getElementById('qhLng').value) || 0,
+    gdv: document.getElementById('qhGdv').value.trim(),
+    qlkv: document.getElementById('qhQlkv').value.trim(),
+    tinhTrang: document.getElementById('qhStatus').value,
+    ch: document.getElementById('qhCh').value.trim()
+  };
+  if (!d.qh) { alert('Chưa nhập Mã QH'); return; }
+  try {
+    const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(d), headers: { 'Content-Type': 'text/plain' } });
+    const j = await r.json();
+    if (j.ok) { closeQHEdit(); loadQHManageData(); alert('✅ Đã lưu điểm QH'); }
+    else alert('⚠️ ' + (j.error || 'Lỗi lưu'));
+  } catch (e) { alert('⚠️ Lỗi kết nối, thử lại sau'); }
+}
+
+async function deleteQHPoint() {
+  if (!editingQh) return;
+  if (!confirm('Xóa điểm QH ' + editingQh + '?')) return;
+  try {
+    const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteQHPoint', qh: editingQh }), headers: { 'Content-Type': 'text/plain' } });
+    const j = await r.json();
+    if (j.ok) { closeQHEdit(); loadQHManageData(); alert('✅ Đã xóa'); }
+    else alert('⚠️ ' + (j.error || 'Lỗi xóa'));
+  } catch (e) { alert('⚠️ Lỗi kết nối'); }
+}
+
+async function handleQMImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const msg = document.getElementById('qmImportMsg');
+  msg.textContent = 'Đang đọc file...';
+  try {
+    let points = [];
+    if (file.name.toLowerCase().endsWith('.csv')) {
+      const txt = await file.text();
+      points = parseQHImportRows(csvParse(txt));
+    } else {
+      if (typeof XLSX === 'undefined') { msg.textContent = '⚠️ Chưa tải thư viện đọc Excel'; return; }
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      points = parseQHImportRows(XLSX.utils.sheet_to_json(ws, { header: 1 }));
+    }
+    if (!points.length) { msg.textContent = '⚠️ Không đọc được dòng nào'; return; }
+    msg.textContent = 'Đang gửi ' + points.length + ' điểm...';
+    const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'batchImportQH', points }), headers: { 'Content-Type': 'text/plain' } });
+    const j = await r.json();
+    if (j.ok) { msg.textContent = '✅ Đã import ' + (j.count || points.length) + ' điểm'; loadQHManageData(); }
+    else msg.textContent = '⚠️ ' + (j.error || 'Lỗi import');
+  } catch (e) { msg.textContent = '⚠️ Lỗi đọc file'; }
+  input.value = '';
+}
+
+function parseQHImportRows(rows) {
+  if (!rows.length) return [];
+  let start = 0;
+  for (let i = 0; i < Math.min(5, rows.length); i++) {
+    const joined = (rows[i] || []).join(' ').toLowerCase();
+    if (joined.includes('mã') || joined.includes('qh') || joined.includes('gdv')) { start = i; break; }
+  }
+  const out = [];
+  for (let i = start + 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r.length || !r[0]) continue;
+    const o = {
+      qh: String(r[0] || '').trim(), t: String(r[1] || '').trim(), h: String(r[2] || '').trim(),
+      x: String(r[3] || '').trim(), gdv: String(r[4] || '').trim(), qlkv: String(r[5] || '').trim(),
+      lat: parseFloat(r[6]) || 0, lng: parseFloat(r[7]) || 0,
+      tinhTrang: String(r[8] || '').trim(), ch: String(r[9] || '').trim()
+    };
+    if (o.qh) out.push(o);
+  }
+  return out;
+}
+
 // ═══ ROLE SWITCH ═══
 init();
 
@@ -1966,6 +2213,7 @@ function init() {
         if (!qhDataLoaded) loadQHData();
         if (!scanGPS.watchId) startScanGPS();
       }
+      if (this.dataset.tab === 'qhmanage') { if (!qmLoaded) loadQHManageData(); }
     });
   });
   populateGDV();
