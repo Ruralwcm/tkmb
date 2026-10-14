@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.10</title>
+<title>TKMB Web App — NSO Miền Bắc v2.11</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.10</h1>
+    <h1>🏪 NSO Miền Bắc v2.11</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -328,6 +328,12 @@ tr:hover td { background:#faf9ff; }
 <!-- ===== DASHBOARD ===== -->
 <section class="section active" id="sec-dash">
   <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
+  <div class="filter-bar">
+    <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+    <select id="dashTinh" onchange="renderDash()" disabled><option value="">Tất cả Tỉnh</option></select>
+    <select id="dashGDV" onchange="onDashGDVChange()"><option value="">Tất cả GĐV</option></select>
+    <select id="dashQLKV" onchange="renderDash()" disabled><option value="">Tất cả QLKV</option></select>
+  </div>
   <div class="kpi" id="kpiMB"></div>
   <div class="card">
     <h3>📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
@@ -1278,19 +1284,59 @@ function showSuccessToast(mbId) {
   
   renderDash(); renderTienDo(); renderDSMB();
 }
+function getDashFilteredMB() {
+  const mienF = document.getElementById('dashMien')?.value||'';
+  const tinhF = document.getElementById('dashTinh')?.value||'';
+  const gdvF = document.getElementById('dashGDV')?.value||'';
+  const qlkvF = document.getElementById('dashQLKV')?.value||'';
+  return MB_DATA.filter(m => {
+    if (mienF && getMien(m.tinh) !== mienF) return false;
+    if (tinhF && m.tinh !== tinhF) return false;
+    if (gdvF && m.gdv !== gdvF) return false;
+    if (qlkvF && m.qlkv !== qlkvF) return false;
+    return true;
+  });
+}
+function populateDashTinh() {
+  const sel = document.getElementById('dashTinh');
+  const mienF = document.getElementById('dashMien')?.value || '';
+  const tinhs = [...new Set(MB_DATA.map(m=>m.tinh).filter(t => !mienF || getMien(t) === mienF))].sort();
+  sel.innerHTML = '<option value="">Tất cả Tỉnh</option>';
+  tinhs.forEach(t => { const o = document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
+  sel.disabled = false;
+}
+function onDashMienChange() { populateDashTinh(); renderDash(); }
+function onDashGDVChange() {
+  const gdv = document.getElementById('dashGDV').value;
+  const sel = document.getElementById('dashQLKV');
+  sel.innerHTML = '<option value="">Tất cả QLKV</option>';
+  sel.disabled = !gdv;
+  if (gdv) {
+    [...new Set(MB_DATA.filter(m=>m.gdv===gdv).map(m=>m.qlkv))].sort().forEach(q => {
+      const o = document.createElement('option'); o.value=q; o.textContent=q; sel.appendChild(o);
+    });
+  }
+  renderDash();
+}
+function populateDashGDV() {
+  const sel = document.getElementById('dashGDV');
+  [...new Set(MB_DATA.map(m=>m.gdv))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  populateDashTinh();
+}
 function renderDash() {
-  const total = MB_DATA.length;
-  const done = MB_DATA.filter(m=>m.steps[5].r==='Done').length;
-  const failMB = MB_DATA.filter(m=>m.steps.some(s=>s.r==='Fail')).length;
+  const list = getDashFilteredMB();
+  const total = list.length;
+  const done = list.filter(m=>m.steps[5].r==='Done').length;
+  const failMB = list.filter(m=>m.steps.some(s=>s.r==='Fail')).length;
   const pendingMB = total - done - failMB;
-  const overdue = MB_DATA.filter(m=>m.steps.some((s,i)=>{ if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i] && STEP_SLA[i].slaHours<500 && (Date.now()-new Date(m.createdAt).getTime())/3600000 > STEP_SLA[i].slaHours*2; })).length;
+  const overdue = list.filter(m=>m.steps.some((s,i)=>{ if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i] && STEP_SLA[i].slaHours<500 && (Date.now()-new Date(m.createdAt).getTime())/3600000 > STEP_SLA[i].slaHours*2; })).length;
   document.getElementById('kpiMB').innerHTML = `
     <div class="kpi-card"><div class="kpi-num p">${total}</div><div class="kpi-label">🏢 Tổng MB</div></div>
     <div class="kpi-card"><div class="kpi-num b">${pendingMB}</div><div class="kpi-label">⏳ Đang xử lý</div></div>
     <div class="kpi-card"><div class="kpi-num g">${done}</div><div class="kpi-label">✅ Đã KT</div></div>
     <div class="kpi-card"><div class="kpi-num r">${failMB}</div><div class="kpi-label">❌ Fail</div></div>
     <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn</div></div>`;
-  document.querySelector('#dashMB tbody').innerHTML = MB_DATA.map(m => {
+  document.querySelector('#dashMB tbody').innerHTML = list.map(m => {
     const p = getPct(m.steps); const hasFail = m.steps.some(s=>s.r==='Fail');
     const lastPending = m.steps.find(s=>s.r==='Pending');
     const slaCls = lastPending ? getSLAColor(lastPending.s, m.createdAt) : 'sla-ok';
@@ -1310,7 +1356,7 @@ function renderDash() {
     <div class="kpi-card"><div class="kpi-num p">${DP_DATA.length}</div><div class="kpi-label">🏢 Cần ĐP</div></div>
     <div class="kpi-card"><div class="kpi-num b">${DP_DATA.filter(d=>['Đã liên hệ','Đang thương lượng'].includes(d.td)).length}</div><div class="kpi-label">⏳ Đang ĐP</div></div>`;
   document.getElementById('kpiChk').innerHTML = `
-    <div class="kpi-card"><div class="kpi-num p">${MB_DATA.filter(m=>m.steps[5].r==='Done').length}</div><div class="kpi-label">✅ Đã KT</div></div>`;
+    <div class="kpi-card"><div class="kpi-num p">${list.filter(m=>m.steps[5].r==='Done').length}</div><div class="kpi-label">✅ Đã KT</div></div>`;
 }
 
 // ═══ TIẾN ĐỘ MB ═══
@@ -1776,6 +1822,7 @@ function init() {
     });
   });
   populateGDV();
+  populateDashGDV();
   renderDash();
   // Preload QH data + start GPS in background
   loadQHData();
