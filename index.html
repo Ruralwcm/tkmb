@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.24</title>
+<title>TKMB Web App — NSO Miền Bắc v2.25</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.24</h1>
+    <h1>🏪 NSO Miền Bắc v2.25</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -2032,9 +2032,9 @@ function dpSubmit(){
 }
 
 function dpDownloadTemplate() {
-  const csv = 'Mã SAP,Tên CH,GĐV,Loại ĐP,Ngày KB,Deadline,MT (m),DTKD (m²),DT (tr),Đánh giá,Tiến độ,Lý do Fail\n6613,WM+ HNI 35 Đông Khê,Bùi Thị Thu Nhài,Mở rộng DTKD,2026-10-10,2026-10-25,9.5,82,18.22,DTKD nhỏ,0,\n';
-  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'DamPhan_Template.csv'; a.click();
+  const xls = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>DamPhan</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>Loại ĐP</th><th>Ngày KB</th><th>Deadline</th><th>MT (m)</th><th>DTKD (m²)</th><th>DT (tr)</th><th>Đánh giá</th><th>Tiến độ</th><th>Lý do Fail</th></tr><tr><td>6613</td><td>WM+ HNI 35 Đông Khê</td><td>Bùi Thị Thu Nhài</td><td>Mở rộng DTKD</td><td>2026-10-10</td><td>2026-10-25</td><td>9.5</td><td>82</td><td>18.22</td><td>DTKD nhỏ</td><td>0</td><td></td></tr></table></body></html>';
+  const blob = new Blob(['\uFEFF'+xls], { type: 'application/vnd.ms-excel' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'DamPhan_Template.xls'; a.click();
 }
 async function handleDPImport(input) {
   const file = input.files[0]; if (!file) return;
@@ -2418,23 +2418,33 @@ async function qhSyncStoreslist() {
       stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Huyện/Quận']||si['Huyện']]||'' });
     }
     info.textContent = stores.length + ' CH · Đang mapping...';
-    // For each QH point, find nearest CH
+    // For each QH point: Step1→nearest CH gets GĐV, Step2→nearest CH within that GĐV gets QLKV
     let changed = 0;
     for (const qh of QH_DATA) {
       if (!qh.lat || !qh.lng) continue;
-      let best = null, bestD = Infinity, sameHuyen = null, sameHuyenD = Infinity;
+      // Step 1: find nearest CH overall → determine GĐV
+      let best = null, bestD = Infinity;
       for (const s of stores) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
         if (d < bestD) { bestD = d; best = s; }
+      }
+      if (!best) continue;
+      const gdv = best.gdv;
+      // Step 2: within same GĐV, find nearest CH (ưu tiên cùng huyện)
+      let bestQLKV = null, bestQLKVD = Infinity, sameHuyen = null, sameHuyenD = Infinity;
+      const sameGdv = stores.filter(s => s.gdv === gdv && s.qlkv);
+      for (const s of sameGdv) {
+        const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
+        if (d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
         if (qh.huyen && s.huyen && qh.tinh === s.tinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
       }
-      const pick = (sameHuyen && sameHuyenD < 50) ? sameHuyen : best;
-      if (!pick) continue;
-      if (qh.gdv !== pick.gdv || qh.qlkv !== pick.qlkv) {
-        qh.gdv = pick.gdv; qh.qlkv = pick.qlkv; changed++;
+      const pickQLKV = (sameHuyen && sameHuyenD < 50) ? sameHuyen : bestQLKV;
+      if (!pickQLKV) continue;
+      if (qh.gdv !== gdv || qh.qlkv !== pickQLKV.qlkv) {
+        qh.gdv = gdv; qh.qlkv = pickQLKV.qlkv; changed++;
       }
     }
-    info.textContent = '✅ Đã map ' + changed + ' điểm QH · Logic: Cùng tỉnh→GĐV, cùng huyện→ưu tiên QLKV';
+    info.textContent = '✅ Đã map ' + changed + ' điểm QH · GĐV→QLKV chỉ trong cùng GĐV';
     renderQHTable();
     // Save via GAS
     try {
