@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.28</title>
+<title>TKMB Web App — NSO Miền Bắc v2.29</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.28</h1>
+    <h1>🏪 NSO Miền Bắc v2.29</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -371,7 +371,7 @@ tr:hover td { background:#faf9ff; }
       <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
     <div style="overflow-x:auto"><table id="tdTable">
-      <thead><tr><th data-key="id" onclick="sortTD('id')" style="cursor:pointer">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')" style="cursor:pointer">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')" style="cursor:pointer">Khu vực<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')" style="cursor:pointer">Địa chỉ<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">Tiến độ (B1–B6)<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">%<span class="sarr"></span></th><th>Người duyệt</th><th data-key="status" onclick="sortTD('status')" style="cursor:pointer">Trạng thái<span class="sarr"></span></th><th style="text-align:center">👁</th></tr></thead>
+      <thead><tr><th data-key="id" onclick="sortTD('id')" style="cursor:pointer">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')" style="cursor:pointer">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')" style="cursor:pointer">Khu vực<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')" style="cursor:pointer">Địa chỉ<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">Tiến độ (B1–B6)<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">%<span class="sarr"></span></th><th data-key="status" onclick="sortTD('status')" style="cursor:pointer">Trạng thái<span class="sarr"></span></th><th>Diễn giải</th><th style="text-align:center">👁</th></tr></thead>
       <tbody id="tdTbody"></tbody></table>
     </div>
   </div>
@@ -1637,11 +1637,13 @@ function renderTienDo() {
       const f = (s.r==='Fail' && s.failReason) ? ' — ' + s.failReason : '';
       return `<div class="step-seg ${s.r}" onclick="openStepModal('${m.id}',${s.s})" title="B${s.s}: ${STEP_SLA[s.s-1].desc}${f}"></div>`;
     }).join('') + '</div>';
+    const statusLabel = getStatusLabel(m);
     const statusTag = statusTagHtml(m);
     const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef3c7;color:#92400e'}">⚠️ ${warning}</span>` : '';
-    // Người duyệt = actor của bước đang pending (hoặc bước hiện tại nếu done)
-    const curStep = m.steps.find(s=>s.r==='Pending'||s.r==='None') || m.steps[m.steps.length-1];
-    const duyetName = curStep ? curStep.appr : '—';
+    // Simple status: P/D/F tag only
+    const hasFail = m.steps.some(s=>s.r==='Fail');
+    const stCls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
+    const stShort = hasFail ? 'Fail' : (m.steps[5].r==='Done' ? 'Done' : 'Pending');
     return `<tr>
       <td><strong>${m.id}</strong><div class="qh-info-mini">${m.nguon}</div></td>
       <td>${m.gdv}</td>
@@ -1649,8 +1651,8 @@ function renderTienDo() {
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.addr}<div class="qh-info-mini">${m.area?m.area+'m² · ':''}${m.price?m.price+'tr/th':''}</div></td>
       <td>${strip}</td>
       <td style="white-space:nowrap">${p.pct}%<div class="qh-info-mini">${p.done}/6</div></td>
-      <td style="white-space:nowrap;font-size:12px">${duyetName}</td>
-      <td style="white-space:nowrap">${statusTag}${warnBadge?` ${warnBadge}`:''}</td>
+      <td style="white-space:nowrap"><span class="tag ${stCls}">${stShort}</span></td>
+      <td style="white-space:nowrap;font-size:12px">${statusLabel}${warnBadge?` ${warnBadge}`:''}</td>
       <td style="text-align:center"><button class="btn btn-xs btn-outline" onclick="openTracklog('${m.id}')" title="Xem tracklog">👁</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
