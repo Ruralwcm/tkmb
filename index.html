@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.21</title>
+<title>TKMB Web App — NSO Miền Bắc v2.22</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.21</h1>
+    <h1>🏪 NSO Miền Bắc v2.22</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -442,11 +442,11 @@ tr:hover td { background:#faf9ff; }
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">CH hiện hữu cần đàm phán mở rộng mặt bằng</p>
     <div class="filter-bar" style="margin-bottom:12px">
       <select id="dpGDV" onchange="onDPGDVChange()" style="width:auto"><option value="">Tất cả GĐV</option></select>
-      <select id="dpTD" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả trạng thái</option><option>Chưa ĐP</option><option>Đã liên hệ</option><option>Đang thương lượng</option><option>Đã ký</option></select>
-      <select id="dpDG" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả đánh giá</option><option>DTKD nhỏ</option><option>MT nhỏ + DTKD nhỏ</option><option>MT nhỏ</option></select>
+      <select id="dpLoai" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả loại ĐP</option><option>Mở rộng DTKD</option><option>Gia hạn hợp đồng</option><option>Điều chỉnh giá</option><option>Khác</option></select>
+      <select id="dpStep" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả tiến độ</option><option>0">Đã giao việc</option><option>1">Đang đàm phán</option><option>2">Đàm phán thành công</option><option>3">Ký PLHĐ/Điều chỉnh</option><option>4">Đã hoàn thành</option><option value="-1">❌ Fail</option></select>
     </div>
     <button class="btn btn-sm btn-p" onclick="dpOpenEdit()" style="margin-bottom:12px">➕ Thêm CH cần ĐP</button>
-    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>Quá hạn</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>Loại ĐP</th><th>Ngày KB</th><th>Deadline</th><th>MT(m)</th><th>DTKD</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ</th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
 
@@ -458,12 +458,15 @@ tr:hover td { background:#faf9ff; }
       <div class="form-group"><label>Mã SAP</label><input id="dpSAP"></div>
       <div class="form-group"><label>Tên CH</label><input id="dpCH"></div>
       <div class="form-group"><label>GĐV</label><select id="dpGDV2"></select></div>
+      <div class="form-group"><label>Loại đàm phán</label><select id="dpLoaiDP"><option>Mở rộng DTKD</option><option>Gia hạn hợp đồng</option><option>Điều chỉnh giá</option><option>Khác</option></select></div>
+      <div class="form-group"><label>Ngày khai báo</label><input id="dpNgayKB" type="date"></div>
+      <div class="form-group"><label>Ngày Deadline</label><input id="dpDeadline" type="date"></div>
       <div class="form-group"><label>MT (m)</label><input id="dpMT" type="number" step="0.1"></div>
       <div class="form-group"><label>DTKD (m²)</label><input id="dpDTKD" type="number" step="1"></div>
       <div class="form-group"><label>Doanh thu (tr)</label><input id="dpDT" type="number" step="0.01"></div>
       <div class="form-group"><label>Đánh giá</label><select id="dpDG2"><option>DTKD nhỏ</option><option>MT nhỏ</option><option>MT nhỏ + DTKD nhỏ</option></select></div>
-      <div class="form-group"><label>Tiến độ ĐP</label><select id="dpTD2"><option>Chưa ĐP</option><option>Đã liên hệ</option><option>Đang thương lượng</option><option>Đã ký</option></select></div>
-      <div class="form-group"><label>Quá hạn</label><select id="dpSLA"><option value="ok">✅ OK</option><option value="warn">⚠️ Cảnh báo</option><option value="over">🔴 Quá hạn</option></select></div>
+      <div class="form-group"><label>Tiến độ</label><select id="dpStep2"><option value="0">Đã giao việc</option><option value="1">Đang đàm phán</option><option value="2">Đàm phán thành công</option><option value="3">Ký PLHĐ/Điều chỉnh</option><option value="4">Đã hoàn thành</option><option value="-1">❌ Fail</option></select></div>
+      <div class="form-group" id="dpFailGroup" style="display:none"><label>Lý do Fail</label><input id="dpFailReason"></div>
     </div>
     <div style="margin-top:14px;display:flex;gap:8px">
       <button class="btn btn-p" onclick="dpSubmit()">💾 Lưu</button>
@@ -1094,10 +1097,11 @@ let MB_DATA = [
   ]},
 ];
 let scans = [{date:'2026-10-06',qhCode:'HNI_ML23',gdv:'Phạm Minh Thu',qlkv:'Trần Thu Trà',hasMB:'yes',addr:'Đội 6 Tiên Đài',status:'Đã chuyển MB'}];
+const DP_STEPS = ['Đã giao việc','Đang đàm phán','Đàm phán thành công','Ký PLHĐ/Điều chỉnh','Đã hoàn thành'];
 const DP_DATA = [
-  {sap:'6613',ch:'WM+ HNI 35 Đông Khê',gdv:'Bùi Thị Thu Nhài',mt:9.5,dtkd:82,dt:18.22,dg:'DTKD nhỏ',td:'Chưa ĐP',sla:'ok'},
-  {sap:'6486',ch:'WM+ HNI 165 Hồng Hà',gdv:'Bùi Thị Thu Nhài',mt:5.9,dtkd:78,dt:20.1,dg:'MT nhỏ + DTKD nhỏ',td:'Đã liên hệ',sla:'ok'},
-  {sap:'5497',ch:'WM+ HBH 665 Cù Chính Lan',gdv:'Dương Tùng',mt:5.9,dtkd:89.1,dt:21.4,dg:'MT nhỏ + DTKD nhỏ',td:'Đang thương lượng',sla:'warn'},
+  {sap:'6613',ch:'WM+ HNI 35 Đông Khê',gdv:'Bùi Thị Thu Nhài',mt:9.5,dtkd:82,dt:18.22,dg:'DTKD nhỏ',loaiDP:'Mở rộng DTKD',ngayKB:'2026-10-10',deadline:'2026-10-25',tienDo:0,failReason:''},
+  {sap:'6486',ch:'WM+ HNI 165 Hồng Hà',gdv:'Bùi Thị Thu Nhài',mt:5.9,dtkd:78,dt:20.1,dg:'MT nhỏ + DTKD nhỏ',loaiDP:'Mở rộng DTKD',ngayKB:'2026-10-08',deadline:'2026-10-22',tienDo:1,failReason:''},
+  {sap:'5497',ch:'WM+ HBH 665 Cù Chính Lan',gdv:'Dương Tùng',mt:5.9,dtkd:89.1,dt:21.4,dg:'MT nhỏ + DTKD nhỏ',loaiDP:'Mở rộng DTKD',ngayKB:'2026-10-05',deadline:'2026-10-20',tienDo:2,failReason:''},
 ];
 let currentRole = 'GDV';
 let currentQHLat = null, currentQHLng = null;
@@ -1941,18 +1945,22 @@ function editMB(mbId) {
 // ═══ ĐÀM PHÁN ═══
 function renderDPTable(){
   const gdvF = document.getElementById('dpGDV')?.value||'';
-  const tdF = document.getElementById('dpTD')?.value||'';
-  const dgF = document.getElementById('dpDG')?.value||'';
+  const loaiF = document.getElementById('dpLoai')?.value||'';
+  const stepF = document.getElementById('dpStep')?.value;
   let list = DP_DATA;
   if (gdvF) list = list.filter(d=>d.gdv===gdvF);
-  if (tdF) list = list.filter(d=>d.td===tdF);
-  if (dgF) list = list.filter(d=>d.dg===dgF);
-  document.querySelector('#dpTable tbody').innerHTML=list.map((d,i)=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':d.td==='Đã ký'?'tag-g':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':d.sla==='warn'?'⚠️':'🔴'}</span></td><td><button class="btn btn-xs btn-outline" onclick="dpOpenEdit(${i})">✏️</button></td></tr>`).join('');}
+  if (loaiF) list = list.filter(d=>d.loaiDP===loaiF);
+  if (stepF !== '' && stepF !== null) list = list.filter(d=>d.tienDo===parseInt(stepF));
+  document.querySelector('#dpTable tbody').innerHTML=list.map((d,i)=>{
+    const tdLabel = d.tienDo<0 ? '❌ Fail' : DP_STEPS[d.tienDo]||'Chưa giao';
+    const tdCls = d.tienDo<0 ? 'tag-r' : (d.tienDo>=4?'tag-g':d.tienDo>=2?'tag-o':'tag-p');
+    const failHtml = d.tienDo<0 ? `<div style="font-size:10px;color:var(--danger)">${d.failReason||''}</div>` : '';
+    return `<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.loaiDP||''}</td><td>${d.ngayKB||''}</td><td>${d.deadline||''}</td><td>${d.mt}</td><td>${d.dtkd}m²</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${tdCls}">${tdLabel}</span>${failHtml}</td><td><button class="btn btn-xs btn-outline" onclick="dpOpenEdit(${i})">✏️</button></td></tr>`;
+  }).join('');}
 function populateDPGDV(){
   const sel = document.getElementById('dpGDV');
   sel.innerHTML = '<option value="">Tất cả GĐV</option>';
   [...new Set(DP_DATA.map(d=>d.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
-  // also populate modal GĐV selector
   const sel2 = document.getElementById('dpGDV2');
   sel2.innerHTML = [...new Set(DP_DATA.map(d=>d.gdv).filter(Boolean))].sort().map(g=>`<option>${g}</option>`).join('');
 }
@@ -1966,32 +1974,44 @@ function dpOpenEdit(idx){
     document.getElementById('dpSAP').value = d.sap;
     document.getElementById('dpCH').value = d.ch;
     document.getElementById('dpGDV2').value = d.gdv;
+    document.getElementById('dpLoaiDP').value = d.loaiDP||'Mở rộng DTKD';
+    document.getElementById('dpNgayKB').value = d.ngayKB||'';
+    document.getElementById('dpDeadline').value = d.deadline||'';
     document.getElementById('dpMT').value = d.mt;
     document.getElementById('dpDTKD').value = d.dtkd;
     document.getElementById('dpDT').value = d.dt;
     document.getElementById('dpDG2').value = d.dg;
-    document.getElementById('dpTD2').value = d.td;
-    document.getElementById('dpSLA').value = d.sla;
+    document.getElementById('dpStep2').value = d.tienDo;
+    document.getElementById('dpFailReason').value = d.failReason||'';
+    document.getElementById('dpFailGroup').style.display = d.tienDo<0 ? '' : 'none';
   } else {
-    ['dpSAP','dpCH','dpMT','dpDTKD','dpDT'].forEach(id=>document.getElementById(id).value='');
+    ['dpSAP','dpCH','dpNgayKB','dpDeadline','dpMT','dpDTKD','dpDT'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('dpLoaiDP').value = 'Mở rộng DTKD';
     document.getElementById('dpDG2').value = 'DTKD nhỏ';
-    document.getElementById('dpTD2').value = 'Chưa ĐP';
-    document.getElementById('dpSLA').value = 'ok';
+    document.getElementById('dpStep2').value = '0';    document.getElementById('dpFailReason').value = '';
+    document.getElementById('dpFailGroup').style.display = 'none';
   }
   modal.style.display = 'flex';
 }
+document.getElementById('dpStep2').addEventListener('change',function(){
+  document.getElementById('dpFailGroup').style.display = this.value==='-1' ? '' : 'none';
+});
 function dpSubmit(){
   const idx = parseInt(document.getElementById('dpEditIdx').value);
+  const tienDo = parseInt(document.getElementById('dpStep2').value);
   const d = {
     sap: document.getElementById('dpSAP').value.trim(),
     ch: document.getElementById('dpCH').value.trim(),
     gdv: document.getElementById('dpGDV2').value,
+    loaiDP: document.getElementById('dpLoaiDP').value,
+    ngayKB: document.getElementById('dpNgayKB').value,
+    deadline: document.getElementById('dpDeadline').value,
     mt: parseFloat(document.getElementById('dpMT').value) || 0,
     dtkd: parseInt(document.getElementById('dpDTKD').value) || 0,
     dt: parseFloat(document.getElementById('dpDT').value) || 0,
     dg: document.getElementById('dpDG2').value,
-    td: document.getElementById('dpTD2').value,
-    sla: document.getElementById('dpSLA').value
+    tienDo: tienDo,
+    failReason: tienDo<0 ? document.getElementById('dpFailReason').value.trim() : ''
   };
   if (!d.sap || !d.ch) return alert('Vui lòng nhập Mã SAP và Tên CH!');
   if (idx >= 0) DP_DATA[idx] = d;
