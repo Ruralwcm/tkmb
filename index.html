@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.33</title>
+<title>TKMB Web App — NSO Miền Bắc v2.34</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.33</h1>
+    <h1>🏪 NSO Miền Bắc v2.34</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -361,7 +361,8 @@ tr:hover td { background:#faf9ff; }
 <!-- ===== TIẾN ĐỘ MB ===== -->
 <section class="section" id="sec-tiendo">
   <div class="card">
-    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h · B2=48h · B3=24h · B4=Thứ4/5 · B5=21ng · B6=7ng</span></h3>
+    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h · B2=48h · B3=24h · B4=Thứ4/5 · B5=21ng · B6=7ng</span>
+    <button class="btn btn-sm btn-outline" onclick="syncGDVQLKVTuQH()" id="syncQHBtn" style="margin-left:12px;font-size:10px">🔄 Đồng bộ GĐV/QLKV từ QH</button></h3>
     <div class="filter-bar">
       <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
       <select id="tdMien" onchange="onTDMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
@@ -1604,6 +1605,21 @@ function updateSortArrows() {
     const sp = th.querySelector('.sarr'); if (sp) sp.textContent = arr;
   });
 }
+async function syncGDVQLKVTuQH(){
+  const btn=document.getElementById('syncQHBtn');btn.disabled=true;btn.textContent='⏳ Đang sync...';
+  let changed=0;
+  for(const mb of MB_DATA){
+    if(!mb.lat||!mb.lng)continue;
+    let best=null,bestD=Infinity;
+    for(const q of QH_DATA){if(!q.lat||!q.lng)continue;const d=haversine(parseFloat(mb.lat),parseFloat(mb.lng),parseFloat(q.lat),parseFloat(q.lng));if(d<bestD){bestD=d;best=q;}}
+    if(!best)continue;
+    if(mb.gdvHienTai!==best.gdv||mb.qlkvHienTai!==best.qlkv){mb.gdvHienTai=best.gdv;mb.qlkvHienTai=best.qlkv;changed++;}
+  }
+  btn.textContent='✅ Đã sync '+changed+' MB';btn.disabled=false;
+  // Save to sheet via GAS
+  try{const gdvs=MB_DATA.map(m=>[m.gdvHienTai||'',m.qlkvHienTai||'']);await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'syncGDVQLKV',gdvs:gdvs}),headers:{'Content-Type':'text/plain'}});}catch(e){}
+  setTimeout(()=>{btn.textContent='🔄 Đồng bộ GĐV/QLKV từ QH'},3000);
+}
 function renderTienDo() {
   const q = (document.getElementById('tdSearch')?.value||'').toLowerCase();
   const mienF = document.getElementById('tdMien')?.value||'';
@@ -2251,6 +2267,7 @@ async function loadLiveData(){
         legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'',
         gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'',
         status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]),
+        gdvHienTai:r[idx['GĐV hiện tại']]||'', qlkvHienTai:r[idx['QLKV hiện tại']]||'',
         steps, tracklog:td[mid]||{}
       });
     }
