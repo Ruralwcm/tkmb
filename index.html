@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.32</title>
+<title>TKMB Web App — NSO Miền Bắc v2.33</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.32</h1>
+    <h1>🏪 NSO Miền Bắc v2.33</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -1654,11 +1654,11 @@ function renderTienDo() {
     // Trạng thái + Bước hiện tại + Quá hạn
     const stCls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
     const stShort = hasFail ? 'Fail' : (m.steps[5].r==='Done' ? 'Done' : 'Pending');
-    const curStep = m.steps.find(s=>s.r==='Pending'||s.r==='None') || {s:1, appr:'—'};
+    const curStep = m.steps.find(s=>s.r==='Fail') || m.steps.find(s=>s.r==='Pending'||s.r==='None') || {s:1, appr:'—'};
     const buocTen = curStep.appr || '—';
     // SLA text
     let slaText = 'Vừa tạo', slaCls = 'sla-ok';
-    const ps = m.steps.find(s=>s.r==='Pending'||s.r==='None');
+    const ps = m.steps.find(s=>s.r==='Fail') || m.steps.find(s=>s.r==='Pending'||s.r==='None');
     if (ps) {
       const st = slaState(m, ps.s);
       if (st === 'over') { slaText = 'Đã quá hạn'; slaCls = 'sla-over'; }
