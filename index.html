@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.14</title>
+<title>TKMB Web App — NSO Miền Bắc v2.15</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -280,7 +280,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.14</h1>
+    <h1>🏪 NSO Miền Bắc v2.15</h1>
     <div class="meta">📅 Cập nhật: 13/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -368,7 +368,7 @@ tr:hover td { background:#faf9ff; }
       <select id="tdStatus" onchange="renderTienDo()"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
     <div style="overflow-x:auto"><table id="tdTable">
-      <thead><tr><th>MB ID</th><th>GĐV</th><th>Khu vực</th><th>Địa chỉ</th><th>Tiến độ (B1–B6)</th><th>%</th><th>Trạng thái</th></tr></thead>
+      <thead><tr><th data-key="id" onclick="sortTD('id')" style="cursor:pointer">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')" style="cursor:pointer">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')" style="cursor:pointer">Khu vực<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')" style="cursor:pointer">Địa chỉ<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">Tiến độ (B1–B6)<span class="sarr"></span></th><th data-key="pct" onclick="sortTD('pct')" style="cursor:pointer">%<span class="sarr"></span></th><th data-key="status" onclick="sortTD('status')" style="cursor:pointer">Trạng thái<span class="sarr"></span></th></tr></thead>
       <tbody id="tdTbody"></tbody></table>
     </div>
   </div>
@@ -1420,6 +1420,31 @@ function statusTagHtml(m) {
   const cls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
   return `<span class="tag ${cls}">${getStatusLabel(m)}</span>`;
 }
+let tdSort = { key: null, dir: 1 };
+function tdSortVal(m, key) {
+  switch(key) {
+    case 'id': return m.id;
+    case 'gdv': return m.gdv || '';
+    case 'tinh': return m.tinh || '';
+    case 'addr': return m.addr || '';
+    case 'pct': return getPct(m.steps).pct;
+    case 'status': return getStatusLabel(m);
+    default: return '';
+  }
+}
+function sortTD(key) {
+  if (tdSort.key === key) tdSort.dir *= -1;
+  else { tdSort.key = key; tdSort.dir = 1; }
+  updateSortArrows();
+  renderTienDo();
+}
+function updateSortArrows() {
+  document.querySelectorAll('#tdTable th[data-key]').forEach(th => {
+    const k = th.getAttribute('data-key');
+    const arr = (tdSort.key === k) ? (tdSort.dir === 1 ? ' ▲' : ' ▼') : '';
+    const sp = th.querySelector('.sarr'); if (sp) sp.textContent = arr;
+  });
+}
 function renderTienDo() {
   const q = (document.getElementById('tdSearch')?.value||'').toLowerCase();
   const mienF = document.getElementById('tdMien')?.value||'';
@@ -1439,6 +1464,16 @@ function renderTienDo() {
     if (stF === 'overdue') return m.steps.some((s,i)=>{if(s.r!=='Pending'&&s.r!=='None') return false; return STEP_SLA[i]&&STEP_SLA[i].slaHours<500&&(Date.now()-new Date(m.createdAt).getTime())/3600000>STEP_SLA[i].slaHours*2;});
     return true;
   });
+  if (tdSort.key) {
+    list = [...list].sort((a,b) => {
+      const va = tdSortVal(a, tdSort.key), vb = tdSortVal(b, tdSort.key);
+      const na = (typeof va === 'number') ? va : String(va).toLowerCase();
+      const nb = (typeof vb === 'number') ? vb : String(vb).toLowerCase();
+      if (na < nb) return -1 * tdSort.dir;
+      if (na > nb) return 1 * tdSort.dir;
+      return 0;
+    });
+  }
   document.querySelector('#tdTbody').innerHTML = list.map(m => {
     const p = getPct(m.steps);
     const hasFail = m.steps.some(s=>s.r==='Fail');
