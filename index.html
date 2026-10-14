@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.22</title>
+<title>TKMB Web App — NSO Miền Bắc v2.23</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.22</h1>
+    <h1>🏪 NSO Miền Bắc v2.23</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -2019,6 +2019,10 @@ function dpSubmit(){
   document.getElementById('dpModal').style.display = 'none';
   populateDPGDV();
   renderDPTable();
+  // save to sheet via GAS
+  try {
+    fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveDamPhan', idx: idx, sap: d.sap, ch: d.ch, gdv: d.gdv, loaiDP: d.loaiDP, ngayKB: d.ngayKB, deadline: d.deadline, mt: d.mt, dtkd: d.dtkd, dt: d.dt, dg: d.dg, tienDo: d.tienDo, failReason: d.failReason }), headers: { 'Content-Type': 'text/plain' } });
+  } catch(e) {}
 }
 
 // ═══ LIVE DATA từ Google Sheet (MB_Data + MB_Tiendo) ═══
@@ -2056,7 +2060,7 @@ function toR(st){
 async function loadLiveData(){
   try{
     const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
-    const [a,b]=await Promise.all([fetch(url('MB_Data')).then(r=>r.text()), fetch(url('MB_Tiendo')).then(r=>r.text())]);
+    const [a,b,c]=await Promise.all([fetch(url('MB_Data')).then(r=>r.text()), fetch(url('MB_Tiendo')).then(r=>r.text()), fetch(url('DamPhan')).then(r=>r.text()).catch(()=>'')]);
     const mrows=csvParse(a), trows=csvParse(b);
     if(mrows.length<2) return;
     const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
@@ -2112,6 +2116,38 @@ async function loadLiveData(){
       if(typeof populateTDGDV==='function') populateTDGDV();
       if(typeof populateDSGDV==='function') populateDSGDV();
       console.log('✅ Live data loaded:', out.length, 'MBs');
+    }
+    // Load DP data from DamPhan tab
+    if (c) {
+      const drows = csvParse(c);
+      if (drows.length > 1) {
+        const di = {}; drows[0].forEach((h,i)=>di[h.replace(/^\uFEFF/,'')]=i);
+        const dpOut = [];
+        for (let i=1;i<drows.length;i++) {
+          const r=drows[i];
+          if(!r[di['Mã SAP']]) continue;
+          dpOut.push({
+            sap: r[di['Mã SAP']]||'',
+            ch: r[di['Tên CH']]||'',
+            gdv: r[di['GĐV']]||'',
+            loaiDP: r[di['Loại ĐP']]||'',
+            ngayKB: r[di['Ngày KB']]||'',
+            deadline: r[di['Deadline']]||'',
+            mt: parseFloat(r[di['MT (m)']])||0,
+            dtkd: parseInt(r[di['DTKD (m²)']])||0,
+            dt: parseFloat(r[di['DT (tr)']])||0,
+            dg: r[di['Đánh giá']]||'',
+            tienDo: parseInt(r[di['Tiến độ']])||0,
+            failReason: r[di['Lý do Fail']]||''
+          });
+        }
+        if (dpOut.length) {
+          DP_DATA = dpOut;
+          if (typeof populateDPGDV==='function') populateDPGDV();
+          if (typeof renderDPTable==='function') renderDPTable();
+          console.log('✅ DamPhan loaded:', dpOut.length);
+        }
+      }
     }
   }catch(e){ console.warn('loadLiveData failed:', e); }
 }
