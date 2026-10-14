@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.20</title>
+<title>TKMB Web App — NSO Miền Bắc v2.21</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.20</h1>
+    <h1>🏪 NSO Miền Bắc v2.21</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -333,7 +333,7 @@ tr:hover td { background:#faf9ff; }
   <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
   <div class="filter-bar">
     <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
-    <select id="dashTinh" onchange="renderDash()" disabled><option value="">Tất cả Tỉnh</option></select>
+    <select id="dashTinh" onchange="onDashTinhChange()" disabled><option value="">Tất cả Tỉnh</option></select>
     <select id="dashGDV" onchange="onDashGDVChange()"><option value="">Tất cả GĐV</option></select>
     <select id="dashQLKV" onchange="renderDash()" disabled><option value="">Tất cả QLKV</option></select>
   </div>
@@ -440,9 +440,37 @@ tr:hover td { background:#faf9ff; }
 </section><section class="section" id="sec-damphan">
   <div class="card"><h3>🏢 Đàm phán mở rộng DTKD</h3>
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">CH hiện hữu cần đàm phán mở rộng mặt bằng</p>
-    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
+    <div class="filter-bar" style="margin-bottom:12px">
+      <select id="dpGDV" onchange="onDPGDVChange()" style="width:auto"><option value="">Tất cả GĐV</option></select>
+      <select id="dpTD" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả trạng thái</option><option>Chưa ĐP</option><option>Đã liên hệ</option><option>Đang thương lượng</option><option>Đã ký</option></select>
+      <select id="dpDG" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả đánh giá</option><option>DTKD nhỏ</option><option>MT nhỏ + DTKD nhỏ</option><option>MT nhỏ</option></select>
+    </div>
+    <button class="btn btn-sm btn-p" onclick="dpOpenEdit()" style="margin-bottom:12px">➕ Thêm CH cần ĐP</button>
+    <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>MT(m)</th><th>DTKD(m²)</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ ĐP</th><th>Quá hạn</th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
+
+<!-- ===== ĐP EDIT MODAL ===== -->
+<div class="modal-overlay" id="dpModal" style="display:none">
+  <div class="modal-card"><h3 id="dpModalTitle">Thêm CH cần đàm phán</h3>
+    <input type="hidden" id="dpEditIdx" value="-1">
+    <div class="form-grid">
+      <div class="form-group"><label>Mã SAP</label><input id="dpSAP"></div>
+      <div class="form-group"><label>Tên CH</label><input id="dpCH"></div>
+      <div class="form-group"><label>GĐV</label><select id="dpGDV2"></select></div>
+      <div class="form-group"><label>MT (m)</label><input id="dpMT" type="number" step="0.1"></div>
+      <div class="form-group"><label>DTKD (m²)</label><input id="dpDTKD" type="number" step="1"></div>
+      <div class="form-group"><label>Doanh thu (tr)</label><input id="dpDT" type="number" step="0.01"></div>
+      <div class="form-group"><label>Đánh giá</label><select id="dpDG2"><option>DTKD nhỏ</option><option>MT nhỏ</option><option>MT nhỏ + DTKD nhỏ</option></select></div>
+      <div class="form-group"><label>Tiến độ ĐP</label><select id="dpTD2"><option>Chưa ĐP</option><option>Đã liên hệ</option><option>Đang thương lượng</option><option>Đã ký</option></select></div>
+      <div class="form-group"><label>Quá hạn</label><select id="dpSLA"><option value="ok">✅ OK</option><option value="warn">⚠️ Cảnh báo</option><option value="over">🔴 Quá hạn</option></select></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-p" onclick="dpSubmit()">💾 Lưu</button>
+      <button class="btn btn-outline" onclick="document.getElementById('dpModal').style.display='none'">Hủy</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== DANH SÁCH MB ===== -->
 <section class="section" id="sec-dsmb">
@@ -1396,14 +1424,20 @@ function populateDashTinh() {
   tinhs.forEach(t => { const o = document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
   sel.disabled = false;
 }
-function onDashMienChange() { populateDashTinh(); renderDash(); }
+function onDashMienChange() { populateDashTinh(); populateDashGDV(); renderDash(); }
+function onDashTinhChange() { populateDashGDV(); renderDash(); }
 function onDashGDVChange() {
   const gdv = document.getElementById('dashGDV').value;
   const sel = document.getElementById('dashQLKV');
   sel.innerHTML = '<option value="">Tất cả QLKV</option>';
   sel.disabled = !gdv;
   if (gdv) {
-    [...new Set(MB_DATA.filter(m=>m.gdv===gdv).map(m=>m.qlkv))].sort().forEach(q => {
+    const mienF = document.getElementById('dashMien')?.value||'';
+    const tinhF = document.getElementById('dashTinh')?.value||'';
+    let list = MB_DATA.filter(m=>m.gdv===gdv);
+    if (mienF) list = list.filter(m=>getMien(m.tinh)===mienF);
+    if (tinhF) list = list.filter(m=>m.tinh===tinhF);
+    [...new Set(list.map(m=>m.qlkv))].sort().forEach(q => {
       const o = document.createElement('option'); o.value=q; o.textContent=q; sel.appendChild(o);
     });
   }
@@ -1411,8 +1445,19 @@ function onDashGDVChange() {
 }
 function populateDashGDV() {
   const sel = document.getElementById('dashGDV');
+  const cur = sel.value;
   sel.innerHTML = '<option value="">Tất cả GĐV</option>';
-  [...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  const mienF = document.getElementById('dashMien')?.value||'';
+  const tinhF = document.getElementById('dashTinh')?.value||'';
+  let list = MB_DATA;
+  if (mienF) list = list.filter(m=>getMien(m.tinh)===mienF);
+  if (tinhF) list = list.filter(m=>m.tinh===tinhF);
+  [...new Set(list.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  if (cur && [...sel.options].some(o=>o.value===cur)) sel.value = cur;
+  // reset QLKV
+  const qlkv = document.getElementById('dashQLKV');
+  qlkv.innerHTML = '<option value="">Tất cả QLKV</option>';
+  qlkv.disabled = true;
   populateDashTinh();
 }
 function renderDash() {
@@ -1894,7 +1939,67 @@ function editMB(mbId) {
 // ═══ CHECKLIST ═══ (moved to separate section above)
 
 // ═══ ĐÀM PHÁN ═══
-function renderDPTable(){document.querySelector('#dpTable tbody').innerHTML=DP_DATA.map(d=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':'⚠️'}</span></td></tr>`).join('');}
+function renderDPTable(){
+  const gdvF = document.getElementById('dpGDV')?.value||'';
+  const tdF = document.getElementById('dpTD')?.value||'';
+  const dgF = document.getElementById('dpDG')?.value||'';
+  let list = DP_DATA;
+  if (gdvF) list = list.filter(d=>d.gdv===gdvF);
+  if (tdF) list = list.filter(d=>d.td===tdF);
+  if (dgF) list = list.filter(d=>d.dg===dgF);
+  document.querySelector('#dpTable tbody').innerHTML=list.map((d,i)=>`<tr><td><strong>${d.sap}</strong></td><td>${d.ch}</td><td>${d.gdv}</td><td>${d.mt}</td><td>${d.dtkd}</td><td>${d.dt}tr</td><td><span class="tag ${d.dg.includes('nhỏ')?'tag-r':'tag-o'}">${d.dg}</span></td><td><span class="tag ${d.td==='Đang thương lượng'?'tag-p':d.td==='Đã liên hệ'?'tag-o':d.td==='Đã ký'?'tag-g':'tag-gray'}">${d.td}</span></td><td><span class="sla-badge ${d.sla}">${d.sla==='ok'?'✅':d.sla==='warn'?'⚠️':'🔴'}</span></td><td><button class="btn btn-xs btn-outline" onclick="dpOpenEdit(${i})">✏️</button></td></tr>`).join('');}
+function populateDPGDV(){
+  const sel = document.getElementById('dpGDV');
+  sel.innerHTML = '<option value="">Tất cả GĐV</option>';
+  [...new Set(DP_DATA.map(d=>d.gdv).filter(Boolean))].sort().forEach(g=>{ const o = document.createElement('option'); o.value=g; o.textContent=g; sel.appendChild(o); });
+  // also populate modal GĐV selector
+  const sel2 = document.getElementById('dpGDV2');
+  sel2.innerHTML = [...new Set(DP_DATA.map(d=>d.gdv).filter(Boolean))].sort().map(g=>`<option>${g}</option>`).join('');
+}
+function onDPGDVChange(){ renderDPTable(); }
+function dpOpenEdit(idx){
+  const modal = document.getElementById('dpModal');
+  document.getElementById('dpModalTitle').textContent = idx>=0 ? '✏️ Sửa thông tin ĐP' : '➕ Thêm CH cần đàm phán';
+  document.getElementById('dpEditIdx').value = idx;
+  if (idx >= 0) {
+    const d = DP_DATA[idx];
+    document.getElementById('dpSAP').value = d.sap;
+    document.getElementById('dpCH').value = d.ch;
+    document.getElementById('dpGDV2').value = d.gdv;
+    document.getElementById('dpMT').value = d.mt;
+    document.getElementById('dpDTKD').value = d.dtkd;
+    document.getElementById('dpDT').value = d.dt;
+    document.getElementById('dpDG2').value = d.dg;
+    document.getElementById('dpTD2').value = d.td;
+    document.getElementById('dpSLA').value = d.sla;
+  } else {
+    ['dpSAP','dpCH','dpMT','dpDTKD','dpDT'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('dpDG2').value = 'DTKD nhỏ';
+    document.getElementById('dpTD2').value = 'Chưa ĐP';
+    document.getElementById('dpSLA').value = 'ok';
+  }
+  modal.style.display = 'flex';
+}
+function dpSubmit(){
+  const idx = parseInt(document.getElementById('dpEditIdx').value);
+  const d = {
+    sap: document.getElementById('dpSAP').value.trim(),
+    ch: document.getElementById('dpCH').value.trim(),
+    gdv: document.getElementById('dpGDV2').value,
+    mt: parseFloat(document.getElementById('dpMT').value) || 0,
+    dtkd: parseInt(document.getElementById('dpDTKD').value) || 0,
+    dt: parseFloat(document.getElementById('dpDT').value) || 0,
+    dg: document.getElementById('dpDG2').value,
+    td: document.getElementById('dpTD2').value,
+    sla: document.getElementById('dpSLA').value
+  };
+  if (!d.sap || !d.ch) return alert('Vui lòng nhập Mã SAP và Tên CH!');
+  if (idx >= 0) DP_DATA[idx] = d;
+  else DP_DATA.push(d);
+  document.getElementById('dpModal').style.display = 'none';
+  populateDPGDV();
+  renderDPTable();
+}
 
 // ═══ LIVE DATA từ Google Sheet (MB_Data + MB_Tiendo) ═══
 const SHEET_LIVE_ID = '1jac8uf8eeB57C-zZ85Lg_l-UwpPxOTPkcoQ2mywMZyw';
@@ -2208,7 +2313,7 @@ function init() {
       if (this.dataset.tab === 'tiendo') { renderTienDo(); populateTDGDV(); }
       if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); }
       if (this.dataset.tab === 'checklist') initChkChecklist();
-      if (this.dataset.tab === 'damphan') renderDPTable();
+      if (this.dataset.tab === 'damphan') { renderDPTable(); populateDPGDV(); }
       if (this.dataset.tab === 'scan') {
         if (!qhDataLoaded) loadQHData();
         if (!scanGPS.watchId) startScanGPS();
