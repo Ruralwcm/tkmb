@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.23</title>
+<title>TKMB Web App — NSO Miền Bắc v2.24</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.23</h1>
+    <h1>🏪 NSO Miền Bắc v2.24</h1>
     <div class="meta">📅 Cập nhật: 14/10/2026 · Nguồn: VH · TKMB</div>
   </div>
   <div class="header-right">
@@ -395,7 +395,10 @@ tr:hover td { background:#faf9ff; }
     </div>
     <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="openQHEdit()">➕ Thêm điểm QH</button>
-      <button class="btn btn-outline" onclick="document.getElementById('qmImportFile').click()">📥 Upload hàng loạt</button>
+      <button class="btn btn-outline" onclick="document.getElementById('qmImportFile').click()">📤 Upload hàng loạt</button>
+      <button class="btn btn-outline" onclick="qhDownloadTemplate()">📥 Tải cấu trúc</button>
+      <button class="btn btn-outline" onclick="qhSyncStoreslist()" id="qhSyncBtn">🔄 Đồng bộ Storeslist</button>
+      <span id="qhSyncInfo" style="font-size:11px;color:var(--muted)"></span>
       <input type="file" id="qmImportFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleQMImport(this)">
       <span id="qmImportMsg" style="font-size:11px;color:var(--muted);align-self:center"></span>
     </div>
@@ -446,6 +449,9 @@ tr:hover td { background:#faf9ff; }
       <select id="dpStep" onchange="renderDPTable()" style="width:auto"><option value="">Tất cả tiến độ</option><option>0">Đã giao việc</option><option>1">Đang đàm phán</option><option>2">Đàm phán thành công</option><option>3">Ký PLHĐ/Điều chỉnh</option><option>4">Đã hoàn thành</option><option value="-1">❌ Fail</option></select>
     </div>
     <button class="btn btn-sm btn-p" onclick="dpOpenEdit()" style="margin-bottom:12px">➕ Thêm CH cần ĐP</button>
+    <button class="btn btn-sm btn-outline" onclick="dpDownloadTemplate()" style="margin:0 4px 12px 4px">📥 Tải cấu trúc</button>
+    <button class="btn btn-sm btn-outline" onclick="document.getElementById('dpImportFile').click()">📤 Upload hàng loạt</button>
+    <input type="file" id="dpImportFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleDPImport(this)">
     <div style="overflow-x:auto"><table id="dpTable"><thead><tr><th>Mã SAP</th><th>Tên CH</th><th>GĐV</th><th>Loại ĐP</th><th>Ngày KB</th><th>Deadline</th><th>MT(m)</th><th>DTKD</th><th>DT(tr)</th><th>Đánh giá</th><th>Tiến độ</th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </section>
@@ -2025,6 +2031,43 @@ function dpSubmit(){
   } catch(e) {}
 }
 
+function dpDownloadTemplate() {
+  const csv = 'Mã SAP,Tên CH,GĐV,Loại ĐP,Ngày KB,Deadline,MT (m),DTKD (m²),DT (tr),Đánh giá,Tiến độ,Lý do Fail\n6613,WM+ HNI 35 Đông Khê,Bùi Thị Thu Nhài,Mở rộng DTKD,2026-10-10,2026-10-25,9.5,82,18.22,DTKD nhỏ,0,\n';
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'DamPhan_Template.csv'; a.click();
+}
+async function handleDPImport(input) {
+  const file = input.files[0]; if (!file) return;
+  const text = await file.text();
+  const rows = text.split('\n').filter(r=>r.trim());
+  if (rows.length < 2) return alert('File trống hoặc không đúng định dạng!');
+  const header = rows[0].split(',');
+  const idx = {}; header.forEach((h,i)=>idx[h.trim()]=i);
+  let added = 0;
+  for (let i=1;i<rows.length;i++) {
+    const cols = rows[i].split(',');
+    const sap = (cols[idx['Mã SAP']]||'').trim();
+    if (!sap) continue;
+    DP_DATA.push({
+      sap, ch: (cols[idx['Tên CH']]||'').trim(),
+      gdv: (cols[idx['GĐV']]||'').trim(),
+      loaiDP: (cols[idx['Loại ĐP']]||'Mở rộng DTKD').trim(),
+      ngayKB: (cols[idx['Ngày KB']]||'').trim(),
+      deadline: (cols[idx['Deadline']]||'').trim(),
+      mt: parseFloat(cols[idx['MT (m)']])||0,
+      dtkd: parseInt(cols[idx['DTKD (m²)']])||0,
+      dt: parseFloat(cols[idx['DT (tr)']])||0,
+      dg: (cols[idx['Đánh giá']]||'').trim(),
+      tienDo: parseInt(cols[idx['Tiến độ']])||0,
+      failReason: (cols[idx['Lý do Fail']]||'').trim()
+    });
+    added++;
+  }
+  input.value = '';
+  populateDPGDV(); renderDPTable();
+  alert('✅ Đã import ' + added + ' CH vào danh sách Đàm phán');
+}
+
 // ═══ LIVE DATA từ Google Sheet (MB_Data + MB_Tiendo) ═══
 const SHEET_LIVE_ID = '1jac8uf8eeB57C-zZ85Lg_l-UwpPxOTPkcoQ2mywMZyw';
 const ACTOR_ARR = [['QLKV','GĐV'],['TN TKMB','TN TKMB'],['GĐ TKMB','GĐ TKMB'],['GĐ TKMB','GĐ TKMB'],['GĐV/TKMB','GĐV/TKMB'],['GĐV','GĐV']];
@@ -2347,6 +2390,68 @@ function parseQHImportRows(rows) {
     if (o.qh) out.push(o);
   }
   return out;
+}
+
+function qhDownloadTemplate() {
+  const csv = 'Mã QH,Tỉnh/TP,Huyện/Quận,Xã/Phường,GĐV,QLKV,Lat,Lng,Tình trạng,Cửa hàng\nQH-HN001,Hà Nội,Hoàn Kiếm,Hàng Bông,,21.030,105.850,Chưa rà soát,\n';
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'QH_Points_Template.csv'; a.click();
+}
+
+async function qhSyncStoreslist() {
+  const btn = document.getElementById('qhSyncBtn');
+  const info = document.getElementById('qhSyncInfo');
+  btn.disabled = true; info.textContent = 'Đang tải Storelist...';
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_LIVE_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('Storeslist');
+    const txt = await fetch(url).then(r => r.text());
+    const rows = csvParse(txt);
+    if (rows.length < 2) { info.textContent = '❌ Storeslist trống'; btn.disabled = false; return; }
+    const hdr = rows[0]; const si = {}; hdr.forEach((h,i)=>si[h.replace(/^\uFEFF/,'')]=i);
+    // Build CH list: [{lat,lng,gdv,qlkv,tinh,huyen}]
+    const stores = [];
+    for (let i=1;i<rows.length;i++) {
+      const r = rows[i];
+      const lat = parseFloat(r[si['Lat']||si['lat']]);
+      const lng = parseFloat(r[si['Lng']||si['lng']]);
+      if (!lat || !lng) continue;
+      stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Huyện/Quận']||si['Huyện']]||'' });
+    }
+    info.textContent = stores.length + ' CH · Đang mapping...';
+    // For each QH point, find nearest CH
+    let changed = 0;
+    for (const qh of QH_DATA) {
+      if (!qh.lat || !qh.lng) continue;
+      let best = null, bestD = Infinity, sameHuyen = null, sameHuyenD = Infinity;
+      for (const s of stores) {
+        const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
+        if (d < bestD) { bestD = d; best = s; }
+        if (qh.huyen && s.huyen && qh.tinh === s.tinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
+      }
+      const pick = (sameHuyen && sameHuyenD < 50) ? sameHuyen : best;
+      if (!pick) continue;
+      if (qh.gdv !== pick.gdv || qh.qlkv !== pick.qlkv) {
+        qh.gdv = pick.gdv; qh.qlkv = pick.qlkv; changed++;
+      }
+    }
+    info.textContent = '✅ Đã map ' + changed + ' điểm QH · Logic: Cùng tỉnh→GĐV, cùng huyện→ưu tiên QLKV';
+    renderQHTable();
+    // Save via GAS
+    try {
+      const pts = QH_DATA.map(q=>({qh:q.qh,gdv:q.gdv,qlkv:q.qlkv}));
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'batchImportQH', points: pts }), headers: { 'Content-Type': 'text/plain' } });
+    } catch(e) {}
+  } catch(e) { info.textContent = '❌ Lỗi: ' + e.message; }
+  btn.disabled = false;
+}
+
+// Haversine (nếu chưa có ở scope này)
+if (typeof haversine === 'undefined') {
+  function haversine(lat1,lng1,lat2,lng2) {
+    const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
 }
 
 // ═══ ROLE SWITCH ═══
