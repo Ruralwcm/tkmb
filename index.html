@@ -2477,8 +2477,8 @@ async function loadLiveData(){
       if (typeof updateKPIs === 'function') updateKPIs();
     }
     // Load DP data from DamPhan tab
-    if (c) {
-      const drows = csvParse(c);
+    if (dpCsv) {
+      const drows = csvParse(dpCsv);
       if (drows.length > 1) {
         const di = {}; drows[0].forEach((h,i)=>di[h.replace(/^\uFEFF/,'')]=i);
         const dpOut = [];
