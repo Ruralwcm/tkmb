@@ -2243,7 +2243,6 @@ async function loadLiveData(){
     } catch(gasErr) { console.warn('GAS also failed:', gasErr.message); }
   }
   if(mrows.length<2) return;
-    if(mrows.length<2) return;
     const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
     const td={};
     if(trows.length>1){
