@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.35</title>
+<title>TKMB Web App — NSO Miền Bắc v2.36</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.35</h1>
+    <h1>🏪 NSO Miền Bắc v2.36</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -2221,10 +2221,35 @@ function toR(st){
   return 'Pending';
 }
 async function loadLiveData(){
-  try{
+  // Try both GAS (CORS OK) and gviz (needs publish) in parallel — first success wins
+  const tryFetch = async () => {
+    // Method 1: GAS web app (CORS supported)
+    const gasP = fetch(GAS_URL, {method:'POST', body:JSON.stringify({action:'getMBData'}), headers:{'Content-Type':'text/plain'}})
+      .then(r=>r.json()).then(j=>{
+        if(j.ok && j.mbData) return {via:'GAS', mb:csvParse(j.mbData), td:csvParse(j.tiendoData||'')};
+        throw new Error('GAS no data');
+      }).catch(()=>null);
+    // Method 2: gviz CSV (needs sheet published to web)
     const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
-    const [a,b,c]=await Promise.all([fetch(url('MB_Data')).then(r=>r.text()), fetch(url('MB_Tiendo')).then(r=>r.text()), fetch(url('DamPhan')).then(r=>r.text()).catch(()=>'')]);
-    const mrows=csvParse(a), trows=csvParse(b);
+    const gvizP = Promise.all([
+      fetch(url('MB_Data')).then(r=>r.text()).catch(()=>''),
+      fetch(url('MB_Tiendo')).then(r=>r.text()).catch(()=>''),
+      fetch(url('DamPhan')).then(r=>r.text()).catch(()=>'')
+    ]).then(([a,b,c])=>{
+      const mrows=csvParse(a);
+      if(mrows.length<2) throw new Error('gviz empty');
+      return {via:'gviz', mb:mrows, td:csvParse(b), dp:c};
+    }).catch(()=>null);
+    // Return whichever succeeds first
+    const result = await Promise.any([gasP, gvizP]);
+    return result;
+  };
+
+  try {
+    const result = await tryFetch();
+    if (!result) throw new Error('Both failed');
+    const {mb:mrows, td:trows, dp:c} = result;
+    const via = result.via || 'unknown';
     if(mrows.length<2) return;
     const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
     const td={};
@@ -2280,7 +2305,7 @@ async function loadLiveData(){
       if(typeof populateTDGDV==='function') populateTDGDV();
       if(typeof populateDSGDV==='function') populateDSGDV();
       const ds = document.getElementById('dataStatus');
-      ds.textContent = '🟢 Live · ' + out.length + ' MB';
+      ds.textContent = '🟢 Live ('+via+') · ' + out.length + ' MB';
       ds.style.color = '#86efac';
       console.log('✅ Live data loaded:', out.length, 'MBs');
     }
