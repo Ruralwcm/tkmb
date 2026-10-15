@@ -89,6 +89,13 @@ body { font-family:var(--font); background:var(--bg); color:var(--ink); line-hei
 .main { max-width:1140px; margin:0 auto; padding:16px; }
 .section { display:none; }
 .section.active { display:block; animation:fadeIn .25s ease; }
+/* ─── COLLAPSIBLE SECTION ─── */
+.sec-header { cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none; padding:8px 0; }
+.sec-header:hover { opacity:.8; }
+.sec-header .arr { transition:.2s; font-size:10px; }
+.sec-header.collapsed .arr { transform:rotate(-90deg); }
+.sec-body { overflow:hidden; transition:max-height .3s ease; }
+.sec-body.collapsed { max-height:0 !important; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
 /* ─── CARD ─── */
@@ -398,7 +405,18 @@ tbody tr { transition:background .12s; }
 
 <!-- ===== DASHBOARD ===== -->
 <section class="section active" id="sec-dash">
-  <!-- ═══ KPI TỔNG QUAN (NEW v2.39) ═══ -->
+  <!-- ═══ KPI TỔNG (Tổng / Đang xử lý / Hoàn thành / Fail / Quá hạn) ═══ -->
+  <div class="kpi" id="kpiMB"></div>
+
+  <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
+  <div class="filter-bar">
+    <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
+    <select id="dashTinh" onchange="onDashTinhChange()" disabled><option value="">Tất cả Tỉnh</option></select>
+    <select id="dashGDV" onchange="onDashGDVChange()"><option value="">Tất cả GĐV</option></select>
+    <select id="dashQLKV" onchange="renderDash()" disabled><option value="">Tất cả QLKV</option></select>
+  </div>
+
+  <!-- ═══ KPI BREAKDOWN B1-B6 ═══ -->
   <div class="kpi-summary" id="kpiSummary">
     <div class="kpi-mini teal"><div class="kpi-mini-num" id="kpiTotalMB">0</div><div class="kpi-mini-label">🏢 Tổng MB</div></div>
     <div class="kpi-mini blue"><div class="kpi-mini-num" id="kpiStepB1">0</div><div class="kpi-mini-label">📋 B1 GĐV duyệt</div><div class="kpi-mini-sub">⏱ 24h</div></div>
@@ -410,27 +428,43 @@ tbody tr { transition:background .12s; }
     <div class="kpi-mini red"><div class="kpi-mini-num" id="kpiOverdue">0</div><div class="kpi-mini-label">⚠️ Quá hạn</div></div>
   </div>
 
-  <div class="kpi-section"><h4>🏢 Mặt Bằng</h4></div>
-  <div class="filter-bar">
-    <select id="dashMien" onchange="onDashMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
-    <select id="dashTinh" onchange="onDashTinhChange()" disabled><option value="">Tất cả Tỉnh</option></select>
-    <select id="dashGDV" onchange="onDashGDVChange()"><option value="">Tất cả GĐV</option></select>
-    <select id="dashQLKV" onchange="renderDash()" disabled><option value="">Tất cả QLKV</option></select>
-  </div>
-  <div class="kpi" id="kpiMB"></div>
+  <!-- MB gần đây (collapsible, mặc định ẩn) -->
   <div class="card">
-    <h3>📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
-    <div style="overflow-x:auto"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+    <div class="sec-header collapsed" onclick="toggleSection(this)" style="margin-bottom:0">
+      <span class="arr">▼</span>
+      <h3 style="margin:0">📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
+    </div>
+    <div class="sec-body collapsed" style="max-height:0">
+      <div style="overflow-x:auto;margin-top:8px"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+    </div>
   </div>
-  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
-  <div class="kpi-section"><h4>🗺 Scan điểm QH</h4></div>
-  <div class="kpi" id="kpiScan"></div>
-  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
-  <div class="kpi-section"><h4>🏢 Đàm phán DTKD</h4></div>
-  <div class="kpi" id="kpiDP"></div>
-  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb">
-  <div class="kpi-section"><h4>✅ Checklist NSO</h4></div>
-  <div class="kpi" id="kpiChk"></div>
+
+  <!-- Scan QH (collapsible) -->
+  <div class="card">
+    <div class="sec-header" onclick="toggleSection(this)">
+      <span class="arr">▼</span>
+      <h4 style="margin:0">🗺 Scan điểm QH</h4>
+    </div>
+    <div class="sec-body" style="max-height:2000px"><div class="kpi" id="kpiScan" style="margin-top:8px"></div></div>
+  </div>
+
+  <!-- Đàm phán DTKD (collapsible) -->
+  <div class="card">
+    <div class="sec-header" onclick="toggleSection(this)">
+      <span class="arr">▼</span>
+      <h4 style="margin:0">🏢 Đàm phán DTKD</h4>
+    </div>
+    <div class="sec-body" style="max-height:2000px"><div class="kpi" id="kpiDP" style="margin-top:8px"></div></div>
+  </div>
+
+  <!-- Checklist NSO (collapsible) -->
+  <div class="card">
+    <div class="sec-header" onclick="toggleSection(this)">
+      <span class="arr">▼</span>
+      <h4 style="margin:0">✅ Checklist NSO</h4>
+    </div>
+    <div class="sec-body" style="max-height:2000px"><div class="kpi" id="kpiChk" style="margin-top:8px"></div></div>
+  </div>
 </section>
 
 <!-- ===== TIẾP NHẬN MB ===== -->
@@ -1563,6 +1597,48 @@ function populateDashGDV() {
   populateDashTinh();
 }
 function renderDash() {
+  const list = getDashFilteredMB();
+  const total = list.length;
+  const done = list.filter(m=>m.steps[5].r==='Done').length;
+  const failMB = list.filter(m=>m.steps.some(s=>s.r==='Fail')).length;
+  const pendingMB = total - done - failMB;
+  const overdue = list.filter(m=>m.steps.some((s,i)=>{ if(s.r!=='Pending'&&s.r!=='None') return false; return slaState(m, s.s) === 'over'; })).length;
+  document.getElementById('kpiMB').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${total}</div><div class="kpi-label">🏢 Tổng MB</div></div>
+    <div class="kpi-card"><div class="kpi-num b">${pendingMB}</div><div class="kpi-label">⏳ Đang xử lý</div></div>
+    <div class="kpi-card"><div class="kpi-num g">${done}</div><div class="kpi-label">✅ Đã KT</div></div>
+    <div class="kpi-card"><div class="kpi-num r">${failMB}</div><div class="kpi-label">❌ Fail</div></div>
+    <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn</div></div>`;
+  document.querySelector('#dashMB tbody').innerHTML = list.map(m => {
+    const p = getPct(m.steps); const hasFail = m.steps.some(s=>s.r==='Fail');
+    const lastPending = m.steps.find(s=>s.r==='Pending');
+    const slaCls = lastPending ? getSLAColor(m, lastPending.s) : 'sla-ok';
+    const slaText = lastPending ? STEP_SLA[lastPending.s-1].slaLabel : '—';
+    return `<tr style="cursor:pointer" onclick="viewMB('${m.id}')">
+      <td><strong>${m.id}</strong></td><td><span class="tag tag-p">${m.nguon}</span></td>
+      <td>${m.gdv}</td><td>${m.tinh}</td>
+      <td>${statusTagHtml(m)}</td>
+      <td><div class="mini-bar"><div class="mini-fill ${hasFail?'fail':p.pct<50?'partial':''}" style="width:${p.pct}%"></div></div></td>
+      <td><span class="sla-badge ${slaCls}">⏱ ${slaText}</span></td>
+      <td><button class="btn btn-xs btn-outline" onclick="event.stopPropagation();editMB('${m.id}')">✏️</button></td></tr>`;
+  }).join('');
+  document.getElementById('kpiScan').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${scans.length}</div><div class="kpi-label">🗺 Tổng Scan</div></div>
+    <div class="kpi-card"><div class="kpi-num g">${scans.filter(s=>s.status==='Đã chuyển MB').length}</div><div class="kpi-label">→ Đã tạo MB</div></div>`;
+  document.getElementById('kpiDP').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${DP_DATA.length}</div><div class="kpi-label">🏢 Cần ĐP</div></div>
+    <div class="kpi-card"><div class="kpi-num b">${DP_DATA.filter(d=>['Đã liên hệ','Đang thương lượng'].includes(d.td)).length}</div><div class="kpi-label">⏳ Đang ĐP</div></div>`;
+  document.getElementById('kpiChk').innerHTML = `
+    <div class="kpi-card"><div class="kpi-num p">${list.filter(m=>m.steps[5].r==='Done').length}</div><div class="kpi-label">✅ Đã KT</div></div>`;
+  updateKPIs();
+}
+
+function toggleSection(el){
+  const body = el.nextElementSibling;
+  const isCollapsed = el.classList.contains('collapsed');
+  if(isCollapsed){ el.classList.remove('collapsed'); body.classList.remove('collapsed'); body.style.maxHeight = body.scrollHeight + 'px'; }
+  else { el.classList.add('collapsed'); body.classList.add('collapsed'); body.style.maxHeight = '0'; }
+}
   const list = getDashFilteredMB();
   const total = list.length;
   const done = list.filter(m=>m.steps[5].r==='Done').length;
