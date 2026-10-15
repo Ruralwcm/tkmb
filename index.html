@@ -2333,10 +2333,6 @@ async function loadLiveData(){
         }
       }
     }
-  }catch(e){ console.warn('loadLiveData failed:', e);
-  const ds = document.getElementById('dataStatus');
-  if(ds){ ds.textContent = '⚠️ Offline — dữ liệu mẫu'; ds.style.color = '#fca5a5'; }
-}
 }
 
 // ═══ QUẢN LÝ ĐIỂM QUY HOẠCH ═══
