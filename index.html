@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.36</title>
+<title>TKMB Web App — NSO Miền Bắc v2.37</title>
 <style>
 :root {
   --primary: #7c3aed; --primary-light: #a78bfa; --primary-bg: #f5f3ff;
@@ -282,7 +282,7 @@ tr:hover td { background:#faf9ff; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 NSO Miền Bắc v2.36</h1>
+    <h1>🏪 NSO Miền Bắc v2.37</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -2228,7 +2228,7 @@ async function loadLiveData(){
       .then(r=>r.json()).then(j=>{
         if(j.ok && j.mbData) return {via:'GAS', mb:csvParse(j.mbData), td:csvParse(j.tiendoData||'')};
         throw new Error('GAS no data');
-      }).catch(()=>null);
+      });
     // Method 2: gviz CSV (needs sheet published to web)
     const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
     const gvizP = Promise.all([
@@ -2239,7 +2239,7 @@ async function loadLiveData(){
       const mrows=csvParse(a);
       if(mrows.length<2) throw new Error('gviz empty');
       return {via:'gviz', mb:mrows, td:csvParse(b), dp:c};
-    }).catch(()=>null);
+    }).catch(e=>{console.warn('gviz fetch err:',e); throw e;});
     // Return whichever succeeds first
     const result = await Promise.any([gasP, gvizP]);
     return result;
