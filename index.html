@@ -2104,30 +2104,37 @@ function toR(st){
   return 'Pending';
 }
 async function loadLiveData(){
+  try {
+  console.log('🔄 loadLiveData: starting...');
   const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
   let mrows=[], trows=[], dpCsv='', via='gviz';
   
   // Try gviz first (fastest)
   try {
+    console.log('🔄 loadLiveData: fetching gviz...');
     const [a,b,c]=await Promise.all([
       fetch(url('MB_Data')).then(r=>r.text()),
       fetch(url('MB_Tiendo')).then(r=>r.text()),
       fetch(url('DamPhan')).then(r=>r.text()).catch(()=>'')
     ]);
     mrows=csvParse(a); trows=csvParse(b); dpCsv=c;
+    console.log('🔄 loadLiveData: gviz done, MB_Data='+mrows.length+' rows, MB_Tiendo='+trows.length+' rows');
     if(mrows.length<2) throw new Error('gviz empty');
   } catch(gvizErr) {
-    console.warn('gviz failed, trying GAS:', gvizErr.message);
+    console.error('🔄 loadLiveData: gviz FAILED —', gvizErr.message, gvizErr);
     // Fallback: GAS
     try {
+      console.log('🔄 loadLiveData: trying GAS fallback...');
       const r = await fetch(GAS_URL, {method:'POST', body:JSON.stringify({action:'getMBData'}), headers:{'Content-Type':'text/plain'}});
       const j = await r.json();
+      console.log('🔄 loadLiveData: GAS response:', j);
       if(j.ok && j.mbData) { mrows=csvParse(j.mbData); trows=csvParse(j.tiendoData||''); via='GAS'; }
-    } catch(gasErr) { console.warn('GAS also failed:', gasErr.message); }
+    } catch(gasErr) { console.error('🔄 loadLiveData: GAS also FAILED —', gasErr.message, gasErr); }
   }
   if(mrows.length<2) {
     const ds = document.getElementById('dataStatus');
     if (ds) { ds.textContent = '❌ Không kết nối được dữ liệu từ Google Sheets'; ds.style.color = '#f87171'; }
+    console.error('🔄 loadLiveData: NO DATA after all attempts');
     return;
   }
     const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
@@ -2221,6 +2228,11 @@ async function loadLiveData(){
         }
       }
     }
+  } catch(e) {
+    console.error('🔄 loadLiveData: UNEXPECTED ERROR —', e.message, e);
+    const ds = document.getElementById('dataStatus');
+    if (ds) { ds.textContent = '❌ Lỗi: ' + e.message; ds.style.color = '#f87171'; }
+  }
 }
 
 // ═══ QUẢN LÝ ĐIỂM QUY HOẠCH ═══
