@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.41 by HaoDT</title>
+<title>TKMB Web App — NSO Miền Bắc v2.42 by HaoDT</title>
 <style>
 /* ═══ DESIGN SYSTEM v2.39 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
@@ -2788,25 +2788,41 @@ async function qhSyncStoreslist() {
       stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Huyện/Quận']||si['Huyện']]||'' });
     }
     info.textContent = stores.length + ' CH · Đang mapping...';
-    // For each QH point: Step1→nearest CH gets GĐV, Step2→nearest CH within that GĐV gets QLKV
-    let changed = 0;
+    // For each QH point: tìm CH trong CÙNG TỈNH → GĐV, QLKV (ưu tiên cùng huyện)
+    let changed = 0, needReview = 0;
     for (const qh of QH_DATA) {
       if (!qh.lat || !qh.lng) continue;
-      // Step 1: find nearest CH overall → determine GĐV
+      
+      // Normalize tên tỉnh để so sánh
+      const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+      
+      // Step 1: tìm CH trong CÙNG TỈNH gần nhất → GĐV
       let best = null, bestD = Infinity;
+      let bestSameTinh = null, bestSameTinhD = Infinity;
       for (const s of stores) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
+        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
         if (d < bestD) { bestD = d; best = s; }
+        if (sTinh === qhTinh && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
       }
-      if (!best) continue;
-      const gdv = best.gdv;
-      // Step 2: within same GĐV, find nearest CH (ưu tiên cùng huyện)
-      let bestQLKV = null, bestQLKVD = Infinity, sameHuyen = null, sameHuyenD = Infinity;
+      if (!best && !bestSameTinh) continue;
+      
+      // Ưu tiên CH cùng tỉnh, fallback CH gần nhất (đánh dấu cần review)
+      const pick = bestSameTinh || best;
+      const gdv = pick.gdv;
+      const isSameTinh = !!bestSameTinh;
+      if (!isSameTinh) needReview++;
+      
+      // Step 2: trong cùng GĐV, tìm QLKV (ưu tiên cùng tỉnh + cùng huyện)
+      let bestQLKV = null, bestQLKVD = Infinity;
+      let sameHuyen = null, sameHuyenD = Infinity;
       const sameGdv = stores.filter(s => s.gdv === gdv && s.qlkv);
       for (const s of sameGdv) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-        if (d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
-        if (qh.huyen && s.huyen && qh.tinh === s.tinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
+        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+        // Ưu tiên CH cùng tỉnh
+        if (sTinh === qhTinh && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
+        if (qh.huyen && s.huyen && sTinh === qhTinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
       }
       const pickQLKV = (sameHuyen && sameHuyenD < 50) ? sameHuyen : bestQLKV;
       if (!pickQLKV) continue;
@@ -2814,7 +2830,7 @@ async function qhSyncStoreslist() {
         qh.gdv = gdv; qh.qlkv = pickQLKV.qlkv; changed++;
       }
     }
-    info.textContent = '✅ Đã map ' + changed + ' điểm QH · GĐV→QLKV chỉ trong cùng GĐV';
+    info.textContent = '✅ Map ' + changed + ' điểm · ' + (needReview > 0 ? '⚠ ' + needReview + ' điểm khác tỉnh cần review' : 'Tất cả cùng tỉnh');
     renderQHManage();
     // Save via GAS
     try {
