@@ -660,7 +660,7 @@ tbody tr { transition:background .12s; }
 
 <!-- TRACKLOG MODAL -->
 <div class="modal-overlay" id="tracklogModal" style="display:none">
-  <div class="modal-card" style="max-width:560px">
+  <div class="modal-card" style="max-width:640px">
     <h3>👁 Tracklog Mặt Bằng — <span id="tracklogTitle"></span></h3>
     <div id="tracklogBody"></div>
     <div class="modal-actions">
@@ -2098,7 +2098,34 @@ function openTracklog(mbId){
   const tl=mb.tracklog||{};
   const lbl={None:'— Chưa đến',Pending:'⏳ Đang xử lý',Done:'✅ Đã xong',Fail:'❌ Fail'};
   const tagCls={Done:'tag-g',Fail:'tag-r',Pending:'tag-p',None:'tag-gray'};
-  let html='';
+
+  // ── Phần 1: Thông số MB ──
+  let html=`<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--line);font-size:12.5px;line-height:1.8">
+    <div style="font-weight:700;color:var(--teal);font-size:13px;margin-bottom:8px">📋 Thông tin Mặt Bằng</div>`;
+
+  const infoRows=[
+    ['📍 Địa chỉ',mb.addr||'—'],['🏙 Tỉnh/TP',mb.tinh||'—'],['📌 Huyện/Quận',mb.huyen||'—'],
+    ['👤 GĐV',mb.gdv||'—'],['🚶 QLKV',mb.qlkv||'—'],
+    ['📐 Diện tích',mb.area?(mb.area+' m²'):'—'],['↔ Mặt tiền',mb.front?(mb.front+'m'):'—'],
+    ['💰 Giá thuê',mb.price||'—'],['💵 Thanh toán',mb.payment||'—'],['🔐 Cọc',mb.deposit||'—'],
+    ['📅 Thời hạn',mb.duration||'—'],['⚖ Pháp lý',mb.legal||'—'],['🔧 Hiện trạng',mb.condition||'—'],
+    ['🤝 Người GT',mb.gtName?(mb.gtName+(mb.gtMNV?' (MNV '+mb.gtMNV+')':'')):'—'],
+    ['🏠 BCT',mb.bct?(mb.bct+(mb.bctPhone?' · '+mb.bctPhone:'')):'—'],
+    ['🔗 Maps',mb.mapLink?`<a href="${mb.mapLink}" target="_blank" style="color:var(--teal)">Xem bản đồ ↗</a>`:'—'],
+    ['🏷 Trạng thái',mb.status||'—']
+  ];
+
+  html+='<table style="width:100%;border-collapse:collapse">';
+  infoRows.forEach((r,i)=>{
+    html+=`<tr style="border-bottom:1px solid ${i%2===0?'#f0f0f0':'transparent'}">
+      <td style="padding:3px 6px;color:var(--muted);white-space:nowrap;width:110px;font-weight:500">${r[0]}</td>
+      <td style="padding:3px 6px;color:var(--ink)">${r[1]}</td></tr>`;
+  });
+  html+='</table></div>';
+
+  // ── Phần 2: Tracklog các bước ──
+  html+='<div style="font-weight:700;color:var(--primary);font-size:13px;margin-bottom:8px">📌 Tiến độ các bước</div>';
+
   for(let s=1;s<=6;s++){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
     const step=mb.steps[s-1]||{};
