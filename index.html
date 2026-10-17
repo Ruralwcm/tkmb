@@ -2099,32 +2099,25 @@ function openTracklog(mbId){
   const lbl={None:'— Chưa đến',Pending:'⏳ Đang xử lý',Done:'✅ Đã xong',Fail:'❌ Fail'};
   const tagCls={Done:'tag-g',Fail:'tag-r',Pending:'tag-p',None:'tag-gray'};
 
-  // ── Phần 1: Thông số MB ──
-  let html=`<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--line);font-size:12.5px;line-height:1.8">
-    <div style="font-weight:700;color:var(--teal);font-size:13px;margin-bottom:8px">📋 Thông tin Mặt Bằng</div>`;
+  // ── Phần 1: Thông số MB (gọn 4 dòng) ──
+  const area=mb.area?(mb.area+'m²'):'—';
+  const front=mb.front?(mb.front+'m'):'';
+  const spec=[area,front?('MT '+front):'',mb.price||'',mb.payment?('TT '+mb.payment):'',mb.deposit?('Cọc '+mb.deposit):'',mb.duration||''].filter(Boolean).join(' · ');
+  const gt=mb.gtName?(mb.gtName+(mb.gtMNV?' (MNV '+mb.gtMNV+')':'')):'—';
+  const bct=mb.bct?(mb.bct+(mb.bctPhone?' · '+mb.bctPhone:'')):'—';
+  const bottom=[mb.legal||'',mb.condition||'',mb.status||''].filter(Boolean).join(' · ');
+  const addrLine=[mb.addr||'',mb.huyen||'',mb.tinh||''].filter(Boolean).join(', ');
 
-  const infoRows=[
-    ['📍 Địa chỉ',mb.addr||'—'],['🏙 Tỉnh/TP',mb.tinh||'—'],['📌 Huyện/Quận',mb.huyen||'—'],
-    ['👤 GĐV',mb.gdv||'—'],['🚶 QLKV',mb.qlkv||'—'],
-    ['📐 Diện tích',mb.area?(mb.area+' m²'):'—'],['↔ Mặt tiền',mb.front?(mb.front+'m'):'—'],
-    ['💰 Giá thuê',mb.price||'—'],['💵 Thanh toán',mb.payment||'—'],['🔐 Cọc',mb.deposit||'—'],
-    ['📅 Thời hạn',mb.duration||'—'],['⚖ Pháp lý',mb.legal||'—'],['🔧 Hiện trạng',mb.condition||'—'],
-    ['🤝 Người GT',mb.gtName?(mb.gtName+(mb.gtMNV?' (MNV '+mb.gtMNV+')':'')):'—'],
-    ['🏠 BCT',mb.bct?(mb.bct+(mb.bctPhone?' · '+mb.bctPhone:'')):'—'],
-    ['🔗 Maps',mb.mapLink?`<a href="${mb.mapLink}" target="_blank" style="color:var(--teal)">Xem bản đồ ↗</a>`:'—'],
-    ['🏷 Trạng thái',mb.status||'—']
-  ];
-
-  html+='<table style="width:100%;border-collapse:collapse">';
-  infoRows.forEach((r,i)=>{
-    html+=`<tr style="border-bottom:1px solid ${i%2===0?'#f0f0f0':'transparent'}">
-      <td style="padding:3px 6px;color:var(--muted);white-space:nowrap;width:110px;font-weight:500">${r[0]}</td>
-      <td style="padding:3px 6px;color:var(--ink)">${r[1]}</td></tr>`;
-  });
-  html+='</table></div>';
+  let html=`<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--line);font-size:12px;line-height:1.7">
+    <div style="font-weight:700;color:var(--teal);font-size:12.5px;margin-bottom:6px">📋 ${mbId}</div>
+    <div style="color:var(--ink)">📍 ${addrLine}${mb.mapLink?` <a href="${mb.mapLink}" target="_blank" style="color:var(--teal);font-size:11px">🗺</a>`:''}</div>
+    <div style="color:var(--ink)">📐 ${spec}</div>
+    <div style="color:var(--ink)">👤 GĐV: ${mb.gdv||'—'} · QLKV: ${mb.qlkv||'—'} · GT: ${gt} · BCT: ${bct}</div>
+    <div style="color:var(--muted);font-size:11px">${bottom}</div>
+  </div>`;
 
   // ── Phần 2: Tracklog các bước ──
-  html+='<div style="font-weight:700;color:var(--primary);font-size:13px;margin-bottom:8px">📌 Tiến độ các bước</div>';
+  html+='<div style="font-weight:700;color:var(--primary);font-size:12.5px;margin-bottom:6px">📌 Tiến độ</div>';
 
   for(let s=1;s<=6;s++){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
