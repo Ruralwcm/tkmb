@@ -936,7 +936,298 @@ function renderScanTimeline(surveys, el) {
 }
 
 // MB_DATA, scans, DP_DATA (same as before)
-let MB_DATA = [];
+let MB_DATA = [
+  { id:'MB-20261002-508', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Điện Biên', huyen:'H. Mường Chà', addr:'sn 03, tổ 2, Na Sang', mapLink:'21.7622402, 103.0937102', area:'260', front:'13', price:'17', payment:'Thỏa thuận', deposit:'Thỏa thuận', duration:'8 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Phương Văn Tình', gtMNV:'6054148', bct:'Nguyễn Ngọc Phát', bctPhone:'829920578', status:'GDV duyet', createdAt:'2026-10-02T17:33:28', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261002-509', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Mai Vân', tinh:'T. Điện Biên', huyen:'TP. Điện Biên Phủ', addr:'Tổ dân phố 3, phường Tân Thanh (cũ)', mapLink:'21.3943210, 103.0239580', area:'200', front:'11', price:'12', payment:'5 năm/1 lần', deposit:'Thương lượng', duration:'Thương lượng', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Nguyễn Khánh Hoà', gtMNV:'6102947', bct:'Nhà hàng đường mới', bctPhone:'983657676', status:'Fail', createdAt:'2026-10-02T18:03:34', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Fail',date:'',failReason:'Dũng 4/10: MB từng trình, có bốt điện cao thế trước cửa, đã bị loại'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261003-510', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Điện Biên', huyen:'H. Tủa Chùa', addr:'Bản Noong Ten, xã Tủa Chùa', mapLink:'https://maps.google.com/?q=21.8529170,103.3472750', area:'120', front:'10m', price:'15tr', payment:'Thoả thuận', deposit:'Thoả thuận', duration:'8 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Lò Thị Thuỷ', gtMNV:'3569329', bct:'', bctPhone:'', status:'GDV duyet', createdAt:'2026-10-03T08:42:01', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261003-511', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thị Điệp', tinh:'T. Hòa Bình', huyen:'TP. Hòa Bình', addr:'Xóm Độc Lập, Xã Thịnh Minh, Hoà Bình', mapLink:'https://maps.google.com/?q=20.988528,105.339278', area:'200', front:'12m', price:'6tr', payment:'Thoả thuận', deposit:'Thoả thuận', duration:'5 năm trở lên', legal:'Sổ đỏ', condition:'Cty tự cải tạo', handover:'', gtName:'Nguyễn Thị Điệp', gtMNV:'3604931', bct:'Chú Thuận', bctPhone:'976127666', status:'GDV duyet', createdAt:'2026-10-03T09:58:54', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261003-512', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Hòa Bình', huyen:'TP. Hòa Bình', addr:'Phường Thống Nhất, TP Hoà Bình', mapLink:'https://maps.google.com/?q=20.786760,105.338208', area:'330', front:'11m', price:'19tr', payment:'Thương lượng', deposit:'Thương lượng', duration:'8 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Bùi Thị Tuyền', gtMNV:'3013139', bct:'Chị Huyền', bctPhone:'919168691', status:'GDV duyet', createdAt:'2026-10-03T13:21:22', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-513', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Trịnh Thanh Bình', tinh:'T. Ninh Bình', huyen:'', addr:'Chợ Lương, Duy Tân', mapLink:'https://maps.google.com/?q=20.650823,105.958739', area:'130', front:'', price:'12tr/tháng', payment:'', deposit:'', duration:'5-10 năm', legal:'Sổ đỏ', condition:'Nhà nguyên căn', handover:'', gtName:'Ngô Sỹ Lâm', gtMNV:'6050439', bct:'chị Nhung', bctPhone:'966693607', status:'GDV duyet', createdAt:'2026-10-04T07:30:26', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-514', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Đỗ Hải Võ', tinh:'T. Thái Nguyên', huyen:'', addr:'Xóm Trung Tâm, Tân Khánh', mapLink:'https://maps.google.com/?q=21.530956,105.959283', area:'160', front:'', price:'6tr/tháng', payment:'', deposit:'', duration:'8 năm', legal:'Sổ đỏ', condition:'Đất trống - bên thuê xây mới', handover:'', gtName:'Đỗ Hải Võ', gtMNV:'3593562', bct:'Cô Phượng (0392269246) / Chú Bắc (0985726358)', bctPhone:'', status:'GDV duyet', createdAt:'2026-10-04T09:55:10', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-515', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Nguyễn Ngọc Tâm', tinh:'T. Phú Thọ', huyen:'H. Thanh Sơn', addr:'Xã Võ Miếu (xã Địch Quả cũ) — QH PTO_THS16', mapLink:'https://maps.google.com/?q=21.188261,105.130122', area:'145', front:'', price:'8tr/tháng', payment:'', deposit:'', duration:'8 năm', legal:'Sổ đỏ', condition:'Đất trống - VCM thi công', handover:'', gtName:'Nguyễn Ngọc Tâm', gtMNV:'330001', bct:'Chú Nho (0929338268)', bctPhone:'', status:'GDV duyet', createdAt:'2026-10-04T10:37:18', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-516', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Tạ Quốc Oanh', tinh:'T. Phú Thọ', huyen:'', addr:'Yên Dưỡng, Đồng Lương — QH PTO_CK17 (cách 10m)', mapLink:'https://maps.google.com/?q=21.332905,105.153629', area:'126', front:'', price:'10tr/tháng', payment:'', deposit:'', duration:'8 năm', legal:'Sổ đỏ', condition:'BT thi công', handover:'', gtName:'Tạ Quốc Oanh', gtMNV:'6058409', bct:'Chú Long (0393948576)', bctPhone:'', status:'GDV duyet', createdAt:'2026-10-04T16:19:25', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-517', nguon:'TKMB', gdv:'Tạ Công Nhận', qlkv:'Hoàng Thị Tuyết', tinh:'TP. Hà Nội', huyen:'', addr:'Ngã 4 Cố Đụng, Yên Xuân, Thạch Thất', mapLink:'https://maps.app.goo.gl/iNieQV1Mk1EV79rx6?g_st=ac', area:'120', front:'9', price:'10tr/tháng (chưa VAT)', payment:'', deposit:'', duration:'5 năm', legal:'Sổ đỏ', condition:'Cho thuê làm BĐS', handover:'', gtName:'Phí Minh Ngân', gtMNV:'', bct:'a Mến', bctPhone:'973349958', status:'GDM duyet', createdAt:'2026-10-04T17:07:51', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-518', nguon:'TKMB', gdv:'Bùi Thị Thu Nhài', qlkv:'Nguyễn Thị Thu Hương', tinh:'TP. Hà Nội', huyen:'', addr:'Vân Nam, Phúc Thọ', mapLink:'https://goo.gl/maps/yBFnqrVusQR6T3oc7?g_st=atm', area:'120-150', front:'8', price:'12tr/tháng', payment:'', deposit:'', duration:'6-8 năm', legal:'Sổ đỏ', condition:'Đất trống WCM xây dựng', handover:'', gtName:'Nguyễn Thị Thu Hương', gtMNV:'3547764', bct:'anh Yên', bctPhone:'976075488', status:'Fail', createdAt:'2026-10-04T17:09:13', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Fail',date:'',failReason:'Dũng 10/10: MB TKMB từng trình 2 lần và bị loại => Gửi tái thẩm'},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-519', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'', addr:'Chợ Phương Thiện, TP Hà Giang', mapLink:'https://maps.google.com/?q=22.800222,104.977889', area:'200', front:'8', price:'22tr/tháng', payment:'Quý', deposit:'', duration:'8 năm', legal:'Sổ đỏ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'C Hoa', bctPhone:'979097516', status:'GDM duyet', createdAt:'2026-10-04T19:57:46', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-520', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Trịnh Thanh Bình', tinh:'T. Hà Nam', huyen:'H. Phủ Lý', addr:'Bích Trì, Liêm Tuyền', mapLink:'https://maps.app.goo.gl/pPyMqNvECP3eghUn7', area:'180', front:'8m', price:'25tr/tháng', payment:'Cọc 2 tháng', deposit:'6 tháng/lần', duration:'5 năm', legal:'Đất ở lâu dài (chờ cấp sổ)', condition:'Nhà tầng, cải tạo ít', handover:'', gtName:'Nguyễn Thanh Bình', gtMNV:'3001291', bct:'Cô Thân', bctPhone:'365800821', status:'GDM duyet', createdAt:'2026-10-04T19:58:07', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-521', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'', addr:'Ngã 3 Duy Thường - Lý Tự Trọng, TP Hà Giang', mapLink:'https://maps.google.com/?q=22.816889,104.988167', area:'285', front:'19+15 (2MT)', price:'32tr/tháng', payment:'Quý', deposit:'', duration:'8 năm', legal:'Sổ đỏ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'Anh Thắng', bctPhone:'326224968', status:'GDM duyet', createdAt:'2026-10-04T20:00:01', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-521-2', nguon:'TKMB', gdv:'Phạm Minh Thu', qlkv:'Lưu Thị Liên', tinh:'TP. Hà Nội', huyen:'H. Mê Linh', addr:'Trung Hậu Đoài, Mê Linh, Hà Nội', mapLink:'https://maps.google.com/?q=21.1534220,105.7521153', area:'179.67', front:'12.6', price:'13tr/tháng', payment:'6 tháng/1 lần', deposit:'2 tháng', duration:'5 năm', legal:'Sổ đỏ chính chủ', condition:'Nhà có mái cần cải tạo', handover:'', gtName:'Lưu Thị Liên', gtMNV:'6031614', bct:'Nguyễn Thị Thân Ngọc Anh', bctPhone:'985386806', status:'GDM duyet', createdAt:'2026-10-04T21:41:20', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261004-521-3', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Nguyễn Duy Thành', tinh:'T. Ninh Bình', huyen:'H. Hoa Lư', addr:'Cổng làng Gia Hội, xã Bình Giang', mapLink:'20°28\'30.8"N 106°05\'18.4"E', area:'130', front:'8.5', price:'14', payment:'', deposit:'', duration:'lâu dài', legal:'sổ đỏ chính chủ', condition:'Đẹp và mới, nhà chủ đồng ý cho đập thông 2 gian, cách KCN 2km, gần trường học', handover:'', gtName:'Thành', gtMNV:'', bct:'Chú Tuấn', bctPhone:'983865912', status:'GDV duyet', createdAt:'2026-10-04T22:10:43', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261006-521', nguon:'TKMB', gdv:'Bùi Thị Thu Nhài', qlkv:'Nguyễn Thị Thu Hương', tinh:'TP. Hà Nội', huyen:'H. Phúc Thọ', addr:'Thôn Ổ Thôn, Phúc Thọ, Hà Nội', mapLink:'https://maps.google.com/?q=21.12229,105.52782', area:'110', front:'9', price:'13tr/tháng', payment:'3-6 tháng/1 lần', deposit:'', duration:'3-5 năm', legal:'Giấy tờ pháp lý chính chủ', condition:'Điểm quy hoạch · Nhà chia 2 anh em, chủ không giảm giá', handover:'', gtName:'Nguyễn Thị An', gtMNV:'6050073', bct:'Chị Tình', bctPhone:'948033007', status:'GDM duyet', createdAt:'2026-10-06T11:37:55', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261006-521-2', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Sơn La', huyen:'TP. Sơn La', addr:'Ngã 3 Bản Cọ, Phường Tô Hiệu, TP. Sơn La', mapLink:'https://maps.app.goo.gl/P3kqmiydsxiVbvv86?g_st=ic', area:'150', front:'10', price:'20tr/tháng', payment:'3 tháng/1 lần', deposit:'2 tháng', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'Cải tạo. Thực tế 170m². Giá có thương lượng.', handover:'', gtName:'Tòng Văn Cường', gtMNV:'6112803', bct:'Chú Bắc', bctPhone:'090 4862899', status:'GDV duyet', createdAt:'2026-10-06T18:01:11', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261006-521-3', nguon:'TKMB', gdv:'Phạm Minh Thu', qlkv:'Nguyễn Thị Hiền', tinh:'TP. Hà Nội', huyen:'H. Sóc Sơn', addr:'138 đường Đông Phong, Thôn Đông, Xã Nội Bài, Sóc Sơn, Hà Nội', mapLink:'https://maps.google.com/?q=21.1930814,105.8253383', area:'120', front:'8', price:'13tr/tháng', payment:'3 tháng', deposit:'1 năm', duration:'8 năm', legal:'Có sổ đỏ', condition:'Bên thuê thi công · Đúng điểm quy hoạch', handover:'', gtName:'Nguyễn Thị Thanh Hải', gtMNV:'', bct:'Nguyễn Xuân Hướng', bctPhone:'326392933', status:'GDM duyet', createdAt:'2026-10-06T20:06:19', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-521', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Sơn La', huyen:'TP. Sơn La', addr:'cổng chào bản Panh, Chiềng Xôm, TP. Sơn La, Sơn La', mapLink:'https://maps.app.goo.gl/jiTLk5XZKcNDim7z8', area:'140', front:'10', price:'12tr/tháng', payment:'6 tháng', deposit:'', duration:'10 năm', legal:'Sổ đỏ chính chủ', condition:'Có cải tạo · MT 10m · Sâu 14m', handover:'', gtName:'Quàng Thị Quý', gtMNV:'6047261', bct:'chú Toán', bctPhone:'961250875', status:'GDV duyet', createdAt:'2026-10-07T21:36:02', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-521-2', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Sơn La', huyen:'TP. Sơn La', addr:'321 Lò Văn Giá, Chiềng An, TP. Sơn La, Sơn La', mapLink:'https://maps.app.goo.gl/WmVnHNTYAs8sDkkv5', area:'700', front:'7', price:'15tr/tháng', payment:'6 tháng', deposit:'', duration:'10 năm', legal:'Sổ đỏ chính chủ', condition:'Có cải tạo · MT 7m · Sâu 100m', handover:'', gtName:'Nguyễn Thu Nhật', gtMNV:'3642308', bct:'cô Mai', bctPhone:'367754216', status:'GDV duyet', createdAt:'2026-10-07T21:38:56', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-523', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Hòa Bình', huyen:'H. Kim Bôi', addr:'Thôn Sào Đông, Xã Hợp Kim, H. Kim Bôi, Hòa Bình', mapLink:'https://maps.app.goo.gl/g7G5wj9P12qN5dF38', area:'152', front:'8', price:'10tr/tháng', payment:'3 tháng', deposit:'3 tháng', duration:'5 năm', legal:'Có sổ đỏ', condition:'Cty tự cải tạo · MT 8m · Sâu 19m', handover:'', gtName:'Bùi Văn Dương', gtMNV:'', bct:'Bùi Văn Côn', bctPhone:'392122406', status:'GDV duyet', createdAt:'2026-10-07T21:43:59', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-523-2', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Phú Thọ', huyen:'H. Thanh Thủy', addr:'Thôn Thanh Hà, Xã An Nghĩa, H. Thanh Thủy, Phú Thọ', mapLink:'https://maps.app.goo.gl/6EToMUnjmeYNuvZZ7', area:'152', front:'8', price:'14tr/tháng', payment:'3 tháng', deposit:'3 tháng', duration:'5 năm', legal:'Có sổ đỏ', condition:'Cty tự cải tạo · MT 8m · Sâu 19m', handover:'', gtName:'Bùi Thị Hình', gtMNV:'', bct:'Cô Phương', bctPhone:'363390929', status:'GDV duyet', createdAt:'2026-10-07T21:48:34', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-525', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Mai Vân', tinh:'T. Điện Biên', huyen:'TP. Điện Biên Phủ', addr:'Ngã 4 chợ Mường Thanh, TP. Điện Biên Phủ, Điện Biên', mapLink:'https://maps.google.com/?q=21.386933,103.014803', area:'200', front:'8.3', price:'30tr/tháng', payment:'Thỏa thuận', deposit:'Thỏa thuận', duration:'5 năm', legal:'Có sổ đỏ', condition:'Bên thuê cải tạo · Tầng 1+2 · MT 8.3m · Sâu 25m', handover:'', gtName:'Tòng Văn Chung', gtMNV:'6106891', bct:'A Đại', bctPhone:'915641454', status:'GDV duyet', createdAt:'2026-10-07T21:55:05', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261007-525-2', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Phạm Thùy Linh', tinh:'T. Sơn La', huyen:'H. Sông Mã', addr:'Bản Chiềng Cang, Xã Mường Hung, H. Sông Mã, Sơn La', mapLink:'https://maps.google.com/?q=20.949880,103.883754', area:'220', front:'11', price:'10tr/tháng', payment:'6 tháng', deposit:'', duration:'5 năm', legal:'Sổ đỏ chính chủ', condition:'Cải tạo · MT 11m · Sâu 20m', handover:'', gtName:'Là Văn Sáng', gtMNV:'6170767', bct:'cô Thuận', bctPhone:'354754588', status:'GDV duyet', createdAt:'2026-10-07T23:23:06', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261008-001', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thu Trang', tinh:'T. Sơn La', huyen:'TX. Mộc Châu', addr:'Ngã 3 Công an, Phường Vân Sơn, TX. Mộc Châu, Sơn La', mapLink:'https://maps.app.goo.gl/X1zrswKP5TeJusUD9', area:'300', front:'10', price:'13tr/tháng', payment:'3 tháng', deposit:'2 tháng', duration:'10 năm', legal:'Đất sổ đỏ', condition:'Cải tạo · MT 10m · Sâu 30m', handover:'', gtName:'Tòng Văn Cường', gtMNV:'6112803', bct:'Chú Bảo', bctPhone:'912587241', status:'GDV duyet', createdAt:'2026-10-08T13:52:27', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261008-002', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Phạm Minh Hiệp', tinh:'T. Tuyên Quang', huyen:'TP. Tuyên Quang', addr:'Ngã 5 chợ Tam Cờ, TP Tuyên Quang', mapLink:'https://maps.google.com/?q=21.81525,105.21475', area:'100', front:'15', price:'28tr/tháng (cả VAT)', payment:'3 tháng/lần', deposit:'', duration:'8 năm', legal:'Có sổ đỏ chính chủ', condition:'Bên cho thuê: sàn, mái, WC, đập tường. Bên thuê: cửa kính, sàn gác lửng 40m²', handover:'', gtName:'Chu Văn Sơn', gtMNV:'3583733', bct:'Anh Hùng', bctPhone:'913250253', status:'GDV duyet', createdAt:'2026-10-08T13:55:15', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261008-003', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'TP. Hà Giang', addr:'Chợ Phương Thiện, TP Hà Giang', mapLink:'https://maps.google.com/?q=22.800222,104.977889', area:'200', front:'8', price:'22tr/tháng (VAT)', payment:'Quý', deposit:'', duration:'8 năm', legal:'Có sổ đỏ chính chủ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'C Hoa', bctPhone:'979097516', status:'GDV duyet', createdAt:'2026-10-08T13:56:39', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261008-004', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Nông Văn Hình', tinh:'T. Lào Cai', huyen:'', addr:'Thôn Phú Hải, xã Tằng Lỏng, Lào Cai', mapLink:'https://maps.google.com/?q=22.258276,104.177728', area:'100', front:'8', price:'6.5tr/tháng', payment:'3 tháng/lần', deposit:'', duration:'8 năm', legal:'Có sổ đỏ đầy đủ', condition:'Đất trống · Công ty tự xây dựng', handover:'', gtName:'Nông Văn Hình', gtMNV:'3598065', bct:'Trần Thị Hoà', bctPhone:'0369.645.581', status:'GDV duyet', createdAt:'2026-10-08T13:59:56', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261009-001', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Phú Thọ', huyen:'H. Thanh Thủy', addr:'Thôn 7, Xã An Nghĩa, H. Thanh Thủy, Phú Thọ', mapLink:'https://maps.app.goo.gl/KwpmxeUh7Gy5auTH7?g_st=ic', area:'120', front:'8', price:'13tr/tháng', payment:'3 tháng', deposit:'3 tháng', duration:'5 năm', legal:'Sổ đỏ', condition:'Cty tự cải tạo · MT 8m · Sâu 15m', handover:'', gtName:'Bùi Thị Hình', gtMNV:'', bct:'Chú Lương', bctPhone:'975806299', status:'GDV duyet', createdAt:'2026-10-09T18:13:52', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261009-002', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Hòa Bình', huyen:'H. Lạc Sơn', addr:'La Văn Cầu, Lạc Sơn, Hòa Bình', mapLink:'https://www.google.com/maps?q=20.5136444,105.3650799', area:'160', front:'8', price:'15tr/tháng', payment:'3 tháng', deposit:'thỏa thuận', duration:'8 năm', legal:'Sổ đỏ', condition:'Chủ đất đồng ý xây nhà lên · MT 8m · Sâu 20m', handover:'', gtName:'Bùi Thị Mơ', gtMNV:'6133060', bct:'A Phú', bctPhone:'368228602', status:'GDV duyet', createdAt:'2026-10-09T18:17:15', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261009-003', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Hòa Bình', huyen:'H. Tân Lạc', addr:'Tử Nê, Tân Lạc, Hòa Bình', mapLink:'https://www.google.com/maps?q=20.5861222,105.2939327', area:'180', front:'9', price:'15tr/tháng', payment:'3 tháng', deposit:'thỏa thuận', duration:'8 năm', legal:'Sổ đỏ', condition:'Chủ đất đồng ý xây nhà lên · MT 9m · Sâu 20m', handover:'', gtName:'Bùi Thị Mơ', gtMNV:'6133060', bct:'A Trình', bctPhone:'384159355', status:'GDV duyet', createdAt:'2026-10-09T18:19:37', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261010-001', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'TP. Hà Giang', addr:'Chợ Phương Thiện, TP Hà Giang', mapLink:'https://maps.google.com/?q=22.800333,104.977833', area:'200', front:'', price:'22tr/tháng (VAT)', payment:'Quý', deposit:'', duration:'8 năm', legal:'Có sổ đỏ chính chủ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'C Hoa', bctPhone:'979097516', status:'GDM duyet', createdAt:'2026-10-10T08:02:54', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261010-001-2', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Đỗ Hải Võ', tinh:'T. Thái Nguyên', huyen:'H. Võ Nhai', addr:'Xã La Hiên, Thái Nguyên (Chợ La Hiên)', mapLink:'https://maps.app.goo.gl/xZUp93vCkiaCzi1u7', area:'120', front:'8m', price:'10tr/tháng', payment:'', deposit:'', duration:'5-8 năm', legal:'Sổ đỏ chính chủ', condition:'Nhà cũ cần cải tạo', handover:'', gtName:'Vy Văn Chí', gtMNV:'6093568', bct:'a Sơn', bctPhone:'984557232', status:'GDV duyet', createdAt:'2026-10-10T10:52:18', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261010-001-3', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thị Điệp', tinh:'T. Phú Thọ', huyen:'', addr:'Thôn Thạch Lý, xã Đà Bắc, Phú Thọ', mapLink:'https://maps.google.com/?q=20.875694,105.261444', area:'150', front:'8m', price:'12tr/tháng', payment:'thỏa thuận', deposit:'thỏa thuận', duration:'5 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Xa Thị Ly', gtMNV:'3605016', bct:'Anh Ngô Văn Tuân', bctPhone:'344900515', status:'GDV duyet', createdAt:'2026-10-10T18:43:03', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261010-002', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thị Điệp', tinh:'T. Hòa Bình', huyen:'', addr:'SN 382 Xóm Độc Lập, Xã Thịnh Minh, Hòa Bình', mapLink:'https://maps.google.com/?q=20.857306,105.345222', area:'200', front:'10m', price:'13tr/tháng', payment:'thỏa thuận', deposit:'thỏa thuận', duration:'5 năm', legal:'Sổ đỏ', condition:'Cty tự cải tạo', handover:'', gtName:'Nguyễn Thị Điệp', gtMNV:'3604931', bct:'Chị Phạm Thị Trường', bctPhone:'353837195', status:'GDV duyet', createdAt:'2026-10-10T18:44:02', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261010-003', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Mai Vân', tinh:'T. Điện Biên', huyen:'TP. Điện Biên Phủ', addr:'803-805 Võ Nguyên Giáp, Điện Biên', mapLink:'https://maps.app.goo.gl/9h2Cxgw34pMgFAdK7', area:'180', front:'9.2m', price:'30tr/tháng', payment:'thỏa thuận', deposit:'thỏa thuận', duration:'5 năm', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Nguyễn Khánh Hoà', gtMNV:'6102947', bct:'C Hương / Cô Oanh', bctPhone:'0982419577 / 0358904888', status:'GDV duyet', createdAt:'2026-10-10T18:46:39', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261011-001', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Nguyễn Hoa Đường', tinh:'T. Phú Thọ', huyen:'H. Đoan Hùng', addr:'Hùng Long, Đoan Hùng, Phú Thọ', mapLink:'https://maps.google.com/?q=21.596,105.22042', area:'120', front:'10m', price:'9tr/tháng', payment:'3 tháng/lần', deposit:'1 tháng', duration:'8 năm', legal:'Có sổ đỏ', condition:'Nhà kiot - bên thuê cải tạo, sửa chữa', handover:'', gtName:'Nguyễn Hoa Đường', gtMNV:'990404', bct:'cô Lý', bctPhone:'966052872', status:'GDV duyet', createdAt:'2026-10-11T09:17:30', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261011-003', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Đỗ Hải Võ', tinh:'T. Thái Nguyên', huyen:'H. Phổ Yên', addr:'482 Phạm Văn Đồng, Phổ Yên, Thái Nguyên', mapLink:'https://maps.google.com/?q=21.4227179,105.8685671', area:'100', front:'8.8m', price:'10tr/tháng', payment:'3 tháng/lần', deposit:'3 tháng', duration:'8 năm', legal:'Có sổ đỏ', condition:'Nhà cũ cấp 4, 1 bên tường mượn, BCT cải tạo xây mới', handover:'', gtName:'Đỗ Hải Võ', gtMNV:'3593562', bct:'anh Trường', bctPhone:'866883331', status:'GDV duyet', createdAt:'2026-10-11T10:10:08', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261012-001', nguon:'TKMB', gdv:'Tạ Công Nhận', qlkv:'Đào Xuân Dũng', tinh:'TP. Hà Nội', huyen:'', addr:'Triều Đông, Hà Nội', mapLink:'https://maps.app.goo.gl/WDD6ZVMBEns4NG9F7?g_st=ic', area:'100', front:'10', price:'15tr/tháng', payment:'', deposit:'', duration:'5 năm', legal:'', condition:'Nhà ở / mặt bằng', handover:'', gtName:'Triều Đông', gtMNV:'', bct:'bà Khánh', bctPhone:'868677223', status:'GDM duyet', createdAt:'2026-10-12T17:07:11', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261012-001-2', nguon:'TKMB', gdv:'Tạ Công Nhận', qlkv:'Vũ Thị Mai Anh', tinh:'TP. Hà Nội', huyen:'H. Quốc Oai', addr:'Số 34 thôn Phú Thịnh, Phú Cát, Quốc Oai, Hà Nội', mapLink:'https://maps.app.goo.gl/RPtbfKy6oQoexHip6?g_st=it', area:'100', front:'10', price:'16tr/tháng', payment:'3 tháng', deposit:'1 tháng', duration:'6-8 năm', legal:'Giấy CNQSDĐ', condition:'Nhà 2 tầng · cho thuê cả nhà', handover:'', gtName:'Vũ Thị Mai Anh', gtMNV:'961727', bct:'Chú Đại', bctPhone:'972662999', status:'GDM duyet', createdAt:'2026-10-12T17:08:16', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Done',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261012-001-3', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Bùi Anh Vũ', tinh:'T. Yên Bái', huyen:'H. Yên Bình', addr:'TDP số 2, TT Thác Bà, Huyện Yên Bình, Tỉnh Yên Bái', mapLink:'https://maps.google.com/?q=21.749617,105.035382', area:'160', front:'8.3', price:'13tr/tháng', payment:'3 tháng/lần', deposit:'1 tháng', duration:'8 năm', legal:'Đất ONT, có sổ', condition:'Cách điểm QH 30m', handover:'', gtName:'Đỗ Xuân Trường', gtMNV:'315292', bct:'', bctPhone:'', status:'GDV duyet', createdAt:'2026-10-12T20:00:28', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-001', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Đỗ Hải Võ', tinh:'T. Thái Nguyên', huyen:'H. Đồng Hỷ', addr:'xóm Chợ, xã Tân Khánh, huyện Đồng Hỷ, tỉnh Thái Nguyên', mapLink:'https://maps.google.com/?q=21.532257,105.958237', area:'130', front:'8.2', price:'12tr/tháng', payment:'3 tháng/lần', deposit:'4 tháng (trừ cọc sau 1 năm)', duration:'8 năm', legal:'Có sổ đỏ', condition:'Nhà kiot - Cách điểm QH 50m', handover:'', gtName:'Đỗ Hải Võ', gtMNV:'3593562', bct:'Cô Nguyệt', bctPhone:'388373188', status:'GDV duyet', createdAt:'2026-10-13T06:44:39', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-001-2', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Ngô Xuân Quang', tinh:'T. Nam Định', huyen:'H. Giao Thủy', addr:'Chợ Hồng Thuận, xã Hồng Thuận, huyện Giao Thủy, tỉnh Nam Định', mapLink:'https://maps.google.com/?q=20.2685256,106.4871553', area:'150', front:'10', price:'16tr/tháng', payment:'3 tháng/lần', deposit:'', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'Nhà cấp 4 mái tôn. Gần 3 trường học + gần Chợ + cạnh Cty may ProSport (2000 nhân viên)', handover:'', gtName:'Ngô Xuân Quang', gtMNV:'3521891', bct:'Anh Hải', bctPhone:'915929292', status:'GDV duyet', createdAt:'2026-10-13T13:45:30', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-001-3', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thị Điệp', tinh:'T. Phú Thọ', huyen:'H. Đà Bắc', addr:'Tiểu Liên Phương, xã Đà Bắc, tỉnh Phú Thọ', mapLink:'https://maps.google.com/?q=20.878611,105.251167', area:'200', front:'10', price:'10tr/tháng', payment:'thỏa thuận', deposit:'', duration:'đàm phán', legal:'Sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Xa Thị Kim Thùy', gtMNV:'6140531', bct:'Nguyễn Danh Trụ', bctPhone:'382901773', status:'GDV duyet', createdAt:'2026-10-13T16:34:54', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-001-4', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'H. Đồng Văn', addr:'Lũng Phìn đối diện chợ, Đồng Văn, Hà Giang', mapLink:'https://maps.google.com/?q=23.149722,105.299222', area:'154', front:'11m', price:'15tr/tháng (VAT)', payment:'Quý', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Có sổ đỏ chính chủ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'Anh Lùng', bctPhone:'097 4844809', status:'GDV duyet', createdAt:'2026-10-13T17:46:55', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-001-5', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'H. Quang Bình', addr:'Quang Bình, Hà Giang', mapLink:'https://maps.app.goo.gl/guTZUFzAQW1qMtCF9', area:'180', front:'9m', price:'8tr/tháng (chưa VAT)', payment:'Thỏa thuận', deposit:'Theo thỏa thuận', duration:'5-8 năm', legal:'Sổ đỏ chính chủ', condition:'Giữ nguyên hiện trạng, WCM tự cải tạo và xây dựng', handover:'', gtName:'Nguyễn Văn Mạnh', gtMNV:'6050145', bct:'Cô Thu', bctPhone:'919038806', status:'GDV duyet', createdAt:'2026-10-13T17:50:38', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-003', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Ngô Xuân Quang', tinh:'T. Nam Định', huyen:'H. Hải Hậu', addr:'Xóm An Đông, xã Hải Đường, huyện Hải Hậu, tỉnh Nam Định', mapLink:'https://maps.google.com/?q=20.1460,106.2448', area:'120', front:'7.5', price:'15tr/tháng', payment:'3 tháng/lần (có thương lượng)', deposit:'', duration:'5-8 năm', legal:'Sổ đỏ chính chủ', condition:'Nhà cấp mái bằng. Nằm trong điểm quy hoạch', handover:'', gtName:'Ngô Xuân Quang', gtMNV:'3521891', bct:'Anh Hùng', bctPhone:'968750173', status:'GDV duyet', createdAt:'2026-10-13T18:52:44', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-004', nguon:'TKMB', gdv:'Đặng Văn Dũng', qlkv:'Ngô Xuân Quang', tinh:'T. Nam Định', huyen:'H. Hải Hậu', addr:'Xóm An Đông, xã Hải Đường, huyện Hải Hậu, tỉnh Nam Định', mapLink:'https://maps.google.com/?q=20.1460,106.2448', area:'180', front:'12', price:'10tr/tháng', payment:'3 tháng/lần (có thương lượng)', deposit:'', duration:'5-8 năm', legal:'Sổ đỏ chính chủ', condition:'Đất trống 2 lô (chủ cho thuê đất). Nằm trong điểm quy hoạch', handover:'', gtName:'Ngô Xuân Quang', gtMNV:'3521891', bct:'Chú Tình', bctPhone:'916875899', status:'GDV duyet', createdAt:'2026-10-13T18:52:44', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-003-2', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'TP. Hà Giang', addr:'188 Lý Tự Trọng, Phường Hà Giang 2, TP Hà Giang', mapLink:'https://www.google.com/maps/place/22%C2%B049\'36.4%22N+104%C2%B059\'20.6%22E', area:'104', front:'8m-13m (2 mặt tiền)', price:'20tr/tháng', payment:'Quý (3 tháng/lần)', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'Cô Hương', bctPhone:'982134179', status:'GDV duyet', createdAt:'2026-10-13T23:16:41', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-003-3', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Phạm Minh Hiệp', tinh:'T. Tuyên Quang', huyen:'H. Sơn Dương', addr:'Ngã 4 Kim Xuyên, Thôn Kim Xuyên, Xã Hồng Sơn, Sơn Dương, Tuyên Quang', mapLink:'https://www.google.com/maps/place/21%C2%B033\'25.0%22N+105%C2%B016\'44.4%22E', area:'120.5', front:'8.8m', price:'15tr/tháng (cả VAT)', payment:'3 tháng/lần', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Sổ đỏ chính chủ cà 2 hộ', condition:'Chủ nhà: cải tạo sàn, đập phá ngăn. WCM: cải tạo cửa kính, trần thạch cao, vách ngăn kho', handover:'', gtName:'Chu Văn Sơn', gtMNV:'3583733', bct:'Chị Nhung (0869.505.233), Chị Huyền (0971666833)', bctPhone:'869505233', status:'GDV duyet', createdAt:'2026-10-13T23:22:56', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-005', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Phạm Minh Hiệp', tinh:'T. Tuyên Quang', huyen:'H. Sơn Dương', addr:'Thôn Phú Lương, Xã Bình Ca, Sơn Dương, Tuyên Quang', mapLink:'https://www.google.com/maps/place/21%C2%B042\'17.8%22N+105%C2%B015\'57.4%22E', area:'148', front:'14.5m', price:'12tr/tháng (cả VAT)', payment:'3 tháng/lần', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'Chủ nhà: cải tạo sàn + WC. WCM: cải tạo cửa kính, trần thạch cao, vách ngăn kho', handover:'', gtName:'Chu Văn Sơn', gtMNV:'3583733', bct:'Anh Thắng', bctPhone:'972871488', status:'GDV duyet', createdAt:'2026-10-13T23:24:47', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-005-2', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Đặng Thị Bích Nhi', tinh:'T. Hà Giang', huyen:'H. Quản Bạ', addr:'MB QHBS Tổ 4, Quản Bạ, Hà Giang', mapLink:'https://www.google.com/maps/place/23%C2%B004\'12.2%22N+104%C2%B059\'24.1%22E', area:'270', front:'9m', price:'12tr/tháng (VAT)', payment:'Quý (3 tháng/lần)', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'WCM tự cải tạo', handover:'', gtName:'Đặng Thị Bích Nhi', gtMNV:'3602274', bct:'C Hằng', bctPhone:'098 9993269', status:'GDV duyet', createdAt:'2026-10-13T23:39:08', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261013-007', nguon:'TKMB', gdv:'Nguyễn Mạnh Sơn', qlkv:'Trịnh Thanh Bình', tinh:'T. Hà Giang', huyen:'H. Vị Xuyên', addr:'Km25 đường HG-ĐV, đối diện UBND xã Minh Tân, Vị Xuyên, Hà Giang', mapLink:'https://maps.app.goo.gl/naoXciZ9mPcY1KB29', area:'200', front:'10m', price:'15tr/tháng (đất có sẵn CSVC)', payment:'Thỏa thuận', deposit:'Theo thỏa thuận', duration:'8 năm', legal:'Sổ đỏ chính chủ', condition:'Giữ nguyên hiện trạng, WCM tự cải tạo và xây dựng', handover:'', gtName:'Trịnh Thanh Bình', gtMNV:'6037375', bct:'Chị Hiền', bctPhone:'966144048', status:'GDV duyet', createdAt:'2026-10-13T23:51:12', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261014-001', nguon:'TKMB', gdv:'Hồ Nam', qlkv:'Nguyễn Thị Hải', tinh:'T. Vĩnh Phúc', huyen:'H. Vĩnh Tường', addr:'Thôn Thành Công, Xã Vĩnh An, Vĩnh Phúc', mapLink:'https://www.google.com/maps?q=21.288222,105.51175', area:'150', front:'13m', price:'8tr/tháng (chưa VAT)', payment:'3 tháng/1 lần', deposit:'1 tháng', duration:'6-8 năm', legal:'Có sổ đỏ', condition:'Nhà tạm bên thuê thi công', handover:'', gtName:'Nguyễn Thị Hải', gtMNV:'6040475', bct:'Chú Thuần', bctPhone:'988164335', status:'GDV duyet', createdAt:'2026-10-14T09:54:30', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261014-002', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Thị Điệp', tinh:'T. Phú Thọ', huyen:'H. Hòa Bình', addr:'Đại lộ Thịnh Lang, Tổ 13, Phường Hòa Bình, Phú Thọ', mapLink:'https://maps.google.com/?q=20.8353740,105.3419352', area:'200', front:'8m', price:'25tr/tháng', payment:'thỏa thuận', deposit:'thỏa thuận', duration:'8 năm trở lên', legal:'Có sổ đỏ', condition:'Cty tự cải tạo (đã có điện 3 pha, điều hòa chủ nhà dùng được)', handover:'', gtName:'Nguyễn Thị Điệp', gtMNV:'3604931', bct:'Chú Sơn', bctPhone:'0904013889', status:'GDV duyet', createdAt:'2026-10-14T10:37:03', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261014-003', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Bùi Thị Tuyền', tinh:'T. Phú Thọ', huyen:'H. Cao Phong', addr:'Thị trấn Cao Phong, Cao Phong, Phú Thọ', mapLink:'https://maps.google.com/?q=20.711338,105.326264', area:'120', front:'14m', price:'15tr/tháng', payment:'thỏa thuận', deposit:'thỏa thuận', duration:'5 năm trở lên', legal:'Có sổ đỏ', condition:'Cty tự cải tạo', handover:'', gtName:'Bùi Thị Tuyền', gtMNV:'3013139', bct:'Anh Bách', bctPhone:'0962506699', status:'GDV duyet', createdAt:'2026-10-14T14:14:23', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+  { id:'MB-20261014-004', nguon:'TKMB', gdv:'Dương Tùng', qlkv:'Nguyễn Mai Vân', tinh:'T. Điện Biên', huyen:'TP. Điện Biên Phủ', addr:'Tổ dân phố 11, phường Mường Thanh, TP. Điện Biên Phủ, Điện Biên', mapLink:'https://maps.google.com/?q=21.382833,103.020722', area:'140', front:'7m', price:'16tr/tháng (có thương lượng)', payment:'thỏa thuận', deposit:'1 tháng', duration:'thỏa thuận', legal:'Có sổ đỏ', condition:'Bên thuê cải tạo', handover:'', gtName:'Nguyễn Khánh Hoà', gtMNV:'6102947', bct:'Tạ Thị Thành Bắc', bctPhone:'0988839498', status:'GDV duyet', createdAt:'2026-10-14T14:32:37', steps:[
+    {s:1,actor:'QLKV',appr:'GĐV',r:'Done',date:''},
+    {s:2,actor:'TKMB',appr:'GĐ TKMB',r:'Pending',date:''},
+    {s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}
+  ]},
+];
 let scans = [{date:'2026-10-06',qhCode:'HNI_ML23',gdv:'Phạm Minh Thu',qlkv:'Trần Thu Trà',hasMB:'yes',addr:'Đội 6 Tiên Đài',status:'Đã chuyển MB'}];
 const DP_STEPS = ['Đã giao việc','Đang đàm phán','Đàm phán thành công','Ký PLHĐ/Điều chỉnh','Đã hoàn thành'];
 const DP_DATA = [
@@ -1103,6 +1394,7 @@ function showQHMap() {
 const CASCADE = CASCADE_DATA;
 function populateGDV() {
   const sel = document.getElementById('mbGDV');
+  if (!sel) return;
   const gdvs = Object.keys(CASCADE_DATA).sort();
   gdvs.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
 }
@@ -2104,39 +2396,28 @@ function toR(st){
   return 'Pending';
 }
 async function loadLiveData(){
-  try {
-  console.log('🔄 loadLiveData: starting...');
   const url=t=>'https://docs.google.com/spreadsheets/d/'+SHEET_LIVE_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(t);
   let mrows=[], trows=[], dpCsv='', via='gviz';
   
   // Try gviz first (fastest)
   try {
-    console.log('🔄 loadLiveData: fetching gviz...');
     const [a,b,c]=await Promise.all([
       fetch(url('MB_Data')).then(r=>r.text()),
       fetch(url('MB_Tiendo')).then(r=>r.text()),
       fetch(url('DamPhan')).then(r=>r.text()).catch(()=>'')
     ]);
     mrows=csvParse(a); trows=csvParse(b); dpCsv=c;
-    console.log('🔄 loadLiveData: gviz done, MB_Data='+mrows.length+' rows, MB_Tiendo='+trows.length+' rows');
     if(mrows.length<2) throw new Error('gviz empty');
   } catch(gvizErr) {
-    console.error('🔄 loadLiveData: gviz FAILED —', gvizErr.message, gvizErr);
+    console.warn('gviz failed, trying GAS:', gvizErr.message);
     // Fallback: GAS
     try {
-      console.log('🔄 loadLiveData: trying GAS fallback...');
       const r = await fetch(GAS_URL, {method:'POST', body:JSON.stringify({action:'getMBData'}), headers:{'Content-Type':'text/plain'}});
       const j = await r.json();
-      console.log('🔄 loadLiveData: GAS response:', j);
       if(j.ok && j.mbData) { mrows=csvParse(j.mbData); trows=csvParse(j.tiendoData||''); via='GAS'; }
-    } catch(gasErr) { console.error('🔄 loadLiveData: GAS also FAILED —', gasErr.message, gasErr); }
+    } catch(gasErr) { console.warn('GAS also failed:', gasErr.message); }
   }
-  if(mrows.length<2) {
-    const ds = document.getElementById('dataStatus');
-    if (ds) { ds.textContent = '❌ Không kết nối được dữ liệu từ Google Sheets'; ds.style.color = '#f87171'; }
-    console.error('🔄 loadLiveData: NO DATA after all attempts');
-    return;
-  }
+  if(mrows.length<2) return;
     const idx={}; mrows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
     const td={};
     if(trows.length>1){
@@ -2228,11 +2509,6 @@ async function loadLiveData(){
         }
       }
     }
-  } catch(e) {
-    console.error('🔄 loadLiveData: UNEXPECTED ERROR —', e.message, e);
-    const ds = document.getElementById('dataStatus');
-    if (ds) { ds.textContent = '❌ Lỗi: ' + e.message; ds.style.color = '#f87171'; }
-  }
 }
 
 // ═══ QUẢN LÝ ĐIỂM QUY HOẠCH ═══
@@ -2504,6 +2780,9 @@ if (typeof haversine === 'undefined') {
     return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   }
 }
+
+// ═══ ROLE SWITCH ═══
+init();
 
 // ═══ INIT ═══
 function init() {
