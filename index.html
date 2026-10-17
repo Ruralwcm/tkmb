@@ -2116,27 +2116,29 @@ function openTracklog(mbId){
     <div style="color:var(--muted);font-size:11px">${bottom}</div>
   </div>`;
 
-  // ── Phần 2: Tracklog các bước ──
-  html+='<div style="font-weight:700;color:var(--primary);font-size:12.5px;margin-bottom:6px">📌 Tiến độ</div>';
-
+  // ── Phần 2: Tracklog các bước (compact table) ──
+  html+='<div style="font-weight:700;color:var(--primary);font-size:12.5px;margin-bottom:5px">📌 Tiến độ</div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  const icon={Done:'✅',Fail:'❌',Pending:'⏳',None:'⬜'};
   for(let s=1;s<=6;s++){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
     const step=mb.steps[s-1]||{};
     const r=step.r||'None';
-    html+=`<div style="border:1px solid #ede9fe;border-radius:8px;padding:9px 11px;margin-bottom:6px;background:${r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'#fafafa'}">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <strong style="color:var(--primary);font-size:12.5px">B${s}: ${STEP_SLA[s-1].desc}</strong>
-        <span class="tag ${tagCls[r]||'tag-gray'}" style="white-space:nowrap">${lbl[r]||r}</span>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.65">
-        ${info.thoiGian?`🗓 Ngày: ${info.thoiGian}<br>`:''}
-        ${info.nguoiThucHien?`👤 Người thực hiện: ${info.nguoiThucHien}<br>`:''}
-        ${info.nguoiDuyet?`✅ Người duyệt: ${info.nguoiDuyet}<br>`:''}
-        ${info.sla?`⏱ SLA: ${info.sla}<br>`:''}
-        ${info.vanDe?`⚠️ Vấn đề: ${info.vanDe}<br>`:''}
-      </div>
-    </div>`;
+    const bg=r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
+    const detail=[info.nguoiThucHien,info.nguoiDuyet,info.thoiGian,info.vanDe].filter(Boolean);
+    html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0">
+      <td style="padding:4px 4px;text-align:center;width:22px">${icon[r]||icon.None}</td>
+      <td style="padding:4px 4px;font-weight:600;color:var(--primary);white-space:nowrap">B${s}</td>
+      <td style="padding:4px 4px">${STEP_SLA[s-1].desc}</td>
+      <td style="padding:4px 6px;color:var(--muted);text-align:right;white-space:nowrap;font-size:11px">${STEP_SLA[s-1].sla||''}</td>
+    </tr>`;
+    if(detail.length){
+      html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0"><td></td><td></td><td colspan="2" style="padding:2px 4px 6px;font-size:10.5px;color:var(--muted)">
+        ${info.nguoiThucHien?`👤 ${info.nguoiThucHien}`:''}${info.nguoiDuyet?` · ✅ ${info.nguoiDuyet}`:''}${info.thoiGian?` · 🗓 ${info.thoiGian}`:''}${info.vanDe?`<br>⚠️ ${info.vanDe}`:''}
+      </td></tr>`;
+    }
   }
+  html+='</table>';
   document.getElementById('tracklogBody').innerHTML=html;
   document.getElementById('tracklogModal').style.display='flex';
 }
