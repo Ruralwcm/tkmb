@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.45</title>
+<title>TKMB Web App by HaoDT v2.46</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.45 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.46 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.45</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.46</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -662,7 +662,7 @@ tbody tr { transition:background .12s; }
 
 <!-- TRACKLOG MODAL -->
 <div class="modal-overlay" id="tracklogModal" style="display:none">
-  <div class="modal-card" style="max-width:560px">
+  <div class="modal-card" style="max-width:640px">
     <h3>👁 Tracklog Mặt Bằng — <span id="tracklogTitle"></span></h3>
     <div id="tracklogBody"></div>
     <div class="modal-actions">
@@ -745,7 +745,7 @@ function slaState(m, stepNum) {
 const CASCADE_DATA = {"Bùi Thị Thu Nhài":{"Bùi Thị Thu Nhài":{"TP. Hà Nội":["H. Hoài Đức","H. Đan Phượng"]},"Nguyễn Hữu Huân":{"TP. Hà Nội":["H. Đan Phượng"]},"Nguyễn Thị Hồng":{"TP. Hà Nội":["H. Ba Vì"]},"Nguyễn Thị Thu Hương":{"TP. Hà Nội":["H. Phúc Thọ"]},"Ngô Thị Quỳnh Anh":{"TP. Hà Nội":["H. Hoài Đức"]},"Phan Phúc Tân":{"TP. Hà Nội":["H. Ba Vì","H. Phúc Thọ"]},"Phạm Thị Nhâm":{"TP. Hà Nội":["H. Hoài Đức"]}},"Dương Tùng":{"Bùi Thị Thu Trang":{"TP. Hà Nội":["H. Ứng Hòa"]},"Dương Tùng":{"T. Hoà Bình":["H. Cao Phong","H. Lương Sơn","H. Mai Châu","H. Tân Lạc","TP. Hoà Bình"]},"Nguyễn Thị Dung":{"TP. Hà Nội":["H. Mỹ Đức"]},"Phạm Thị Bưởi":{"T. Hoà Bình":["H. Đà Bắc"]},"Vũ Thị Hương":{"T. Hoà Bình":["H. Lạc Thủy","H. Yên Thủy"]},"Đinh Thị Thu Hiền":{"T. Hoà Bình":["H. Lạc Sơn"]},"Đỗ Thanh Thủy":{"T. Sơn La":["H. Mộc Châu","H. Phù Yên","H. Vân Hồ"]}},"Hồ Nam":{"Bàn Văn Minh":{"T. Phú Thọ":["H. Hạ Hoà"]},"Cấn Văn Hoàn":{"T. Phú Thọ":["H. Thanh Ba"]},"Dương Đức Tài":{"T. Thái Nguyên":["H. Đồng Hỷ"]},"Hoàng Văn Huỳnh":{"T. Tuyên Quang":["H. Chiêm Hoá"]},"Lộc Thị Tươi":{"T. Tuyên Quang":["TP. Tuyên Quang"]},"Lương Văn Thửa":{"T. Thái Nguyên":["H. Phú Lương"]},"Lý Văn Sinh":{"T. Thái Nguyên":["H. Định Hoá"]},"Lê Thị Thu":{"T. Phú Thọ":["H. Thanh Thuỷ"]},"Ma Văn Toàn":{"T. Phú Thọ":["H. Thanh Sơn"]},"Nguyễn Ngọc Tâm":{"T. Phú Thọ":["H. Tam Nông","H. Thanh Sơn"]},"Nguyễn Trọng Hoàng":{"T. Bắc Kạn":["H. Ba Bể"]},"Nguyễn Văn Bình":{"T. Phú Thọ":["H. Yên Lập"]},"Nguyễn Đình Hậu":{"TP. Hà Nội":["H. Ba Vì"]},"Nông Minh Sơn":{"T. Tuyên Quang":["H. Na Hang"]},"Phùng Minh Hoàng":{"T. Tuyên Quang":["H. Sơn Dương"]},"Triệu Đức Thành":{"T. Bắc Kạn":["TP. Bắc Kạn"]},"Trần Trọng Hiếu":{"TP. Hà Nội":["H. Ba Vì"]},"Tạ Quốc Oanh":{"T. Phú Thọ":["H. Cẩm Khê"]},"Tạ Vân Anh":{"TP. Hà Nội":["H. Sơn Tây"]},"Vi Văn Đại":{"T. Phú Thọ":["H. Tân Sơn"]},"Đỗ Hải Võ":{"T. Thái Nguyên":["TP. Thái Nguyên"]}},"Lê Thị Hồng Thu":{"Lê Thị Hồng Thu":{"T. Hải Dương":["H. Nam Sách","TP. Chí Linh","TP. Hải Dương"]},"Nguyễn Thị Thu":{"T. Hải Dương":["H. Cẩm Giàng","H. Kim Thành"]},"Phạm Thị Hải":{"T. Hải Dương":["H. Thanh Hà","TP. Hải Dương"]},"Trần Thị Hoa":{"T. Hải Dương":["H. Kinh Môn"]},"Đào Thị Hường":{"T. Hải Dương":["H. Ninh Giang"]}},"Nguyễn Duy Đoàn":{"Chu Văn Anh":{"T. Hưng Yên":["H. Văn Giang"]},"Dương Thị Hòa":{"T. Hưng Yên":["H. Khoái Châu"]},"Lưu Văn Sơn":{"T. Hưng Yên":["H. Mỹ Hào","H. Văn Lâm"]},"Lê Văn Thao":{"T. Hưng Yên":["TP. Hưng Yên"]},"Nguyễn Văn Luyến":{"T. Hưng Yên":["H. Văn Giang"]},"Nguyễn Đức Lợi":{"T. Bắc Ninh":["H. Thuận Thành","TP. Bắc Ninh"]},"Phạm Văn Huân":{"T. Hưng Yên":["H. Phù Cừ"]},"Đinh Mạnh Tuân":{"T. Hưng Yên":["H. Yên Mỹ","H. Văn Giang","H. Văn Lâm"]}},"Nguyễn Mạnh Sơn":{"Bùi Thị Thanh":{"T. Hà Giang":["H. Quang Bình"]},"Hoàng Xuân Tưởng":{"T. Tuyên Quang":["H. Yên Sơn"]},"Lâm Văn Hà":{"T. Hà Giang":["H. Vị Xuyên","TP. Hà Giang"]},"Mã Ích Dương":{"T. Hà Giang":["H. Quản Bạ","H. Yên Minh"]},"Nông Minh Hòa":{"T. Hà Giang":["H. Bắc Mê","H. Đồng Văn"]},"Phạm Hữu Tài":{"T. Hà Giang":["H. Hoàng Su Phì"]},"Trần Đức Anh":{"T. Hà Giang":["H. Mèo Vạc"]},"Trần Đức Dũng":{"T. Hà Giang":["H. Xín Mần"]},"Đặng Thị Bích Nhi":{"T. Hà Giang":["TP. Hà Giang"]}},"Nguyễn Thị Thu":{"Bùi Ngọc Quỳnh Trang":{"TP. Hà Nội":["H. Mỹ Đức"]},"Mai Thanh Hải":{"T. Thanh Hóa":["H. Nga Sơn"]},"Nguyễn Ngọc Tú":{"T. Thanh Hóa":["H. Hà Trung"]},"Nguyễn Thị Hằng":{"T. Nam Định":["H. Trực Ninh","H. Vụ Bản"]},"Phan Thị Mai":{"T. Nam Định":["H. Hải Hậu","H. Nghĩa Hưng"]},"Phạm Xuân Hùng":{"T. Thanh Hóa":["H. Hậu Lộc"]},"Phạm Đình Kỳ":{"T. Ninh Bình":["H. Hoa Lư","H. Yên Mô"]},"Trần Văn Thao":{"T. Ninh Bình":["H. Kim Sơn","H. Yên Khánh"]},"Vũ Ngọc Toàn":{"T. Nam Định":["H. Ý Yên","TP. Nam Định"]}},"Phạm Minh Thu":{"Bùi Văn Chiến":{"TP. Hà Nội":["H. Mê Linh"]},"Hoàng Thị Thảo":{"T. Vĩnh Phúc":["H. Vĩnh Tường","H. Yên Lạc"]},"Lê Văn Trung":{"T. Vĩnh Phúc":["H. Tam Dương","TP. Vĩnh Yên"]},"Lê Đức Toàn":{"T. Vĩnh Phúc":["H. Bình Xuyên","H. Tam Đảo"]},"Nguyễn Đức Thành":{"T. Vĩnh Phúc":["H. Lập Thạch","H. Sông Lô"]},"Ngô Thị Hà":{"TP. Hà Nội":["H. Sóc Sơn"]},"Trần Thu Trà":{"TP. Hà Nội":["H. Đông Anh","H. Gia Lâm"]},"Trần Văn Bắc":{"TP. Hà Nội":["H. Mê Linh"]},"Đoàn Thị Hương Giang":{"TP. Hà Nội":["H. Đông Anh"]}},"Tạ Công Nhận":{"Hoàng Văn Cường":{"T. Bắc Giang":["H. Lục Ngạn","H. Sơn Động"]},"Hà Văn Nhân":{"T. Bắc Ninh":["H. Quế Võ"]},"Nông Thị Minh Sơn":{"T. Lạng Sơn":["H. Bắc Sơn"]},"Phùng Văn Thịnh":{"T. Bắc Giang":["H. Lạng Giang","H. Yên Dũng"]},"Phạm Bá Quang":{"T. Bắc Ninh":["H. Gia Bình","H. Lương Tài"]},"Thân Văn Tùng":{"T. Bắc Giang":["TP. Bắc Giang"]},"Trần Thị Hợp":{"T. Lạng Sơn":["H. Hữu Lũng"]},"Vi Hoài Nam":{"T. Lạng Sơn":["H. Lộc Bình"]},"Đào Xuân Hải":{"T. Bắc Giang":["H. Tân Yên","H. Yên Thế"]}},"Tạ Quốc Huy":{"Lê Thị Mây":{"T. Hải Dương":["H. Thanh Miện"]},"Nguyễn Quốc Minh":{"T. Bắc Ninh":["H. Tiên Du","H. Yên Phong","TP. Từ Sơn"]},"Phạm Hồng Hải":{"T. Bắc Ninh":["TP. Bắc Ninh"]},"Trần Mạnh Hùng":{"T. Bắc Ninh":["H. Thuận Thành"]},"Vũ Đình Thức":{"T. Hải Dương":["H. Bình Giang"]}},"Đặng Văn Dũng":{"Lương Văn Chỉnh":{"T. Hà Nam":["H. Kim Bảng","H. Thanh Liêm","TP. Phủ Lý"]},"Nguyễn Việt Hùng":{"T. Thái Bình":["H. Quỳnh Phụ","H. Thái Thụy"]},"Nguyễn Đức Hải":{"T. Hà Nam":["H. Bình Lục","H. Duy Tiên","H. Lý Nhân"]},"Phạm Văn Tuân":{"T. Thái Bình":["H. Kiến Xương","H. Tiền Hải"]},"Trịnh Thanh Bình":{"T. Ninh Bình":["H. Gia Viễn","H. Nho Quan","H. Yên Khánh","TP. Ninh Bình","TP. Tam Điệp"]},"Trần Thị Hương":{"T. Hà Nam":["H. Duy Tiên","TP. Phủ Lý"]},"Vũ Đức Vượng":{"T. Thái Bình":["H. Hưng Hà","H. Vũ Thư","TP. Thái Bình"]}}};
 
 
-// ═══ TKMB PHỤ TRÁCH MAPPING (chốt 17/10/2026 bởi anh Hảo) ═══
+// ═══ TKMB PHỤ TRÁCH MAPPING ═══
 const TKMB_HN_PHI_JS = ['Sóc Sơn','Mê Linh','Đông Anh','Gia Lâm'];
 const TINH_TO_TKMB_JS = {
   'Hưng Yên':'Phi','Hải Dương':'Phi','Hải Phòng':'Phi','Quảng Ninh':'Phi',
@@ -758,8 +758,8 @@ const TINH_TO_TKMB_JS = {
   'Hà Nam':'Thái','Ninh Bình':'Thái','Thái Bình':'Thái','Nam Định':'Thái'
 };
 function getTKMB_JS(tinh, huyen) {
-  var t = (tinh || '').replace(/^(T\\.|TP\\.)\\s*/, '').trim();
-  var h = (huyen || '').replace(/^(H\\.|TP\\.)\\s*/, '').trim();
+  var t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+  var h = (huyen || '').replace(/^(H\.|TP\.)\s*/, '').trim();
   if (t === 'Hà Nội') {
     for (var i=0;i<TKMB_HN_PHI_JS.length;i++) { if (h.indexOf(TKMB_HN_PHI_JS[i])>=0) return 'Phi'; }
     return 'Huy Dũng';
@@ -1333,7 +1333,7 @@ function autoLoginFromPortal() {
 
 function setCurrentUser(u) {
   currentUser = u;
-  localStorage.setItem('portal_user', JSON.stringify({id:u.code,name:u.name,role:u.rank,gdv:u.gdv||'',tkmb:u.tkmb||'',ts:Date.now()}));
+  localStorage.setItem('portal_user', JSON.stringify({id:u.code,name:u.name,role:u.rank,gdv:u.gdv||'',ts:Date.now()}));
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
@@ -1350,20 +1350,6 @@ function doLogout() {
 }
 
 // ═══ HELPERS ═══
-function getTKMB_Filter() {
-  if (!currentUser) return '';
-  if (currentUser.rank === 'GĐM' || currentUser.rank === 'GĐTKMB') return '';
-  if (currentUser.tkmb) return currentUser.tkmb;
-  return '';
-}
-function refreshAllViews() {
-  try {
-    if (qmLoaded) { populateQMFilters(); renderQHManage(); }
-    if (typeof MB_DATA !== 'undefined' && MB_DATA.length > 0) {
-      renderDash(); renderTienDo();
-    }
-  } catch(e) { console.warn('refreshAllViews:', e); }
-}
 function getSLAColor(m, step) {
   const st = slaState(m, step);
   return st === 'over' ? 'sla-over' : (st === 'warn' ? 'sla-warn' : 'sla-ok');
@@ -1687,7 +1673,7 @@ function toggleSection(el){
 
 
 
-/* ═══ KPI SUMMARY (NEW v2.45) ═══ */
+/* ═══ KPI SUMMARY (NEW v2.39) ═══ */
 function updateKPIs() {
   const list = MB_DATA || [];
   const total = list.length;
@@ -1738,7 +1724,7 @@ function updateKPIs() {
 
 // ═══ TIẾN ĐỘ MB ═══
 function getMien(tinh) {
-  const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
   const map = {
     'Hà Nội':'Hà Nội',
     'Điện Biên':'Đông Tây Bắc','Lai Châu':'Đông Tây Bắc','Sơn La':'Đông Tây Bắc','Hòa Bình':'Đông Tây Bắc','Hoà Bình':'Đông Tây Bắc','Yên Bái':'Đông Tây Bắc','Lào Cai':'Đông Tây Bắc',
@@ -2139,25 +2125,47 @@ function openTracklog(mbId){
   const tl=mb.tracklog||{};
   const lbl={None:'— Chưa đến',Pending:'⏳ Đang xử lý',Done:'✅ Đã xong',Fail:'❌ Fail'};
   const tagCls={Done:'tag-g',Fail:'tag-r',Pending:'tag-p',None:'tag-gray'};
-  let html='';
+
+  // ── Phần 1: Thông số MB (gọn 4 dòng) ──
+  const area=mb.area?(mb.area+'m²'):'—';
+  const front=mb.front?(mb.front+'m'):'';
+  const spec=[area,front?('MT '+front):'',mb.price||'',mb.payment?('TT '+mb.payment):'',mb.deposit?('Cọc '+mb.deposit):'',mb.duration||''].filter(Boolean).join(' · ');
+  const gt=mb.gtName?(mb.gtName+(mb.gtMNV?' (MNV '+mb.gtMNV+')':'')):'—';
+  const bct=mb.bct?(mb.bct+(mb.bctPhone?' · '+mb.bctPhone:'')):'—';
+  const bottom=[mb.legal||'',mb.condition||'',mb.status||''].filter(Boolean).join(' · ');
+  const addrLine=[mb.addr||'',mb.huyen||'',mb.tinh||''].filter(Boolean).join(', ');
+
+  let html=`<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--line);font-size:12px;line-height:1.7">
+    <div style="font-weight:700;color:var(--teal);font-size:12.5px;margin-bottom:6px">📋 ${mbId}</div>
+    <div style="color:var(--ink)">📍 ${addrLine}${mb.mapLink?` <a href="${mb.mapLink}" target="_blank" style="color:var(--teal);font-size:11px">🗺</a>`:''}</div>
+    <div style="color:var(--ink)">📐 ${spec}</div>
+    <div style="color:var(--ink)">👤 GĐV: ${mb.gdv||'—'} · QLKV: ${mb.qlkv||'—'} · GT: ${gt} · BCT: ${bct}</div>
+    <div style="color:var(--muted);font-size:11px">${bottom}</div>
+  </div>`;
+
+  // ── Phần 2: Tracklog các bước (compact table) ──
+  html+='<div style="font-weight:700;color:var(--primary);font-size:12.5px;margin-bottom:5px">📌 Tiến độ</div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  const icon={Done:'✅',Fail:'❌',Pending:'⏳',None:'⬜'};
   for(let s=1;s<=6;s++){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
     const step=mb.steps[s-1]||{};
     const r=step.r||'None';
-    html+=`<div style="border:1px solid #ede9fe;border-radius:8px;padding:9px 11px;margin-bottom:6px;background:${r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'#fafafa'}">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <strong style="color:var(--primary);font-size:12.5px">B${s}: ${STEP_SLA[s-1].desc}</strong>
-        <span class="tag ${tagCls[r]||'tag-gray'}" style="white-space:nowrap">${lbl[r]||r}</span>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.65">
-        ${info.thoiGian?`🗓 Ngày: ${info.thoiGian}<br>`:''}
-        ${info.nguoiThucHien?`👤 Người thực hiện: ${info.nguoiThucHien}<br>`:''}
-        ${info.nguoiDuyet?`✅ Người duyệt: ${info.nguoiDuyet}<br>`:''}
-        ${info.sla?`⏱ SLA: ${info.sla}<br>`:''}
-        ${info.vanDe?`⚠️ Vấn đề: ${info.vanDe}<br>`:''}
-      </div>
-    </div>`;
+    const bg=r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
+    const detail=[info.nguoiThucHien,info.nguoiDuyet,info.thoiGian,info.vanDe].filter(Boolean);
+    html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0">
+      <td style="padding:4px 4px;text-align:center;width:22px">${icon[r]||icon.None}</td>
+      <td style="padding:4px 4px;font-weight:600;color:var(--primary);white-space:nowrap">B${s}</td>
+      <td style="padding:4px 4px">${STEP_SLA[s-1].desc}</td>
+      <td style="padding:4px 6px;color:var(--muted);text-align:right;white-space:nowrap;font-size:11px">${STEP_SLA[s-1].sla||''}</td>
+    </tr>`;
+    if(detail.length){
+      html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0"><td></td><td></td><td colspan="2" style="padding:2px 4px 6px;font-size:10.5px;color:var(--muted)">
+        ${info.nguoiThucHien?`👤 ${info.nguoiThucHien}`:''}${info.nguoiDuyet?` · ✅ ${info.nguoiDuyet}`:''}${info.thoiGian?` · 🗓 ${info.thoiGian}`:''}${info.vanDe?`<br>⚠️ ${info.vanDe}`:''}
+      </td></tr>`;
+    }
   }
+  html+='</table>';
   document.getElementById('tracklogBody').innerHTML=html;
   document.getElementById('tracklogModal').style.display='flex';
 }
@@ -2522,8 +2530,8 @@ async function loadLiveData(){
       if (typeof updateKPIs === 'function') updateKPIs();
     }
     // Load DP data from DamPhan tab
-    if (c) {
-      const drows = csvParse(c);
+    if (dpCsv) {
+      const drows = csvParse(dpCsv);
       if (drows.length > 1) {
         const di = {}; drows[0].forEach((h,i)=>di[h.replace(/^\uFEFF/,'')]=i);
         const dpOut = [];
@@ -2772,9 +2780,7 @@ function qhDownloadTemplate() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'QH_Points_Template.xls'; a.click();
 }
 
-async // Normalize tên tỉnh để so sánh (xử lý encoding lỗi, dấu, prefix)
-
-function qhSyncStoreslist() {
+async function qhSyncStoreslist() {
   const btn = document.getElementById('qhSyncBtn');
   const info = document.getElementById('qhSyncInfo');
   btn.disabled = true; info.textContent = 'Đang tải Storelist...';
@@ -2794,17 +2800,12 @@ function qhSyncStoreslist() {
       stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Huyện/Quận']||si['Huyện']]||'' });
     }
     info.textContent = stores.length + ' CH · Đang mapping...';
-    // For each QH point: tìm CH trong CÙNG TỈNH → GĐV, QLKV (ưu tiên cùng huyện)
+    // For each QH point: ưu tiên CH CÙNG TỈNH → GĐV, QLKV
     let changed = 0, needReview = 0;
     for (const qh of QH_DATA) {
       if (!qh.lat || !qh.lng) continue;
-      
-      // Normalize tên tỉnh để so sánh
       const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
-      
-      // Step 1: tìm CH trong CÙNG TỈNH gần nhất → GĐV
-      let best = null, bestD = Infinity;
-      let bestSameTinh = null, bestSameTinhD = Infinity;
+      let best = null, bestD = Infinity, bestSameTinh = null, bestSameTinhD = Infinity;
       for (const s of stores) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
         const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
@@ -2812,29 +2813,20 @@ function qhSyncStoreslist() {
         if (sTinh === qhTinh && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
       }
       if (!best && !bestSameTinh) continue;
-      
-      // Ưu tiên CH cùng tỉnh, fallback CH gần nhất (đánh dấu cần review)
       const pick = bestSameTinh || best;
       const gdv = pick.gdv;
-      const isSameTinh = !!bestSameTinh;
-      if (!isSameTinh) needReview++;
-      
-      // Step 2: trong cùng GĐV, tìm QLKV (ưu tiên cùng tỉnh + cùng huyện)
-      let bestQLKV = null, bestQLKVD = Infinity;
-      let sameHuyen = null, sameHuyenD = Infinity;
+      if (!bestSameTinh) needReview++;
+      let bestQLKV = null, bestQLKVD = Infinity, sameHuyen = null, sameHuyenD = Infinity;
       const sameGdv = stores.filter(s => s.gdv === gdv && s.qlkv);
       for (const s of sameGdv) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
         const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
-        // Ưu tiên CH cùng tỉnh
         if (sTinh === qhTinh && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
         if (qh.huyen && s.huyen && sTinh === qhTinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
       }
       const pickQLKV = (sameHuyen && sameHuyenD < 50) ? sameHuyen : bestQLKV;
       if (!pickQLKV) continue;
-      if (qh.gdv !== gdv || qh.qlkv !== pickQLKV.qlkv) {
-        qh.gdv = gdv; qh.qlkv = pickQLKV.qlkv; changed++;
-      }
+      if (qh.gdv !== gdv || qh.qlkv !== pickQLKV.qlkv) { qh.gdv = gdv; qh.qlkv = pickQLKV.qlkv; changed++; }
     }
     info.textContent = '✅ Map ' + changed + ' điểm · ' + (needReview > 0 ? '⚠ ' + needReview + ' điểm khác tỉnh cần review' : 'Tất cả cùng tỉnh');
     renderQHManage();
