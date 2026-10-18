@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.56</title>
+<title>TKMB Web App by HaoDT v2.57</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.56 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.57 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.56</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.57</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -418,15 +418,15 @@ tbody tr { transition:background .12s; }
   </div>
 
   <!-- ═══ KPI BREAKDOWN B1-B6 ═══ -->
-  <div class="kpi-summary" id="kpiSummary">
-    <div class="kpi-mini teal"><div class="kpi-mini-num" id="kpiTotalMB">0</div><div class="kpi-mini-label">🏢 Tổng MB</div></div>
-    <div class="kpi-mini blue"><div class="kpi-mini-num" id="kpiStepB1">0</div><div class="kpi-mini-label">📋 B1 GĐV duyệt</div><div class="kpi-mini-sub">⏱ 24h</div></div>
-    <div class="kpi-mini orange"><div class="kpi-mini-num" id="kpiStepB2">0</div><div class="kpi-mini-label">🔍 B2 Khảo sát</div><div class="kpi-mini-sub">⏱ 48h</div></div>
-    <div class="kpi-mini purple"><div class="kpi-mini-num" id="kpiStepB3">0</div><div class="kpi-mini-label">📐 B3 Duyệt BBTĐ</div><div class="kpi-mini-sub">⏱ 24h</div></div>
-    <div class="kpi-mini teal"><div class="kpi-mini-num" id="kpiStepB4">0</div><div class="kpi-mini-label">📝 B4 Lên HĐTĐ</div><div class="kpi-mini-sub">📅 Thứ 4/5</div></div>
-    <div class="kpi-mini orange"><div class="kpi-mini-num" id="kpiStepB5">0</div><div class="kpi-mini-label">🤝 B5 Đàm phán</div><div class="kpi-mini-sub">⏱ 21 ngày</div></div>
-    <div class="kpi-mini green"><div class="kpi-mini-num" id="kpiStepB6">0</div><div class="kpi-mini-label">🚀 B6 Khai trương</div><div class="kpi-mini-sub">⏱ 7 ngày</div></div>
-    <div class="kpi-mini red"><div class="kpi-mini-num" id="kpiOverdue">0</div><div class="kpi-mini-label">⚠️ Quá hạn</div></div>
+  <div class="kpi-summary" id="kpiSummary" style="gap:12px;justify-content:center">
+    <span style="font-weight:700;font-size:14px">🏢 <span id="kpiTotalMB">0</span> MB</span>
+    <span style="color:#1d4ed8">B1:<b id="kpiStepB1">0</b></span>
+    <span style="color:#d97706">B2:<b id="kpiStepB2">0</b></span>
+    <span style="color:#7c3aed">B3:<b id="kpiStepB3">0</b></span>
+    <span style="color:var(--teal)">B4:<b id="kpiStepB4">0</b></span>
+    <span style="color:#d97706">B5:<b id="kpiStepB5">0</b></span>
+    <span style="color:#16a34a">B6:<b id="kpiStepB6">0</b></span>
+    <span style="color:#dc2626">⚠<b id="kpiOverdue">0</b></span>
   </div>
 
   <!-- MB gần đây (collapsible, mặc định ẩn) -->
