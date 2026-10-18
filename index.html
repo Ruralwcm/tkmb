@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.72</title>
+<title>TKMB Web App by HaoDT v2.73</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.72 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.73 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.72</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.73</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -733,6 +733,23 @@ tbody tr { transition:background .12s; }
       <button class="btn btn-outline" id="qhDeleteBtn" style="display:none" onclick="deleteQHPoint()">🗑 Xóa</button>
       <button class="btn btn-outline" onclick="closeQHEdit()">Hủy</button>
       <button class="btn btn-primary" onclick="saveQHPoint()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER EDIT MODAL -->
+<div class="modal-overlay" id="userEditModal" style="display:none">
+  <div class="modal-card">
+    <h3 id="userEditTitle">✏️ Sửa User</h3>
+    <input type="hidden" id="userEditIdx">
+    <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
+    <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
+    <div class="form-group"><label>GĐV/TKMB phụ trách</label><input id="ueGdv" placeholder="Vùng hoặc KV (Phi/Huy Dũng/Thái)"></div>
+    <div class="form-group"><label>Phạm vi (tỉnh, cách dấu phẩy)</label><input id="uePhamvi" placeholder="vd: Thái Nguyên, Bắc Kạn"></div>
+    <div class="form-group"><label>Password</label><input id="uePass" type="password"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="document.getElementById('userEditModal').style.display='none'">Hủy</button>
+      <button class="btn btn-primary" onclick="ueSave()">💾 Lưu</button>
     </div>
   </div>
 </div>
@@ -3027,15 +3044,26 @@ function cfgAddUser() {
 }
 function cfgEditUser(i) {
   const u=USERS[i];
-  const name=prompt('Họ tên:',u.name);if(!name)return;
-  const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV/CV TKMB):',u.rank);if(!rank)return;
-  const gdv=prompt('GDV/TKMB phụ trách:',u.gdv||u.tkmb||'');
-  const phamvi=prompt('Phạm vi quản lý (tỉnh, cách bởi dấu phẩy):',(u.phamvi||[]).join(','));
-  const phone=prompt('Password:',u.phone||'12345678');if(!phone)return;
-  u.name=name;u.rank=rank;u.phone=phone;
-  if(rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
+  document.getElementById('userEditIdx').value = i;
+  document.getElementById('userEditTitle').textContent = 'Sửa: ' + u.name;
+  document.getElementById('ueName').value = u.name;
+  document.getElementById('ueRank').value = u.rank;
+  document.getElementById('ueGdv').value = u.gdv||u.tkmb||'';
+  document.getElementById('uePhamvi').value = (u.phamvi||[]).join(',');
+  document.getElementById('uePass').value = u.phone||'12345678';
+  document.getElementById('userEditModal').style.display = 'flex';
+}
+function ueSave() {
+  const i = parseInt(document.getElementById('userEditIdx').value);
+  const u = USERS[i];
+  u.name = document.getElementById('ueName').value.trim();
+  u.rank = document.getElementById('ueRank').value;
+  const gdv = document.getElementById('ueGdv').value.trim();
+  if(u.rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
   else{u.gdv=gdv;u.tkmb='';}
-  u.phamvi = phamvi ? phamvi.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  u.phamvi = document.getElementById('uePhamvi').value.split(',').map(s=>s.trim()).filter(Boolean);
+  u.phone = document.getElementById('uePass').value.trim();
+  document.getElementById('userEditModal').style.display = 'none';
   renderSettings();
 }
 function cfgDeleteUser(i) {
