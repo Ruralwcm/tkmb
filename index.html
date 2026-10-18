@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.49</title>
+<title>TKMB Web App by HaoDT v2.50</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.49 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.50 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.49</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.50</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -626,15 +626,27 @@ tbody tr { transition:background .12s; }
 <!-- ===== CÀI ĐẶT ===== -->
 <section class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt</h3>
-    <h4 style="margin-top:16px">📏 Khoảng cách check-in điểm QH (mét)</h4>
-    <div style="display:flex;gap:12px;align-items:center;margin:8px 0">
-      <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
-      <span id="cfgScanRadiusVal" style="font-weight:700;min-width:50px;text-align:right">100</span><span>m</span>
-      <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾 Lưu</button>
+    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH</h4>
+    <div style="display:flex;gap:8px;align-items:center;margin:4px 0 16px">
+      <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1;max-width:300px" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
+      <span id="cfgScanRadiusVal" style="font-weight:700;min-width:40px">100</span><span>m</span>
+      <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾</button>
     </div>
-    <h4 style="margin-top:20px">👥 Quản lý User</h4>
-    <div style="overflow-x:auto"><table id="cfgUserTable"><thead><tr><th>Mã NV</th><th>Họ tên</th><th>Vai trò</th><th>GĐV / TKMB</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
-    <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm User</button>
+
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <!-- User list grouped by role -->
+      <div style="flex:1;min-width:300px">
+        <h4 style="margin-bottom:8px">👥 Users theo chức danh</h4>
+        <div id="cfgUserGroups"></div>
+        <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
+      </div>
+      <!-- Permission matrix -->
+      <div style="flex:1;min-width:280px">
+        <h4 style="margin-bottom:8px">🔐 Matrix phân quyền</h4>
+        <table style="font-size:11px"><thead><tr><th>Vai trò</th><th>Xem</th><th>Sửa</th></tr></thead>
+        <tbody id="cfgPermMatrix"></tbody></table>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -2931,14 +2943,41 @@ function renderSettings() {
   document.getElementById('cfgScanRadius').value = r;
   document.getElementById('cfgScanRadiusVal').textContent = r;
   SCAN_RADIUS = r;
-  // Render users table
-  const tbody = document.querySelector('#cfgUserTable tbody');
-  tbody.innerHTML = USERS.map((u,i) => `<tr>
-    <td>${u.code}</td><td>${u.name}</td><td>${u.rank}</td>
-    <td>${u.gdv||u.tkmb||'—'}</td>
-    <td><button class="btn btn-xs btn-outline" onclick="cfgEditUser(${i})">✏️</button>
-    <button class="btn btn-xs btn-danger" onclick="cfgDeleteUser(${i})">🗑</button></td>
-  </tr>`).join('');
+  // Group users by rank
+  const groups = {};
+  USERS.forEach((u,i) => {
+    const key = u.rank||'Khác';
+    if(!groups[key]) groups[key]=[];
+    groups[key].push({...u,idx:i});
+  });
+  const order = ['GĐM','GĐTKMB','GĐV','TKMB','QLKV'];
+  let html = '';
+  order.forEach(rank => {
+    if(!groups[rank]) return;
+    html += `<div style="margin-bottom:8px"><strong style="color:var(--teal);font-size:12px">${rank}</strong>`;
+    groups[rank].forEach(u => {
+      const sub = u.gdv||u.tkmb||'';
+      html += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px">
+        <span style="flex:1">${u.name} <span style="color:var(--muted)">(${u.code})</span> ${sub?'— <em>'+sub+'</em>':''}</span>
+        <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${u.idx})" title="Sửa">✏️</button>
+        <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${u.idx})" title="Xóa">✕</button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('cfgUserGroups').innerHTML = html || '<div style="color:var(--muted)">Chưa có user</div>';
+
+  // Permission matrix
+  const perms = [
+    {role:'GĐM',view:'Tất cả',edit:'✅'},
+    {role:'GĐTKMB',view:'Tất cả',edit:'✅'},
+    {role:'GĐV',view:'Vùng phụ trách',edit:'MB của vùng'},
+    {role:'TKMB',view:'Khu vực được giao',edit:'—'},
+    {role:'QLKV',view:'Khu vực QLKV',edit:'—'}
+  ];
+  document.getElementById('cfgPermMatrix').innerHTML = perms.map(p =>
+    `<tr><td><strong>${p.role}</strong></td><td>${p.view}</td><td>${p.edit}</td></tr>`
+  ).join('');
 }
 function cfgAddUser() {
   const code=prompt('Mã NV:','');if(!code)return;
