@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.73</title>
+<title>TKMB Web App by HaoDT v2.74</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.73 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.74 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.73</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.74</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -745,7 +745,8 @@ tbody tr { transition:background .12s; }
     <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
     <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
     <div class="form-group"><label>GĐV/TKMB phụ trách</label><input id="ueGdv" placeholder="Vùng hoặc KV (Phi/Huy Dũng/Thái)"></div>
-    <div class="form-group"><label>Phạm vi (tỉnh, cách dấu phẩy)</label><input id="uePhamvi" placeholder="vd: Thái Nguyên, Bắc Kạn"></div>
+    <div class="form-group"><label>Phạm vi (tỉnh)</label><input id="uePhamvi" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList()">
+    <div id="ueTinhList" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
     <div class="form-group"><label>Password</label><input id="uePass" type="password"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="document.getElementById('userEditModal').style.display='none'">Hủy</button>
@@ -3065,6 +3066,24 @@ function ueSave() {
   u.phone = document.getElementById('uePass').value.trim();
   document.getElementById('userEditModal').style.display = 'none';
   renderSettings();
+}
+function ueShowTinhList() {
+  const div = document.getElementById('ueTinhList');
+  if (div.style.display !== 'none') { div.style.display = 'none'; return; }
+  div.style.display = 'block';
+  const cur = document.getElementById('uePhamvi').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const tinhs = Object.keys(TINH_TO_TKMB_JS).sort();
+  div.innerHTML = tinhs.map(t => {
+    const ck = cur.includes(t) ? 'checked' : '';
+    return `<label style="display:block;font-size:11px;cursor:pointer"><input type="checkbox" ${ck} onchange="ueToggleTinh(this,'${t}')"> ${t}</label>`;
+  }).join('');
+}
+function ueToggleTinh(cb, tinh) {
+  const input = document.getElementById('uePhamvi');
+  let arr = input.value.split(',').map(s=>s.trim()).filter(Boolean);
+  if (cb.checked) { if(!arr.includes(tinh)) arr.push(tinh); }
+  else arr = arr.filter(t=>t!==tinh);
+  input.value = arr.join(',');
 }
 function cfgDeleteUser(i) {
   if(!confirm('Xóa user '+USERS[i].name+'?'))return;
