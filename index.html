@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.61</title>
+<title>TKMB Web App by HaoDT v2.62</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.61 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.62 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.61</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.62</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -630,7 +630,7 @@ tbody tr { transition:background .12s; }
     <div style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:500px">
         <h4 style="margin-bottom:8px">👥 Users</h4>
-        <div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Pass</th><th>Phân quyền</th><th></th></tr></thead>
+        <div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Pass</th><th>Vai trò</th><th></th></tr></thead>
         <tbody id="cfgUserTable"></tbody></table></div>
         <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
       </div>
@@ -2969,7 +2969,7 @@ function renderSettings() {
       <td>${u.name}</td>
       <td><code>${u.code}</code></td>
       <td>••••••••</td>
-      <td>${u.gdv||u.tkmb||'—'}</td>
+      <td>${u.gdv? 'Vùng: '+u.gdv : u.tkmb? 'KV: '+u.tkmb : u.rank==='GĐM'||u.rank==='GĐTKMB'? 'Toàn quyền' : '—'}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${i})" title="Sửa">✏️</button>
         <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${i})" title="Xóa">✕</button>
@@ -3012,9 +3012,10 @@ function cfgAddUser() {
 function cfgEditUser(i) {
   const u=USERS[i];
   const name=prompt('Họ tên:',u.name);if(!name)return;
-  const rank=prompt('Vai trò:',u.rank);if(!rank)return;
-  const gdv=prompt('GĐV/TKMB:',u.gdv||u.tkmb||'');
-  u.name=name;u.rank=rank;
+  const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV):',u.rank);if(!rank)return;
+  const gdv=prompt('Phân quyền (với GĐV: tên vùng | với TKMB: Phi/Huy Dũng/Thái):',u.gdv||u.tkmb||'');
+  const phone=prompt('Password:',u.phone||'12345678');if(!phone)return;
+  u.name=name;u.rank=rank;u.phone=phone;
   if(rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
   else{u.gdv=gdv;u.tkmb='';}
   renderSettings();
