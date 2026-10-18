@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.57</title>
+<title>TKMB Web App by HaoDT v2.58</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.57 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.58 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.57</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.58</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -418,25 +418,17 @@ tbody tr { transition:background .12s; }
   </div>
 
   <!-- ═══ KPI BREAKDOWN B1-B6 ═══ -->
-  <div class="kpi-summary" id="kpiSummary" style="gap:12px;justify-content:center">
-    <span style="font-weight:700;font-size:14px">🏢 <span id="kpiTotalMB">0</span> MB</span>
-    <span style="color:#1d4ed8">B1:<b id="kpiStepB1">0</b></span>
-    <span style="color:#d97706">B2:<b id="kpiStepB2">0</b></span>
-    <span style="color:#7c3aed">B3:<b id="kpiStepB3">0</b></span>
-    <span style="color:var(--teal)">B4:<b id="kpiStepB4">0</b></span>
-    <span style="color:#d97706">B5:<b id="kpiStepB5">0</b></span>
-    <span style="color:#16a34a">B6:<b id="kpiStepB6">0</b></span>
-    <span style="color:#dc2626">⚠<b id="kpiOverdue">0</b></span>
-  </div>
+  <!-- KPI đã bỏ, chuyển sang MB gần đây -->
 
-  <!-- MB gần đây (collapsible, mặc định ẩn) -->
+  <!-- MB gần đây -->
   <div class="card">
-    <div class="sec-header collapsed" onclick="toggleSection(this)" style="margin-bottom:0">
+    <div class="sec-header" onclick="toggleSection(this)" style="margin-bottom:0">
       <span class="arr">▼</span>
-      <h3 style="margin:0">📋 MB gần đây <span class="sub">click dòng để xem chi tiết</span></h3>
+      <h3 style="margin:0">📋 MB gần đây <span class="sub">10 MB mới nhất</span></h3>
     </div>
-    <div class="sec-body collapsed" style="max-height:0">
-      <div style="overflow-x:auto;margin-top:8px"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+    <div class="sec-body" style="max-height:2000px">
+      <div style="overflow-x:auto;margin-top:8px"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
+      <div style="text-align:center;margin-top:8px"><button class="btn btn-sm btn-outline" onclick="document.querySelector('[data-tab=tiendo]').click()">📋 Xem tất cả →</button></div>
     </div>
   </div>
 
@@ -1668,7 +1660,7 @@ function renderDash() {
     <div class="kpi-card"><div class="kpi-num g">${done}</div><div class="kpi-label">✅ Đã KT</div></div>
     <div class="kpi-card"><div class="kpi-num r">${failMB}</div><div class="kpi-label">❌ Fail</div></div>
     <div class="kpi-card"><div class="kpi-num r">${overdue}</div><div class="kpi-label">⚠️ Quá hạn</div></div>`;
-  document.querySelector('#dashMB tbody').innerHTML = list.map(m => {
+  document.querySelector('#dashMB tbody').innerHTML = list.slice(0,10).map(m => {
     const p = getPct(m.steps); const hasFail = m.steps.some(s=>s.r==='Fail');
     const lastPending = m.steps.find(s=>s.r==='Pending');
     const slaCls = lastPending ? getSLAColor(m, lastPending.s) : 'sla-ok';
