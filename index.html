@@ -1,10 +1,9 @@
-<!-- v2.44 fresh 1792282090263 -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App — NSO Miền Bắc v2.44 by HaoDT</title>
+<title>TKMB Web App — NSO Miền Bắc v2.45 by HaoDT</title>
 <style>
 /* ═══ DESIGN SYSTEM v2.39 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
@@ -1736,7 +1735,7 @@ function updateKPIs() {
 
 // ═══ TIẾN ĐỘ MB ═══
 function getMien(tinh) {
-  const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+  const t = (tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const map = {
     'Hà Nội':'Hà Nội',
     'Điện Biên':'Đông Tây Bắc','Lai Châu':'Đông Tây Bắc','Sơn La':'Đông Tây Bắc','Hòa Bình':'Đông Tây Bắc','Hoà Bình':'Đông Tây Bắc','Yên Bái':'Đông Tây Bắc','Lào Cai':'Đông Tây Bắc',
@@ -2770,7 +2769,14 @@ function qhDownloadTemplate() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'QH_Points_Template.xls'; a.click();
 }
 
-async function qhSyncStoreslist() {
+async // Normalize tên tỉnh để so sánh (xử lý encoding lỗi, dấu, prefix)
+function normTinh(s) {
+  return (s || '').replace(/^(T\.|TP\.)\s*/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^\w\s]/g, ''); // xóa ký tự lạ
+}
+
+function qhSyncStoreslist_() {
   const btn = document.getElementById('qhSyncBtn');
   const info = document.getElementById('qhSyncInfo');
   btn.disabled = true; info.textContent = 'Đang tải Storelist...';
@@ -2796,16 +2802,16 @@ async function qhSyncStoreslist() {
       if (!qh.lat || !qh.lng) continue;
       
       // Normalize tên tỉnh để so sánh
-      const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+      const qhTinhNorm = normTinh(qh.tinh);
       
       // Step 1: tìm CH trong CÙNG TỈNH gần nhất → GĐV
       let best = null, bestD = Infinity;
       let bestSameTinh = null, bestSameTinhD = Infinity;
       for (const s of stores) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+        const sTinh = normTinh(s.tinh);
         if (d < bestD) { bestD = d; best = s; }
-        if (sTinh === qhTinh && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
+        if (sTinh === qhTinhNorm && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
       }
       if (!best && !bestSameTinh) continue;
       
@@ -2821,10 +2827,10 @@ async function qhSyncStoreslist() {
       const sameGdv = stores.filter(s => s.gdv === gdv && s.qlkv);
       for (const s of sameGdv) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+        const sTinh = normTinh(s.tinh);
         // Ưu tiên CH cùng tỉnh
-        if (sTinh === qhTinh && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
-        if (qh.huyen && s.huyen && sTinh === qhTinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
+        if (sTinh === qhTinhNorm && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
+        if (qh.huyen && s.huyen && sTinh === qhTinhNorm && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
       }
       const pickQLKV = (sameHuyen && sameHuyenD < 50) ? sameHuyen : bestQLKV;
       if (!pickQLKV) continue;
