@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.52</title>
+<title>TKMB Web App by HaoDT v2.53</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.52 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.53 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.52</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.53</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -2930,12 +2930,19 @@ function init() {
 function loadSettings() {
   try { return JSON.parse(localStorage.getItem('tkmb_settings')||'{}'); } catch(e) { return {}; }
 }
+function cfgTogglePerm(role, idx, val) {
+  const s = loadSettings();
+  if(!s.perms) s.perms = {};
+  if(!s.perms[role]) s.perms[role] = [1,1,1,1,1,1,1,1,1];
+  s.perms[role][idx] = val?1:0;
+  localStorage.setItem('tkmb_settings', JSON.stringify(s));
+}
 function saveSettings() {
   const s = loadSettings();
   s.scanRadius = parseInt(document.getElementById('cfgScanRadius').value)||100;
   localStorage.setItem('tkmb_settings', JSON.stringify(s));
   SCAN_RADIUS = s.scanRadius;
-  alert('✅ Đã lưu cài đặt');
+  alert('✅ Đã lưu');
 }
 function renderSettings() {
   const s = loadSettings();
@@ -2958,17 +2965,27 @@ function renderSettings() {
     </tr>`
   ).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Chưa có user</td></tr>';
   // Permission matrix
-  const perms = [
-    {role:'GĐM',t:'✅✅✅✅✅✅✅✅✅'},
-    {role:'GĐTKMB',t:'✅✅✅✅✅✅✅✅—'},
-    {role:'GĐV',t:'✅✅✅✅✅✅✅✅—'},
-    {role:'TKMB',t:'✅✅✅✅✅————'},
-    {role:'QLKV',t:'✅✅—✅—————'}
-  ];
-  document.getElementById('cfgPermMatrix').innerHTML = perms.map(p => {
-    const cells = p.t.split('').map(c => `<td style="text-align:center">${c}</td>`).join('');
-    return `<tr><td><strong>${p.role}</strong></td>${cells}</tr>`;
-  }).join('');
+  const tabs = ['dash','tkmb','tiendo','scan','qhmanage','checklist','damphan','dsmb','settings'];
+  const tabLabels = ['📊 Dash','📋 Tiếp nhận','🔄 Tiến độ','🗺 Scan','🗂 QH','✅ Checklist','🏢 ĐP','📑 DS MB','⚙️ Cài đặt'];
+  const roles = ['GĐM','GĐTKMB','GĐV','TKMB','QLKV'];
+  const defaultPerms = {
+    GĐM:     [1,1,1,1,1,1,1,1,1],
+    GĐTKMB:  [1,1,1,1,1,1,1,1,0],
+    GĐV:     [1,1,1,1,1,1,1,1,0],
+    TKMB:    [1,1,1,1,1,0,0,0,0],
+    QLKV:    [1,1,0,1,0,0,0,0,0]
+  };
+  let savedPerms = s.perms || defaultPerms;
+  document.getElementById('cfgPermMatrix').innerHTML = 
+    '<tr><th></th>'+tabLabels.map(l=>`<th style="font-size:9px;text-align:center;writing-mode:vertical-lr">${l}</th>`).join('')+'</tr>' +
+    roles.map(r => {
+      const cells = tabs.map((t,i) => {
+        const checked = (savedPerms[r]||defaultPerms[r]||[])[i] ? 'checked' : '';
+        return `<td style="text-align:center"><input type="checkbox" ${checked} onchange="cfgTogglePerm('${r}',${i},this.checked)" style="cursor:pointer"></td>`;
+      }).join('');
+      return `<tr><td><strong>${r}</strong></td>${cells}</tr>`;
+    }).join('');
+  document.getElementById('cfgPermMatrix').closest('table').style.fontSize='10px';
 }
 function cfgAddUser() {
   const code=prompt('Mã NV:','');if(!code)return;
