@@ -1337,7 +1337,6 @@ function setCurrentUser(u) {
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
-  refreshAllViews();
 }
 
 function doLogout() {
