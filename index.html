@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.70</title>
+<title>TKMB Web App by HaoDT v2.71</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.70 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.71 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.70</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.71</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -631,7 +631,7 @@ tbody tr { transition:background .12s; }
       <div style="flex:1;min-width:500px">
         <h4 style="margin-bottom:8px">👥 Users</h4>
         <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm Mã NV hoặc tên..." style="width:100%;max-width:300px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:8px;font-size:12px" oninput="cfgSearchUsers()">
-        <div style="max-height:400px;overflow-y:auto">
+        <div style="">
 
 
 
@@ -2990,20 +2990,7 @@ function renderSettings() {
   document.getElementById('cfgScanRadius').value = r;
   document.getElementById('cfgScanRadiusVal').textContent = r;
   SCAN_RADIUS = r;
-  // Flat table
-  document.getElementById('cfgUserTable').innerHTML = USERS.map((u,i) => `
-    <tr>
-      <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
-      <td>${u.name}</td>
-      <td><code>${u.code}</code></td>
-      <td>••••••••</td>
-      <td>${u.rank}${u.phamvi&&u.phamvi.length?" <span style=font-size:9px;color:var(--muted)>("+u.phamvi.length+" tỉnh)</span>":""}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${idx})" title="Sửa">✏️</button>
-        <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${idx})" title="Xóa">✕</button>
-      </td>
-    </tr>`
-  ).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Chưa có user</td></tr>';
+  cfgSearchUsers();
   // Permission matrix
   const tabs = ['dash','tkmb','tiendo','scan','qhmanage','checklist','damphan','dsmb','settings'];
   const tabLabels = ['Dash','Tiếp nhận','Tiến độ','Scan','QH','Checklist','ĐP','DS MB','Cài đặt'];
