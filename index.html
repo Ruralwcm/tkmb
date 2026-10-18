@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.59</title>
+<title>TKMB Web App by HaoDT v2.60</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.59 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.60 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.59</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.60</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -618,6 +618,7 @@ tbody tr { transition:background .12s; }
 <!-- ===== CÀI ĐẶT ===== -->
 <section class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt</h3>
+    <!-- Scan radius -->
     <h4 style="margin-top:12px">📏 Khoảng cách check-in QH</h4>
     <div style="display:flex;gap:8px;align-items:center;margin:4px 0 16px">
       <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1;max-width:300px" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
@@ -625,6 +626,7 @@ tbody tr { transition:background .12s; }
       <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾</button>
     </div>
 
+    <!-- Users -->
     <div style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:500px">
         <h4 style="margin-bottom:8px">👥 Users</h4>
@@ -632,13 +634,23 @@ tbody tr { transition:background .12s; }
         <tbody id="cfgUserTable"></tbody></table></div>
         <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
       </div>
-      <!-- Permission matrix -->
+      <!-- Matrix -->
       <div style="flex:1;min-width:280px">
         <h4 style="margin-bottom:8px">🔐 Phân quyền truy cập Tab</h4>
         <div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th>Vai trò</th><th>📊 Dash</th><th>📋 Tiếp nhận</th><th>🔄 Tiến độ</th><th>🗺 Scan</th><th>🗂 QH</th><th>✅ Checklist</th><th>🏢 ĐP</th><th>📑 DS MB</th><th>⚙️ Cài đặt</th></tr></thead>
         <tbody id="cfgPermMatrix"></tbody></table></div>
       </div>
     </div>
+
+    <!-- Phạm vi quản lý TKMB -->
+    <h4 style="margin-top:20px">🗺 Phạm vi quản lý TKMB <button class="btn btn-sm btn-outline" onclick="cfgSyncStoreslist()" style="margin-left:8px;font-size:10px">🔄 Đồng bộ GĐV/QLKV</button></h4>
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <select id="cfgTkmbFilter" onchange="renderTkmbMap()"><option value="">Tất cả TKMB</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
+      <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
+      <input type="file" id="cfgTkmbImport" accept=".csv" style="display:none" onchange="cfgHandleTkmbImport(this)">
+    </div>
+    <div style="overflow-x:auto"><table style="font-size:11px"><thead><tr><th>Tỉnh/TP</th><th>Huyện (HN only)</th><th>TKMB phụ trách</th><th></th></tr></thead>
+    <tbody id="cfgTkmbMap"></tbody></table></div>
   </div>
 </section>
 
@@ -2985,6 +2997,7 @@ function renderSettings() {
       return `<tr><td><strong>${r}</strong></td>${cells}</tr>`;
     }).join('');
   document.getElementById('cfgPermMatrix').closest('table').style.fontSize='10px';
+  renderTkmbMap();
 }
 function cfgAddUser() {
   const code=prompt('Mã NV:','');if(!code)return;
@@ -3008,6 +3021,65 @@ function cfgDeleteUser(i) {
   if(!confirm('Xóa user '+USERS[i].name+'?'))return;
   USERS.splice(i,1);
   renderSettings();
+}
+
+// ═══ TKMB Map Management ═══
+function getTkmbMap() {
+  try { return JSON.parse(localStorage.getItem('tkmb_map')||'{}'); } catch(e) { return {}; }
+}
+function saveTkmbMap(map) { localStorage.setItem('tkmb_map', JSON.stringify(map)); }
+function renderTkmbMap() {
+  const filter = document.getElementById('cfgTkmbFilter').value;
+  const map = getTkmbMap();
+  let rows = [];
+  // Show all provinces in TINH_TO_TKMB_JS plus saved overrides
+  const all = {...TINH_TO_TKMB_JS, ...map};
+  const sorted = Object.keys(all).sort();
+  sorted.forEach(t => {
+    const tkmb = all[t];
+    if (filter && tkmb !== filter) return;
+    const isOverride = map[t] !== undefined;
+    rows.push(`<tr style="${isOverride?'background:#ecfdf5':''}">
+      <td>${t}</td><td>—</td>
+      <td><select onchange="cfgUpdateTkmbMap('${t}',this.value)" style="font-size:11px">
+        <option value="">—</option><option ${tkmb==='Phi'?'selected':''}>Phi</option><option ${tkmb==='Huy Dũng'?'selected':''}>Huy Dũng</option><option ${tkmb==='Thái'?'selected':''}>Thái</option>
+      </select></td>
+      <td>${isOverride?'<span style="font-size:9px;color:#16a34a">đã sửa</span>':''}</td>
+    </tr>`);
+  });
+  document.getElementById('cfgTkmbMap').innerHTML = rows.join('') || '<tr><td colspan="4">Không có dữ liệu</td></tr>';
+}
+function cfgUpdateTkmbMap(tinh, val) {
+  const map = getTkmbMap();
+  if (val) map[tinh] = val; else delete map[tinh];
+  saveTkmbMap(map);
+}
+function cfgImportTkmbMap() { document.getElementById('cfgTkmbImport').click(); }
+function cfgHandleTkmbImport(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split('\n');
+    const map = getTkmbMap();
+    lines.forEach(l => {
+      const parts = l.split(/[,;\t]/);
+      if (parts.length >= 2) {
+        const t = parts[0].trim(), v = parts[1].trim();
+        if (t && v) map[t] = v;
+      }
+    });
+    saveTkmbMap(map);
+    renderTkmbMap();
+    alert('✅ Đã import ' + Object.keys(map).length + ' tỉnh');
+  };
+  reader.readAsText(file);
+}
+function cfgSyncStoreslist() {
+  // Call qhSyncStoreslist from settings tab
+  if (typeof qhSyncStoreslist === 'function') {
+    qhSyncStoreslist();
+    setTimeout(() => alert('✅ Đã đồng bộ GĐV/QLKV'), 3000);
+  }
 }
 
 init();
