@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.58</title>
+<title>TKMB Web App by HaoDT v2.59</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.58 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.59 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.58</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.59</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -1370,6 +1370,12 @@ function doLogout() {
 }
 
 // ═══ HELPERS ═══
+function getUserFilterGDV() {
+  if (!currentUser) return '';
+  if (currentUser.rank === 'GĐM' || currentUser.rank === 'GĐTKMB') return '';
+  if (currentUser.rank === 'GĐV') return currentUser.gdv || currentUser.name;
+  return '';
+}
 function getSLAColor(m, step) {
   const st = slaState(m, step);
   return st === 'over' ? 'sla-over' : (st === 'warn' ? 'sla-warn' : 'sla-ok');
