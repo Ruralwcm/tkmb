@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.50</title>
+<title>TKMB Web App by HaoDT v2.51</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.50 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.51 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.50</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.51</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -634,10 +634,10 @@ tbody tr { transition:background .12s; }
     </div>
 
     <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <!-- User list grouped by role -->
-      <div style="flex:1;min-width:300px">
-        <h4 style="margin-bottom:8px">👥 Users theo chức danh</h4>
-        <div id="cfgUserGroups"></div>
+      <div style="flex:1;min-width:500px">
+        <h4 style="margin-bottom:8px">👥 Users</h4>
+        <div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Pass</th><th>Phân quyền</th><th></th></tr></thead>
+        <tbody id="cfgUserTable"></tbody></table></div>
         <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
       </div>
       <!-- Permission matrix -->
@@ -2943,30 +2943,20 @@ function renderSettings() {
   document.getElementById('cfgScanRadius').value = r;
   document.getElementById('cfgScanRadiusVal').textContent = r;
   SCAN_RADIUS = r;
-  // Group users by rank
-  const groups = {};
-  USERS.forEach((u,i) => {
-    const key = u.rank||'Khác';
-    if(!groups[key]) groups[key]=[];
-    groups[key].push({...u,idx:i});
-  });
-  const order = ['GĐM','GĐTKMB','GĐV','TKMB','QLKV'];
-  let html = '';
-  order.forEach(rank => {
-    if(!groups[rank]) return;
-    html += `<div style="margin-bottom:8px"><strong style="color:var(--teal);font-size:12px">${rank}</strong>`;
-    groups[rank].forEach(u => {
-      const sub = u.gdv||u.tkmb||'';
-      html += `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px">
-        <span style="flex:1">${u.name} <span style="color:var(--muted)">(${u.code})</span> ${sub?'— <em>'+sub+'</em>':''}</span>
-        <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${u.idx})" title="Sửa">✏️</button>
-        <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${u.idx})" title="Xóa">✕</button>
-      </div>`;
-    });
-    html += '</div>';
-  });
-  document.getElementById('cfgUserGroups').innerHTML = html || '<div style="color:var(--muted)">Chưa có user</div>';
-
+  // Flat table
+  document.getElementById('cfgUserTable').innerHTML = USERS.map((u,i) => `
+    <tr>
+      <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
+      <td>${u.name}</td>
+      <td><code>${u.code}</code></td>
+      <td>••••••••</td>
+      <td>${u.gdv||u.tkmb||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${i})" title="Sửa">✏️</button>
+        <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${i})" title="Xóa">✕</button>
+      </td>
+    </tr>`
+  ).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Chưa có user</td></tr>';
   // Permission matrix
   const perms = [
     {role:'GĐM',view:'Tất cả',edit:'✅'},
