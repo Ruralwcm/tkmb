@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.51</title>
+<title>TKMB Web App by HaoDT v2.52</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.51 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.52 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.51</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.52</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -642,9 +642,9 @@ tbody tr { transition:background .12s; }
       </div>
       <!-- Permission matrix -->
       <div style="flex:1;min-width:280px">
-        <h4 style="margin-bottom:8px">🔐 Matrix phân quyền</h4>
-        <table style="font-size:11px"><thead><tr><th>Vai trò</th><th>Xem</th><th>Sửa</th></tr></thead>
-        <tbody id="cfgPermMatrix"></tbody></table>
+        <h4 style="margin-bottom:8px">🔐 Phân quyền truy cập Tab</h4>
+        <div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th>Vai trò</th><th>📊 Dash</th><th>📋 Tiếp nhận</th><th>🔄 Tiến độ</th><th>🗺 Scan</th><th>🗂 QH</th><th>✅ Checklist</th><th>🏢 ĐP</th><th>📑 DS MB</th><th>⚙️ Cài đặt</th></tr></thead>
+        <tbody id="cfgPermMatrix"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -2959,15 +2959,16 @@ function renderSettings() {
   ).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Chưa có user</td></tr>';
   // Permission matrix
   const perms = [
-    {role:'GĐM',view:'Tất cả',edit:'✅'},
-    {role:'GĐTKMB',view:'Tất cả',edit:'✅'},
-    {role:'GĐV',view:'Vùng phụ trách',edit:'MB của vùng'},
-    {role:'TKMB',view:'Khu vực được giao',edit:'—'},
-    {role:'QLKV',view:'Khu vực QLKV',edit:'—'}
+    {role:'GĐM',t:'✅✅✅✅✅✅✅✅✅'},
+    {role:'GĐTKMB',t:'✅✅✅✅✅✅✅✅—'},
+    {role:'GĐV',t:'✅✅✅✅✅✅✅✅—'},
+    {role:'TKMB',t:'✅✅✅✅✅————'},
+    {role:'QLKV',t:'✅✅—✅—————'}
   ];
-  document.getElementById('cfgPermMatrix').innerHTML = perms.map(p =>
-    `<tr><td><strong>${p.role}</strong></td><td>${p.view}</td><td>${p.edit}</td></tr>`
-  ).join('');
+  document.getElementById('cfgPermMatrix').innerHTML = perms.map(p => {
+    const cells = p.t.split('').map(c => `<td style="text-align:center">${c}</td>`).join('');
+    return `<tr><td><strong>${p.role}</strong></td>${cells}</tr>`;
+  }).join('');
 }
 function cfgAddUser() {
   const code=prompt('Mã NV:','');if(!code)return;
