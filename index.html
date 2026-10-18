@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.46</title>
+<title>TKMB Web App by HaoDT v2.47</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.46 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.47 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.46</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.47</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -2794,10 +2794,10 @@ async function qhSyncStoreslist() {
     const stores = [];
     for (let i=1;i<rows.length;i++) {
       const r = rows[i];
-      const lat = parseFloat(r[si['Lat']||si['lat']]);
-      const lng = parseFloat(r[si['Lng']||si['lng']]);
+      const lat = parseFloat(r[si['Vĩ độ']||si['Lat']||si['lat']]);
+      const lng = parseFloat(r[si['Kinh độ']||si['Lng']||si['lng']]);
       if (!lat || !lng) continue;
-      stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Huyện/Quận']||si['Huyện']]||'' });
+      stores.push({ lat, lng, gdv: r[si['GĐV']||si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: r[si['Tỉnh/TP']||si['Tỉnh']]||'', huyen: r[si['Quận/huyện']||si['Huyện/Quận']||si['Huyện']]||'' });
     }
     info.textContent = stores.length + ' CH · Đang mapping...';
     // For each QH point: ưu tiên CH CÙNG TỈNH → GĐV, QLKV
