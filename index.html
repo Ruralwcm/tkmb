@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.53</title>
+<title>TKMB Web App by HaoDT v2.54</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.53 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.54 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.53</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.54</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -2966,7 +2966,7 @@ function renderSettings() {
   ).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Chưa có user</td></tr>';
   // Permission matrix
   const tabs = ['dash','tkmb','tiendo','scan','qhmanage','checklist','damphan','dsmb','settings'];
-  const tabLabels = ['📊 Dash','📋 Tiếp nhận','🔄 Tiến độ','🗺 Scan','🗂 QH','✅ Checklist','🏢 ĐP','📑 DS MB','⚙️ Cài đặt'];
+  const tabLabels = ['Dash','Tiếp nhận','Tiến độ','Scan','QH','Checklist','ĐP','DS MB','Cài đặt'];
   const roles = ['GĐM','GĐTKMB','GĐV','TKMB','QLKV'];
   const defaultPerms = {
     GĐM:     [1,1,1,1,1,1,1,1,1],
@@ -2977,7 +2977,7 @@ function renderSettings() {
   };
   let savedPerms = s.perms || defaultPerms;
   document.getElementById('cfgPermMatrix').innerHTML = 
-    '<tr><th></th>'+tabLabels.map(l=>`<th style="font-size:9px;text-align:center;writing-mode:vertical-lr">${l}</th>`).join('')+'</tr>' +
+    '<tr><th></th>'+tabLabels.map(l=>`<th style="font-size:10px;text-align:center">${l}</th>`).join('')+'</tr>' +
     roles.map(r => {
       const cells = tabs.map((t,i) => {
         const checked = (savedPerms[r]||defaultPerms[r]||[])[i] ? 'checked' : '';
