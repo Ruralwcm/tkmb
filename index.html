@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.48</title>
+<title>TKMB Web App by HaoDT v2.49</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.48 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.49 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.48</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.49</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -399,6 +399,7 @@ tbody tr { transition:background .12s; }
   <button data-tab="checklist">✅ Checklist NSO</button>
   <button data-tab="damphan">🏢 Đàm phán</button>
   <button data-tab="dsmb">📑 Danh sách MB</button>
+  <button data-tab="settings" id="navSettings" style="display:none">⚙️ Cài đặt</button>
 </div>
 
 <div class="main">
@@ -622,6 +623,21 @@ tbody tr { transition:background .12s; }
 </div>
 </div>
 
+<!-- ===== CÀI ĐẶT ===== -->
+<section class="section" id="sec-settings">
+  <div class="card"><h3>⚙️ Cài đặt</h3>
+    <h4 style="margin-top:16px">📏 Khoảng cách check-in điểm QH (mét)</h4>
+    <div style="display:flex;gap:12px;align-items:center;margin:8px 0">
+      <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
+      <span id="cfgScanRadiusVal" style="font-weight:700;min-width:50px;text-align:right">100</span><span>m</span>
+      <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾 Lưu</button>
+    </div>
+    <h4 style="margin-top:20px">👥 Quản lý User</h4>
+    <div style="overflow-x:auto"><table id="cfgUserTable"><thead><tr><th>Mã NV</th><th>Họ tên</th><th>Vai trò</th><th>GĐV / TKMB</th><th>Thao tác</th></tr></thead><tbody></tbody></table></div>
+    <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm User</button>
+  </div>
+</section>
+
 <!-- ===== STEP MODAL ===== -->
 <div class="modal-overlay" id="stepModal" style="display:none">
   <div class="modal-card">
@@ -772,7 +788,7 @@ let QH_POINTS = [];
 let qhDataLoaded = false;
 let scanGPS = { lat: null, lng: null, watchId: null };
 let scanSelectedQH = null;
-const SCAN_RADIUS = 100; // meters
+let SCAN_RADIUS = 100; // meters
 
 async function loadQHData() {
   try {
@@ -2875,6 +2891,7 @@ function init() {
       if (this.dataset.tab === 'dash') renderDash();
       if (this.dataset.tab === 'tiendo') { renderTienDo(); populateTDGDV(); }
       if (this.dataset.tab === 'dsmb') { renderDSMB(); populateDSGDV(); if(!KYHD_DATA.length) loadKyHDData(); }
+      if (this.dataset.tab === 'settings') { renderSettings(); }
       if (this.dataset.tab === 'checklist') initChkChecklist();
       if (this.dataset.tab === 'damphan') { renderDPTable(); populateDPGDV(); }
       if (this.dataset.tab === 'scan') {
@@ -2887,10 +2904,64 @@ function init() {
   populateGDV();
   populateDashGDV();
   renderDash();
+  // Show settings tab for GĐM only
+  if (currentUser && currentUser.rank === 'GĐM') {
+    document.getElementById('navSettings').style.display = '';
+  }
   // Preload QH data + start GPS in background
   loadQHData();
   startScanGPS();
   loadLiveData();
+}
+
+// ═══ SETTINGS ═══
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem('tkmb_settings')||'{}'); } catch(e) { return {}; }
+}
+function saveSettings() {
+  const s = loadSettings();
+  s.scanRadius = parseInt(document.getElementById('cfgScanRadius').value)||100;
+  localStorage.setItem('tkmb_settings', JSON.stringify(s));
+  SCAN_RADIUS = s.scanRadius;
+  alert('✅ Đã lưu cài đặt');
+}
+function renderSettings() {
+  const s = loadSettings();
+  const r = s.scanRadius || 100;
+  document.getElementById('cfgScanRadius').value = r;
+  document.getElementById('cfgScanRadiusVal').textContent = r;
+  SCAN_RADIUS = r;
+  // Render users table
+  const tbody = document.querySelector('#cfgUserTable tbody');
+  tbody.innerHTML = USERS.map((u,i) => `<tr>
+    <td>${u.code}</td><td>${u.name}</td><td>${u.rank}</td>
+    <td>${u.gdv||u.tkmb||'—'}</td>
+    <td><button class="btn btn-xs btn-outline" onclick="cfgEditUser(${i})">✏️</button>
+    <button class="btn btn-xs btn-danger" onclick="cfgDeleteUser(${i})">🗑</button></td>
+  </tr>`).join('');
+}
+function cfgAddUser() {
+  const code=prompt('Mã NV:','');if(!code)return;
+  const name=prompt('Họ tên:','');if(!name)return;
+  const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV):','TKMB');if(!rank)return;
+  const gdv=prompt('GĐV phụ trách (nếu là GĐV) hoặc TKMB (Phi/Huy Dũng/Thái):','');
+  USERS.push({rank,name,code,phone:'12345678',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:''});
+  renderSettings();
+}
+function cfgEditUser(i) {
+  const u=USERS[i];
+  const name=prompt('Họ tên:',u.name);if(!name)return;
+  const rank=prompt('Vai trò:',u.rank);if(!rank)return;
+  const gdv=prompt('GĐV/TKMB:',u.gdv||u.tkmb||'');
+  u.name=name;u.rank=rank;
+  if(rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
+  else{u.gdv=gdv;u.tkmb='';}
+  renderSettings();
+}
+function cfgDeleteUser(i) {
+  if(!confirm('Xóa user '+USERS[i].name+'?'))return;
+  USERS.splice(i,1);
+  renderSettings();
 }
 
 init();
