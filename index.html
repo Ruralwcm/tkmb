@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.71</title>
+<title>TKMB Web App by HaoDT v2.72</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.71 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.72 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -357,7 +357,7 @@ tbody tr { transition:background .12s; }
 
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.71</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.72</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -658,7 +658,7 @@ tbody tr { transition:background .12s; }
       <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
       <input type="file" id="cfgTkmbImport" accept=".csv" style="display:none" onchange="cfgHandleTkmbImport(this)">
     </div>
-    <div style="overflow-x:auto"><table style="font-size:11px"><thead><tr><th>Tỉnh/TP</th><th>Huyện (HN only)</th><th>TKMB phụ trách</th><th></th></tr></thead>
+    <div style="overflow:auto;max-height:300px"><table style="font-size:11px"><thead><tr><th>Tỉnh/TP</th><th>Huyện (HN only)</th><th>TKMB phụ trách</th><th></th></tr></thead>
     <tbody id="cfgTkmbMap"></tbody></table></div>
   </div>
 </section>
