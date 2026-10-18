@@ -1358,8 +1358,12 @@ function getTKMB_Filter() {
   return '';
 }
 function refreshAllViews() {
-  if (qmLoaded) { populateQMFilters(); renderQHManage(); }
-  renderDash(); renderTienDo();
+  try {
+    if (qmLoaded) { populateQMFilters(); renderQHManage(); }
+    if (typeof MB_DATA !== 'undefined' && MB_DATA.length > 0) {
+      renderDash(); renderTienDo();
+    }
+  } catch(e) { console.warn('refreshAllViews:', e); }
 }
 function getSLAColor(m, step) {
   const st = slaState(m, step);
