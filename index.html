@@ -2773,11 +2773,6 @@ function qhDownloadTemplate() {
 }
 
 async // Normalize tên tỉnh để so sánh (xử lý encoding lỗi, dấu, prefix)
-function normTinh(s) {
-  return (s || '').replace(/^(T\.|TP\.)\s*/, '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    .replace(/[^\w\s]/g, ''); // xóa ký tự lạ
-}
 
 function qhSyncStoreslist() {
   const btn = document.getElementById('qhSyncBtn');
@@ -2805,16 +2800,16 @@ function qhSyncStoreslist() {
       if (!qh.lat || !qh.lng) continue;
       
       // Normalize tên tỉnh để so sánh
-      const qhTinhNorm = normTinh(qh.tinh);
+      const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
       
       // Step 1: tìm CH trong CÙNG TỈNH gần nhất → GĐV
       let best = null, bestD = Infinity;
       let bestSameTinh = null, bestSameTinhD = Infinity;
       for (const s of stores) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-        const sTinh = normTinh(s.tinh);
+        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
         if (d < bestD) { bestD = d; best = s; }
-        if (sTinh === qhTinhNorm && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
+        if (sTinh === qhTinh && d < bestSameTinhD) { bestSameTinhD = d; bestSameTinh = s; }
       }
       if (!best && !bestSameTinh) continue;
       
@@ -2830,10 +2825,10 @@ function qhSyncStoreslist() {
       const sameGdv = stores.filter(s => s.gdv === gdv && s.qlkv);
       for (const s of sameGdv) {
         const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-        const sTinh = normTinh(s.tinh);
+        const sTinh = (s.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
         // Ưu tiên CH cùng tỉnh
-        if (sTinh === qhTinhNorm && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
-        if (qh.huyen && s.huyen && sTinh === qhTinhNorm && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
+        if (sTinh === qhTinh && d < bestQLKVD) { bestQLKVD = d; bestQLKV = s; }
+        if (qh.huyen && s.huyen && sTinh === qhTinh && qh.huyen === s.huyen && d < sameHuyenD) { sameHuyenD = d; sameHuyen = s; }
       }
       const pickQLKV = (sameHuyen && sameHuyenD < 50) ? sameHuyen : bestQLKV;
       if (!pickQLKV) continue;
