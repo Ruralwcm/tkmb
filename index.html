@@ -3007,7 +3007,7 @@ function cfgSearchUsers() {
   let filtered = q ? USERS.filter(u => u.code.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)) : USERS;
   const tbody = document.getElementById('cfgUserTable');
   if (!tbody) return;
-  tbody.innerHTML = filtered.slice(0,10).map(u => {
+  tbody.innerHTML = filtered.map(u => {
     const idx = USERS.indexOf(u);
     return `<tr>
       <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
