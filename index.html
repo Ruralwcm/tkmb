@@ -633,23 +633,17 @@ tbody tr { transition:background .12s; }
     <div style="display:flex;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:500px">
         <h4 style="margin-bottom:8px">👥 Users</h4>
-        <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm Mã NV hoặc tên..." style="width:100%;max-width:300px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:8px;font-size:12px" oninput="cfgSearchUsers()">
-        <div style="">
-
-
-
-
-
-
-        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Role</th><th>Password</th><th></th></tr></thead>
-        <tbody id="cfgUserTable"></tbody></table>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+          <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm kiếm" style="width:100%;max-width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px" oninput="cfgSearchUsers()">
           <button class="btn btn-sm btn-primary" onclick="cfgAddUser()">➕ Thêm User</button>
-          <button class="btn btn-sm btn-outline" onclick="document.getElementById('impUserFile').click()">📥 Import User</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('impUserFile').click()">📥 Import</button>
           <button class="btn btn-sm btn-outline" onclick="downloadUserTemplate()">📋 Tải cấu trúc</button>
           <input type="file" id="impUserFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importUsers(this)">
-          <span id="impUserInfo" style="font-size:11px;color:var(--muted);align-self:center"></span>
+          <span id="impUserInfo" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div style="overflow-x:auto">
+        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Role</th><th>Password</th><th></th></tr></thead>
+        <tbody id="cfgUserTable"></tbody></table>
         </div>
       </div>
       <!-- Matrix -->
