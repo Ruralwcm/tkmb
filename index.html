@@ -649,38 +649,35 @@ tbody tr { transition:background .12s; }
         <h4 style="margin-bottom:8px">🔐 Phân quyền truy cập Tab</h4>
         <div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th>Nhóm</th><th>📊 Dash</th><th>📋 Tiếp nhận</th><th>🔄 Tiến độ</th><th>🗺 Scan</th><th>🗂 QH</th><th>✅ Checklist</th><th>🏢 ĐP</th><th>📑 DS MB</th><th>⚙️ Cài đặt</th></tr></thead>
         <tbody id="cfgPermMatrix"></tbody></table></div>
+
+        <h4 style="margin:14px 0 6px">🔄 Đồng bộ người quản lý hiện tại</h4>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Tự tính GĐV/QLKV hiện tại theo chuỗi <b>Storelist (CH) → Điểm QH → MB</b>. Ưu tiên cùng tỉnh → cùng huyện → gần nhất. Khác tỉnh / thiếu tọa độ / ngoài bán kính → "cần review".</p>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+          <button class="btn btn-primary btn-sm" onclick="syncAllManagers()" id="syncAllBtn">🔄 Đồng bộ tất cả</button>
+          <span id="syncAllInfo" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div id="syncAllLog" style="font-size:11px;color:var(--muted);margin-bottom:12px"></div>
+
+        <h4 style="margin:8px 0 6px">🏢 MB (GĐV/QLKV hiện tại)</h4>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+          <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('MB')">📤 Export MB</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('impMBFile').click()">📥 Import MB</button>
+          <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('MB')">📋 Tải template MB</button>
+          <input type="file" id="impMBFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('MB', this)">
+          <span id="impMBInfo" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+
+        <h4 style="margin:8px 0 6px">🗂 Điểm QH (GĐV/QLKV)</h4>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('QH')">📤 Export QH</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('impQHFile').click()">📥 Import QH</button>
+          <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('QH')">📋 Tải template QH</button>
+          <input type="file" id="impQHFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('QH', this)">
+          <span id="impQHInfo" style="font-size:11px;color:var(--muted)"></span>
+        </div>
       </div>
     </div>
 
-  </div>
-
-  <!-- ===== ĐỒNG BỘ NGƯỜI QUẢN LÝ HIỆN TẠI ===== -->
-  <div class="card" style="margin-top:20px">
-    <h3>🔄 Đồng bộ người quản lý hiện tại</h3>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Tự tính GĐV/QLKV hiện tại theo chuỗi <b>Storelist (CH) → Điểm QH → MB</b>. Ưu tiên cùng tỉnh → cùng huyện → gần nhất. Khác tỉnh / thiếu tọa độ / ngoài bán kính → "cần review".</p>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <button class="btn btn-primary btn-sm" onclick="syncAllManagers()" id="syncAllBtn">🔄 Đồng bộ tất cả</button>
-      <span id="syncAllInfo" style="font-size:11px;color:var(--muted)"></span>
-    </div>
-    <div id="syncAllLog" style="font-size:11px;color:var(--muted);margin-bottom:12px"></div>
-
-    <h4 style="margin:8px 0 6px">🏢 MB (GĐV/QLKV hiện tại)</h4>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('MB')">📤 Export MB</button>
-      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impMBFile').click()">📥 Import MB</button>
-      <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('MB')">📋 Tải template MB</button>
-      <input type="file" id="impMBFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('MB', this)">
-      <span id="impMBInfo" style="font-size:11px;color:var(--muted)"></span>
-    </div>
-
-    <h4 style="margin:8px 0 6px">🗂 Điểm QH (GĐV/QLKV)</h4>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('QH')">📤 Export QH</button>
-      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impQHFile').click()">📥 Import QH</button>
-      <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('QH')">📋 Tải template QH</button>
-      <input type="file" id="impQHFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('QH', this)">
-      <span id="impQHInfo" style="font-size:11px;color:var(--muted)"></span>
-    </div>
   </div>
 </section>
 
@@ -3117,7 +3114,6 @@ function renderSettings() {
   };
   let savedPerms = s.perms || defaultPerms;
   document.getElementById('cfgPermMatrix').innerHTML = 
-    '<tr><th></th>'+tabLabels.map(l=>`<th style="font-size:10px;text-align:center">${l}</th>`).join('')+'</tr>' +
     roles.map(r => {
       const cells = tabs.map((t,i) => {
         const checked = (savedPerms[r]||defaultPerms[r]||[])[i] ? 'checked' : '';
