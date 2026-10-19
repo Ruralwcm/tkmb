@@ -622,7 +622,7 @@ tbody tr { transition:background .12s; }
 <section class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt</h3>
     <!-- Scan radius -->
-    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH <span style="font-size:10px;color:var(--muted);font-weight:400">(chưa hiệu lực)</span></h4>
+    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH</h4>
     <div style="display:flex;gap:8px;align-items:center;margin:4px 0 16px">
       <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1;max-width:300px" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
       <span id="cfgScanRadiusVal" style="font-weight:700;min-width:40px">100</span><span>m</span>
@@ -2965,6 +2965,9 @@ function init() {
   if (!currentUser && autoLoginFromPortal()) {
     // Already logged in via Portal
   }
+  // Load saved check-in distance + đưa vào iframe Scan QH (radius)
+  SCAN_RADIUS = loadSettings().scanRadius || 100;
+  applyScanRadius();
   
   document.querySelectorAll('.nav button').forEach(b => {
     b.addEventListener('click', function() {
@@ -3027,11 +3030,16 @@ function cfgTogglePerm(role, idx, val) {
   s.perms[role][idx] = val?1:0;
   localStorage.setItem('tkmb_settings', JSON.stringify(s));
 }
+function applyScanRadius() {
+  const iframe = document.getElementById('iframeScan');
+  if (iframe) iframe.src = 'https://ruralwcm.github.io/tkmb-field/?embed=1&tab=scan&radius=' + SCAN_RADIUS;
+}
 function saveSettings() {
   const s = loadSettings();
   s.scanRadius = parseInt(document.getElementById('cfgScanRadius').value)||100;
   localStorage.setItem('tkmb_settings', JSON.stringify(s));
   SCAN_RADIUS = s.scanRadius;
+  applyScanRadius();
   alert('✅ Đã lưu');
 }
 function renderSettings() {
@@ -3040,6 +3048,7 @@ function renderSettings() {
   document.getElementById('cfgScanRadius').value = r;
   document.getElementById('cfgScanRadiusVal').textContent = r;
   SCAN_RADIUS = r;
+  applyScanRadius();
   cfgSearchUsers();
   // Permission matrix
   const tabs = ['dash','tkmb','tiendo','scan','qhmanage','checklist','damphan','dsmb','settings'];
