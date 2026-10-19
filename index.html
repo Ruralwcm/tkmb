@@ -654,15 +654,6 @@ tbody tr { transition:background .12s; }
       </div>
     </div>
 
-    <!-- Phạm vi quản lý TKMB -->
-    <h4 style="margin-top:20px">🗺 Phạm vi quản lý TKMB <button class="btn btn-sm btn-outline" onclick="cfgSyncStoreslist()" style="margin-left:8px;font-size:10px">🔄 Đồng bộ GĐV/QLKV</button></h4>
-    <div style="display:flex;gap:8px;margin:8px 0">
-      <select id="cfgTkmbFilter" onchange="renderTkmbMap()"><option value="">Tất cả TKMB</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
-      <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
-      <input type="file" id="cfgTkmbImport" accept=".csv" style="display:none" onchange="cfgHandleTkmbImport(this)">
-    </div>
-    <div style="overflow:auto;max-height:300px"><table style="font-size:11px"><thead><tr><th>Tỉnh/TP</th><th>Huyện (HN only)</th><th>TKMB phụ trách</th><th></th></tr></thead>
-    <tbody id="cfgTkmbMap"></tbody></table></div>
   </div>
 
   <!-- ===== ĐỒNG BỘ NGƯỜI QUẢN LÝ HIỆN TẠI ===== -->
@@ -3203,7 +3194,9 @@ function getTkmbMap() {
 }
 function saveTkmbMap(map) { localStorage.setItem('tkmb_map', JSON.stringify(map)); }
 function renderTkmbMap() {
-  const filter = document.getElementById('cfgTkmbFilter').value;
+  const filterEl = document.getElementById('cfgTkmbFilter');
+  if (!filterEl) return; // section removed
+  const filter = filterEl.value;
   const map = getTkmbMap();
   let rows = [];
   // Show all provinces in TINH_TO_TKMB_JS plus saved overrides
