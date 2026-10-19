@@ -378,13 +378,13 @@ tbody tr { transition:background .12s; }
     <div class="lock-icon">🔐</div>
     <h2>Đăng nhập</h2>
     <div class="input-group">
-      <label>Mã nhân viên</label>
-      <input type="text" id="loginCode" placeholder="Nhập mã nhân viên..." oninput="onCodeInput()" autocomplete="off">
+      <label>Email</label>
+      <input type="text" id="loginCode" placeholder="Nhập email..." oninput="onCodeInput()" autocomplete="off">
       <div class="user-found" id="userHint"></div>
     </div>
     <div class="input-group">
-      <label>Mật khẩu</label>
-      <input type="password" id="loginPass" placeholder="Nhập mật khẩu (SĐT)">
+      <label>Mã NV (mật khẩu)</label>
+      <input type="password" id="loginPass" placeholder="Nhập mã NV">
     </div>
     <button onclick="doLogin()">Đăng nhập</button>
     <div class="error" id="loginError"></div>
@@ -634,7 +634,7 @@ tbody tr { transition:background .12s; }
           <span id="impUserInfo" style="font-size:11px;color:var(--muted)"></span>
         </div>
         <div style="overflow-x:auto">
-        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Role</th><th>Password</th><th></th></tr></thead>
+        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>Email</th><th>Role</th><th>Mã NV</th><th></th></tr></thead>
         <tbody id="cfgUserTable"></tbody></table>
         </div>
       </div>
@@ -764,7 +764,7 @@ tbody tr { transition:background .12s; }
     <h3 id="userEditTitle">✏️ Sửa User</h3>
     <input type="hidden" id="userEditIdx">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
-      <div class="form-group"><label>User (mã NV)</label><input id="ueCode" placeholder="Mã đăng nhập"></div>
+      <div class="form-group"><label>Email</label><input id="ueCode" placeholder="Email đăng nhập"></div>
       <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
     </div>
     <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
@@ -772,7 +772,7 @@ tbody tr { transition:background .12s; }
     <div id="ueTinhListMB" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
     <div class="form-group"><label>Phạm vi phụ trách điểm QH</label><input id="uePhamviQH" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList('QH')">
     <div id="ueTinhListQH" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
-    <div class="form-group"><label>Password (giữ nguyên ký tự)</label><input id="uePass" type="text"></div>
+    <div class="form-group"><label>Mã NV (mật khẩu)</label><input id="uePass" type="text"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="document.getElementById('userEditModal').style.display='none'">Hủy</button>
       <button class="btn btn-primary" onclick="ueSave()">💾 Lưu</button>
@@ -1365,16 +1365,20 @@ window.addEventListener('message', function(e) {
 
 // ═══ USERS (đăng nhập) ═══
 const USERS = [
-  {rank:'GĐV',name:'Phạm Minh Thu',code:'928615',phone:'12345678',gdv:'Phạm Minh Thu'},
-  {rank:'GĐV',name:'Lê Thị Hồng Thu',code:'960421',phone:'12345678',gdv:'Lê Thị Hồng Thu'},
-  {rank:'GĐV',name:'Tạ Công Nhận',code:'961088',phone:'12345678',gdv:'Tạ Công Nhận'},
-  {rank:'GĐV',name:'Bùi Thị Thu Nhài',code:'976644',phone:'12345678',gdv:'Bùi Thị Thu Nhài'},
-  {rank:'GĐV',name:'Nguyễn Mạnh Sơn',code:'965799',phone:'12345678',gdv:'Nguyễn Mạnh Sơn'},
-  {rank:'GĐV',name:'Hồ Nam',code:'960668',phone:'12345678',gdv:'Hồ Nam'},
-  {rank:'GĐV',name:'Nguyễn Duy Đoàn',code:'976998',phone:'12345678',gdv:'Nguyễn Duy Đoàn'},
-  {rank:'GĐV',name:'Đặng Văn Dũng',code:'3004544',phone:'12345678',gdv:'Đặng Văn Dũng'},
-  {rank:'GĐV',name:'Dương Tùng',code:'3604641',phone:'12345678',gdv:'Dương Tùng'},
-  {rank:'GĐV',name:'Tạ Quốc Huy',code:'309425',phone:'12345678',gdv:'Tạ Quốc Huy'},
+  {rank:'GĐV',name:'Phạm Minh Thu',code:'thupm@winmart.masangroup.com',phone:'928615',gdv:'Phạm Minh Thu'},
+  {rank:'GĐV',name:'Lạc Nhật Minh',code:'minhln@winmart.masangroup.com',phone:'978573',gdv:'Lạc Nhật Minh'},
+  {rank:'GĐV',name:'Lê Thị Hồng Thu',code:'thulth@winmart.masangroup.com',phone:'960421',gdv:'Lê Thị Hồng Thu'},
+  {rank:'GĐV',name:'Tạ Công Nhận',code:'nhantc@winmart.masangroup.com',phone:'961088',gdv:'Tạ Công Nhận'},
+  {rank:'GĐV',name:'Bùi Thị Thu Nhài',code:'nhaibtt@winmart.masangroup.com',phone:'976644',gdv:'Bùi Thị Thu Nhài'},
+  {rank:'GĐV',name:'Bùi Anh Tuấn',code:'tuanba@winmart.masangroup.com',phone:'964027',gdv:'Bùi Anh Tuấn'},
+  {rank:'GĐV',name:'Nguyễn Mạnh Sơn',code:'sonnm@winmart.masangroup.com',phone:'965799',gdv:'Nguyễn Mạnh Sơn'},
+  {rank:'GĐV',name:'Hồ Nam',code:'namh@winmart.masangroup.com',phone:'960668',gdv:'Hồ Nam'},
+  {rank:'GĐV',name:'Nguyễn Duy Đoàn',code:'doannd@winmart.masangroup.com',phone:'976998',gdv:'Nguyễn Duy Đoàn'},
+  {rank:'GĐV',name:'Đặng Văn Dũng',code:'dungdv@winmart.masangroup.com',phone:'3004544',gdv:'Đặng Văn Dũng'},
+  {rank:'GĐV',name:'Nguyễn Thị Thu',code:'thunt7@winmart.masangroup.com',phone:'3597956',gdv:'Nguyễn Thị Thu'},
+  {rank:'GĐV',name:'Dương Tùng',code:'tungd@winmart.masangroup.com',phone:'3604641',gdv:'Dương Tùng'},
+  {rank:'GĐV',name:'Nguyễn Đức Chung',code:'chungnd@winmart.masangroup.com',phone:'962352',gdv:'Nguyễn Đức Chung'},
+  {rank:'GĐV',name:'Tạ Quốc Huy',code:'huytq@winmart.masangroup.com',phone:'309425',gdv:'Tạ Quốc Huy'},
   {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678',gdv:'Đặng Trần Hảo'},
   {rank:'QLKV',name:'Đinh Mạnh Tuân',code:'tuandm',phone:'12345678',gdv:'Nguyễn Duy Đoàn'},
   {rank:'TKMB',name:'Nguyễn Văn Phi',code:'phinv2',phone:'12345678',gdv:'',tkmb:'Phi'},
