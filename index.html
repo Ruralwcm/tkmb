@@ -785,7 +785,6 @@ tbody tr { transition:background .12s; }
       <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
     </div>
     <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
-    <div class="form-group"><label>GĐV/TKMB phụ trách</label><input id="ueGdv" placeholder="Vùng hoặc KV (Phi/Huy Dũng/Thái)"></div>
     <div class="form-group"><label>Phạm vi phụ trách MB</label><input id="uePhamviMB" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList('MB')">
     <div id="ueTinhListMB" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
     <div class="form-group"><label>Phạm vi phụ trách điểm QH</label><input id="uePhamviQH" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList('QH')">
@@ -3159,7 +3158,6 @@ function cfgEditUser(i) {
   document.getElementById('ueCode').value = u.code;
   document.getElementById('ueName').value = u.name;
   document.getElementById('ueRank').value = u.rank;
-  document.getElementById('ueGdv').value = u.gdv||u.tkmb||'';
   document.getElementById('uePhamviMB').value = (u.phamviMB||[]).join(',');
   document.getElementById('uePhamviQH').value = (u.phamviQH||[]).join(',');
   document.getElementById('uePass').value = u.phone||'12345678';
@@ -3171,11 +3169,12 @@ function ueSave() {
   u.code = document.getElementById('ueCode').value.trim();
   u.name = document.getElementById('ueName').value.trim();
   u.rank = document.getElementById('ueRank').value;
-  const gdv = document.getElementById('ueGdv').value.trim();
-  if(u.rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
-  else{u.gdv=gdv;u.tkmb='';}
   u.phamviMB = document.getElementById('uePhamviMB').value.split(',').map(s=>s.trim()).filter(Boolean);
   u.phamviQH = document.getElementById('uePhamviQH').value.split(',').map(s=>s.trim()).filter(Boolean);
+  // Tự tính vùng/KV từ rank + phạm vi (đã bỏ ô "GĐV/TKMB phụ trách")
+  if (u.rank === 'GĐV') { u.gdv = u.name; u.tkmb = ''; }
+  else if (u.rank === 'TKMB' || u.rank === 'CV TKMB') { u.tkmb = getTKMB_JS(u.phamviQH[0] || u.phamviMB[0] || '', '') || u.tkmb || ''; u.gdv = ''; }
+  else if (u.rank === 'GĐTKMB' || u.rank === 'GĐM') { u.gdv = ''; u.tkmb = ''; }
   u.phone = document.getElementById('uePass').value.trim();
   document.getElementById('userEditModal').style.display = 'none';
   renderSettings();
