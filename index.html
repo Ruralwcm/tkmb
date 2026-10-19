@@ -664,6 +664,35 @@ tbody tr { transition:background .12s; }
     <div style="overflow:auto;max-height:300px"><table style="font-size:11px"><thead><tr><th>Tỉnh/TP</th><th>Huyện (HN only)</th><th>TKMB phụ trách</th><th></th></tr></thead>
     <tbody id="cfgTkmbMap"></tbody></table></div>
   </div>
+
+  <!-- ===== ĐỒNG BỘ NGƯỜI QUẢN LÝ HIỆN TẠI ===== -->
+  <div class="card" style="margin-top:20px">
+    <h3>🔄 Đồng bộ người quản lý hiện tại</h3>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Tự tính GĐV/QLKV hiện tại theo chuỗi <b>Storelist (CH) → Điểm QH → MB</b>. Ưu tiên cùng tỉnh → cùng huyện → gần nhất. Khác tỉnh / thiếu tọa độ / ngoài bán kính → "cần review".</p>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-primary btn-sm" onclick="syncAllManagers()" id="syncAllBtn">🔄 Đồng bộ tất cả</button>
+      <span id="syncAllInfo" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+    <div id="syncAllLog" style="font-size:11px;color:var(--muted);margin-bottom:12px"></div>
+
+    <h4 style="margin:8px 0 6px">🏢 MB (GĐV/QLKV hiện tại)</h4>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('MB')">📤 Export MB</button>
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impMBFile').click()">📥 Import MB</button>
+      <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('MB')">📋 Tải template MB</button>
+      <input type="file" id="impMBFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('MB', this)">
+      <span id="impMBInfo" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+
+    <h4 style="margin:8px 0 6px">🗂 Điểm QH (GĐV/QLKV)</h4>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('QH')">📤 Export QH</button>
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impQHFile').click()">📥 Import QH</button>
+      <button class="btn btn-sm btn-outline" onclick="downloadManagerTemplate('QH')">📋 Tải template QH</button>
+      <input type="file" id="impQHFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('QH', this)">
+      <span id="impQHInfo" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+  </div>
 </section>
 
 <!-- ===== STEP MODAL ===== -->
@@ -3151,6 +3180,169 @@ function cfgSyncStoreslist() {
     qhSyncStoreslist();
     setTimeout(() => alert('✅ Đã đồng bộ GĐV/QLKV'), 3000);
   }
+}
+
+// ═══ ĐỒNG BỘ NGƯỜI QUẢN LÝ HIỆN TẠI (Cài đặt) ═══
+function parseMBCoord(mapLink) {
+  if (!mapLink) return null;
+  const s = String(mapLink);
+  const dms = s.match(/(\d{1,2})°(\d{1,2})'([\d.]+)"\s*([NS])\s*(\d{1,3})°(\d{1,2})'([\d.]+)"\s*([EW])/);
+  if (dms) {
+    let lat = parseFloat(dms[1]) + parseFloat(dms[2])/60 + parseFloat(dms[3])/3600;
+    let lng = parseFloat(dms[5]) + parseFloat(dms[6])/60 + parseFloat(dms[7])/3600;
+    if (dms[4] === 'S') lat = -lat;
+    if (dms[8] === 'W') lng = -lng;
+    return { lat, lng };
+  }
+  const m = s.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  return null;
+}
+
+async function syncAllManagers() {
+  const btn = document.getElementById('syncAllBtn');
+  const info = document.getElementById('syncAllInfo');
+  const log = document.getElementById('syncAllLog');
+  if (btn) btn.disabled = true;
+  if (info) info.textContent = '⏳ Đang đồng bộ QH ← Storelist...';
+
+  // B1: QH ← Storelist (CH gần nhất, ưu tiên cùng tỉnh/huyện)
+  let qhChanged = 0, qhReview = 0;
+  try {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_LIVE_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('Storeslist');
+    const txt = await fetch(url).then(r => r.text());
+    const rows = csvParse(txt);
+    if (rows.length >= 2) {
+      const hdr = rows[0]; const si = {}; hdr.forEach((h,i) => si[h.replace(/^\uFEFF/,'')] = i);
+      const stores = [];
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const lat = parseFloat(r[si['Vĩ độ']||si['Lat']||si['lat']]);
+        const lng = parseFloat(r[si['Kinh độ']||si['Lng']||si['lng']]);
+        if (!lat || !lng) continue;
+        stores.push({ lat, lng, gdv: r[si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: (r[si['Tỉnh/TP']||si['Tỉnh']]||'').replace(/^(T\.|TP\.)\s*/, '').trim(), huyen: r[si['Quận/huyện']||si['Huyện/Quận']||si['Huyện']]||'' });
+      }
+      for (const qh of QH_DATA) {
+        if (!qh.lat || !qh.lng) continue;
+        const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
+        let best = null, bestD = Infinity, bestSame = null, bestSameD = Infinity;
+        for (const s of stores) {
+          const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
+          if (d < bestD) { bestD = d; best = s; }
+          if (s.tinh === qhTinh && d < bestSameD) { bestSameD = d; bestSame = s; }
+        }
+        if (!best && !bestSame) continue;
+        const pick = bestSame || best;
+        if (!bestSame) qhReview++;
+        if (qh.gdv !== pick.gdv || qh.qlkv !== pick.qlkv) { qh.gdv = pick.gdv; qh.qlkv = pick.qlkv; qhChanged++; }
+      }
+    }
+  } catch(e) {}
+
+  if (info) info.textContent = '⏳ Đang đồng bộ MB ← QH...';
+
+  // B2: MB ← QH (điểm QH gần nhất, trong bán kính ~5km)
+  let mbChanged = 0, mbReview = 0;
+  for (const mb of MB_DATA) {
+    const c = parseMBCoord(mb.mapLink);
+    if (!c) { mbReview++; continue; }
+    let best = null, bestD = Infinity;
+    for (const qh of QH_DATA) {
+      if (!qh.lat || !qh.lng) continue;
+      const d = haversine(c.lat, c.lng, qh.lat, qh.lng);
+      if (d < bestD) { bestD = d; best = qh; }
+    }
+    if (!best || bestD > 5000) { mbReview++; continue; }
+    if (mb.gdvHienTai !== best.gdv || mb.qlkvHienTai !== best.qlkv) { mb.gdvHienTai = best.gdv; mb.qlkvHienTai = best.qlkv; mbChanged++; }
+  }
+
+  // Lưu về GAS (tái dùng actions có sẵn)
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'syncGDVQLKV', gdvs: MB_DATA.map(m => [m.gdvHienTai||'', m.qlkvHienTai||'']) }), headers: { 'Content-Type':'text/plain' } });
+  } catch(e) {}
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'batchImportQH', points: QH_DATA.map(q => ({ qh:q.qh, gdv:q.gdv, qlkv:q.qlkv })) }), headers: { 'Content-Type':'text/plain' } });
+  } catch(e) {}
+
+  if (info) info.textContent = '✅ QH: ' + qhChanged + ' điểm đổi · MB: ' + mbChanged + ' đổi · ⚠ ' + (qhReview + mbReview) + ' cần review';
+  if (log) log.textContent = 'Lần chạy cuối: ' + new Date().toLocaleString('vi-VN');
+  if (btn) btn.disabled = false;
+  if (typeof renderQHManage === 'function') renderQHManage();
+  if (typeof renderTienDo === 'function') renderTienDo();
+}
+
+function managerCSV(type) {
+  if (type === 'MB') {
+    return 'MB ID,GĐV hiện tại,QLKV hiện tại\n' + MB_DATA.map(m => m.id + ',' + (m.gdvHienTai||'') + ',' + (m.qlkvHienTai||'')).join('\n');
+  } else {
+    return 'Mã QH,GĐV,QLKV\n' + QH_DATA.map(q => q.qh + ',' + (q.gdv||'') + ',' + (q.qlkv||'')).join('\n');
+  }
+}
+
+function exportManagerMapping(type) {
+  const csv = managerCSV(type);
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (type === 'MB' ? 'MB_QLHT.csv' : 'QH_QLHT.csv');
+  a.click();
+}
+
+function downloadManagerTemplate(type) {
+  const csv = (type === 'MB')
+    ? 'MB ID,GĐV hiện tại,QLKV hiện tại\nMB-20260101-001,Nguyễn Văn A,Trần Thị B'
+    : 'Mã QH,GĐV,QLKV\nQH0001,Nguyễn Văn A,Trần Thị B';
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (type === 'MB' ? 'Template_MB_QLHT.csv' : 'Template_QH_QLHT.csv');
+  a.click();
+}
+
+function importManagerMapping(type, input) {
+  const file = input.files[0]; if (!file) return;
+  const info = document.getElementById(type === 'MB' ? 'impMBInfo' : 'impQHInfo');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let rows;
+    if (/\.csv$/i.test(file.name)) {
+      rows = csvParse(e.target.result);
+    } else {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+      } catch(err) { if (info) info.textContent = '❌ Lỗi đọc file'; return; }
+    }
+    if (!rows || rows.length < 2) { if (info) info.textContent = '❌ File trống'; return; }
+    const hdr = rows[0].map(h => String(h || '').trim().toLowerCase());
+    const iId = Math.max(hdr.indexOf('mb id'), hdr.indexOf('mã qh'));
+    const iGdv = Math.max(hdr.indexOf('gđv hiện tại'), hdr.indexOf('gđv'));
+    const iQlkv = Math.max(hdr.indexOf('qlkv hiện tại'), hdr.indexOf('qlkv'));
+    if (iId < 0 || iGdv < 0 || iQlkv < 0) { if (info) info.textContent = '❌ Sai cấu trúc cột (cần: mã + GĐV + QLKV)'; return; }
+    let n = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i]; if (!r || !String(r[iId]||'').trim()) continue;
+      const id = String(r[iId]).trim();
+      const gdv = String(r[iGdv]||'').trim();
+      const qlkv = String(r[iQlkv]||'').trim();
+      if (type === 'MB') {
+        const mb = MB_DATA.find(x => x.id === id);
+        if (mb) { mb.gdvHienTai = gdv; mb.qlkvHienTai = qlkv; n++; }
+      } else {
+        const q = QH_DATA.find(x => x.qh === id);
+        if (q) { q.gdv = gdv; q.qlkv = qlkv; n++; }
+      }
+    }
+    if (info) info.textContent = '✅ Đã import ' + n + ' dòng';
+    // Lưu về GAS
+    try {
+      if (type === 'MB') fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'syncGDVQLKV', gdvs: MB_DATA.map(m => [m.gdvHienTai||'', m.qlkvHienTai||'']) }), headers: { 'Content-Type':'text/plain' } });
+      else fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'batchImportQH', points: QH_DATA.map(q => ({ qh:q.qh, gdv:q.gdv, qlkv:q.qlkv })) }), headers: { 'Content-Type':'text/plain' } });
+    } catch(err) {}
+  };
+  if (/\.csv$/i.test(file.name)) reader.readAsText(file, 'utf-8');
+  else reader.readAsArrayBuffer(file);
 }
 
 init();
