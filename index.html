@@ -774,12 +774,17 @@ tbody tr { transition:background .12s; }
   <div class="modal-card">
     <h3 id="userEditTitle">✏️ Sửa User</h3>
     <input type="hidden" id="userEditIdx">
-    <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
+      <div class="form-group"><label>User (mã NV)</label><input id="ueCode" placeholder="Mã đăng nhập"></div>
+      <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
+    </div>
     <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
     <div class="form-group"><label>GĐV/TKMB phụ trách</label><input id="ueGdv" placeholder="Vùng hoặc KV (Phi/Huy Dũng/Thái)"></div>
-    <div class="form-group"><label>Phạm vi (tỉnh)</label><input id="uePhamvi" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList()">
-    <div id="ueTinhList" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
-    <div class="form-group"><label>Password</label><input id="uePass" type="password"></div>
+    <div class="form-group"><label>Phạm vi phụ trách MB</label><input id="uePhamviMB" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList('MB')">
+    <div id="ueTinhListMB" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
+    <div class="form-group"><label>Phạm vi phụ trách điểm QH</label><input id="uePhamviQH" placeholder="Tỉnh cách nhau dấu phẩy" onfocus="ueShowTinhList('QH')">
+    <div id="ueTinhListQH" style="display:none;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;background:var(--bg)"></div></div>
+    <div class="form-group"><label>Password (giữ nguyên ký tự)</label><input id="uePass" type="text"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="document.getElementById('userEditModal').style.display='none'">Hủy</button>
       <button class="btn btn-primary" onclick="ueSave()">💾 Lưu</button>
@@ -3012,7 +3017,7 @@ function cfgSearchUsers() {
     return `<tr>
       <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
       <td>${u.name}</td><td>••••••••</td>
-      <td>${u.rank}${u.phamvi&&u.phamvi.length?" <span style=font-size:9px;color:var(--muted)>("+u.phamvi.length+" tỉnh)</span>":""}</td>
+      <td>${u.rank}${u.phamviMB&&u.phamviMB.length?" <span style=font-size:9px;color:var(--muted)>(MB "+u.phamviMB.length+" tỉnh)</span>":""}${u.phamviQH&&u.phamviQH.length?" <span style=font-size:9px;color:var(--muted)>(QH "+u.phamviQH.length+")</span>":""}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${idx})" title="Sửa">✏️</button>
         <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${idx})" title="Xóa">✕</button>
@@ -3081,46 +3086,50 @@ function cfgAddUser() {
   const name=prompt('Họ tên:','');if(!name)return;
   const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV):','TKMB');if(!rank)return;
   const gdv=prompt('GĐV phụ trách (nếu là GĐV) hoặc TKMB (Phi/Huy Dũng/Thái):','');
-  USERS.push({rank,name,code,phone:'12345678',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:''});
+  USERS.push({rank,name,code,phone:'12345678',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:'',phamviMB:[],phamviQH:[]});
   renderSettings();
 }
 function cfgEditUser(i) {
   const u=USERS[i];
   document.getElementById('userEditIdx').value = i;
   document.getElementById('userEditTitle').textContent = 'Sửa: ' + u.name;
+  document.getElementById('ueCode').value = u.code;
   document.getElementById('ueName').value = u.name;
   document.getElementById('ueRank').value = u.rank;
   document.getElementById('ueGdv').value = u.gdv||u.tkmb||'';
-  document.getElementById('uePhamvi').value = (u.phamvi||[]).join(',');
+  document.getElementById('uePhamviMB').value = (u.phamviMB||[]).join(',');
+  document.getElementById('uePhamviQH').value = (u.phamviQH||[]).join(',');
   document.getElementById('uePass').value = u.phone||'12345678';
   document.getElementById('userEditModal').style.display = 'flex';
 }
 function ueSave() {
   const i = parseInt(document.getElementById('userEditIdx').value);
   const u = USERS[i];
+  u.code = document.getElementById('ueCode').value.trim();
   u.name = document.getElementById('ueName').value.trim();
   u.rank = document.getElementById('ueRank').value;
   const gdv = document.getElementById('ueGdv').value.trim();
   if(u.rank==='TKMB'){u.tkmb=gdv;u.gdv='';}
   else{u.gdv=gdv;u.tkmb='';}
-  u.phamvi = document.getElementById('uePhamvi').value.split(',').map(s=>s.trim()).filter(Boolean);
+  u.phamviMB = document.getElementById('uePhamviMB').value.split(',').map(s=>s.trim()).filter(Boolean);
+  u.phamviQH = document.getElementById('uePhamviQH').value.split(',').map(s=>s.trim()).filter(Boolean);
   u.phone = document.getElementById('uePass').value.trim();
   document.getElementById('userEditModal').style.display = 'none';
   renderSettings();
 }
-function ueShowTinhList() {
-  const div = document.getElementById('ueTinhList');
+function ueShowTinhList(type) {
+  const div = document.getElementById('ueTinhList' + type);
   if (div.style.display !== 'none') { div.style.display = 'none'; return; }
   div.style.display = 'block';
-  const cur = document.getElementById('uePhamvi').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const cur = document.getElementById('uePhamvi' + type).value.split(',').map(s=>s.trim()).filter(Boolean);
   const tinhs = Object.keys(TINH_TO_TKMB_JS).sort();
   div.innerHTML = tinhs.map(t => {
     const ck = cur.includes(t) ? 'checked' : '';
-    return `<label style="display:block;font-size:11px;cursor:pointer"><input type="checkbox" ${ck} onchange="ueToggleTinh(this,'${t}')"> ${t}</label>`;
+    return `<label style="display:block;font-size:11px;cursor:pointer"><input type="checkbox" ${ck} onchange="ueToggleTinh('${type}', this, '${t}')"> ${t}</label>`;
   }).join('');
 }
-function ueToggleTinh(cb, tinh) {
-  const input = document.getElementById('uePhamvi');
+function ueToggleTinh(type, cb, tinh) {
+  const input = document.getElementById('uePhamvi' + type);
   let arr = input.value.split(',').map(s=>s.trim()).filter(Boolean);
   if (cb.checked) { if(!arr.includes(tinh)) arr.push(tinh); }
   else arr = arr.filter(t=>t!==tinh);
