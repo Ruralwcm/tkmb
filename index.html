@@ -641,10 +641,16 @@ tbody tr { transition:background .12s; }
 
 
 
-        <table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>Pass</th><th>Nhóm</th><th></th></tr></thead>
+        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Role</th><th>Password</th><th></th></tr></thead>
         <tbody id="cfgUserTable"></tbody></table>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center">
+          <button class="btn btn-sm btn-primary" onclick="cfgAddUser()">➕ Thêm User</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('impUserFile').click()">📥 Import User</button>
+          <button class="btn btn-sm btn-outline" onclick="downloadUserTemplate()">📋 Tải cấu trúc</button>
+          <input type="file" id="impUserFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importUsers(this)">
+          <span id="impUserInfo" style="font-size:11px;color:var(--muted);align-self:center"></span>
+        </div>
       </div>
       <!-- Matrix -->
       <div style="flex:1;min-width:280px">
@@ -3007,23 +3013,80 @@ function init() {
 }
 
 // ═══ SETTINGS ═══
+function roleLabel(u) {
+  if (u.rank === 'GĐM') return 'Toàn quyền';
+  if (u.rank === 'GĐTKMB') return 'QL TKMB';
+  if (u.rank === 'GĐV') return 'Vùng: ' + (u.gdv || u.name);
+  if (u.rank === 'TKMB') return 'KV: ' + (u.tkmb || '');
+  if (u.rank === 'QLKV') return 'QLKV: ' + (u.gdv || '');
+  if (u.rank === 'CV TKMB') return 'CV: ' + (u.tkmb || '');
+  return u.rank;
+}
 function cfgSearchUsers() {
   const q = (document.getElementById('cfgUserSearch')?.value||'').toLowerCase();
-  let filtered = q ? USERS.filter(u => u.code.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)) : USERS;
+  let filtered = q ? USERS.filter(u => (u.code||'').toLowerCase().includes(q) || u.name.toLowerCase().includes(q)) : USERS;
   const tbody = document.getElementById('cfgUserTable');
   if (!tbody) return;
-  tbody.innerHTML = filtered.map(u => {
+  tbody.innerHTML = filtered.map((u, ri) => {
     const idx = USERS.indexOf(u);
     return `<tr>
+      <td style="color:var(--muted)">${ri+1}</td>
       <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
-      <td>${u.name}</td><td>••••••••</td>
-      <td>${u.rank}${u.phamviMB&&u.phamviMB.length?" <span style=font-size:9px;color:var(--muted)>(MB "+u.phamviMB.length+" tỉnh)</span>":""}${u.phamviQH&&u.phamviQH.length?" <span style=font-size:9px;color:var(--muted)>(QH "+u.phamviQH.length+")</span>":""}</td>
+      <td>${u.name}</td>
+      <td><code>${u.code}</code></td>
+      <td style="font-size:11px;color:var(--muted)">${roleLabel(u)}</td>
+      <td>••••••••</td>
       <td style="white-space:nowrap">
         <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${idx})" title="Sửa">✏️</button>
         <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${idx})" title="Xóa">✕</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px">Không tìm thấy</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:12px">Không tìm thấy</td></tr>';
+}
+function downloadUserTemplate() {
+  const csv = 'Chức danh,Họ và tên,User,Role,Password\nGĐV,Nguyễn Văn A,928615,Vùng: Nguyễn Văn A,12345678\n';
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Template_Users.csv';
+  a.click();
+}
+function importUsers(input) {
+  const file = input.files[0]; if (!file) return;
+  const info = document.getElementById('impUserInfo');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let rows;
+    if (/\.csv$/i.test(file.name)) rows = csvParse(e.target.result);
+    else {
+      try { const wb = XLSX.read(e.target.result, { type:'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true }); }
+      catch(err) { if (info) info.textContent = '❌ Lỗi đọc file'; return; }
+    }
+    if (!rows || rows.length < 2) { if (info) info.textContent = '❌ File trống'; return; }
+    const hdr = rows[0].map(h => String(h||'').trim().toLowerCase());
+    const iRank = Math.max(hdr.indexOf('chức danh'), hdr.indexOf('vai trò'), hdr.indexOf('role'));
+    const iName = hdr.indexOf('họ và tên');
+    const iCode = Math.max(hdr.indexOf('user'), hdr.indexOf('mã nv'));
+    const iPass = hdr.indexOf('password');
+    if (iRank < 0 || iName < 0 || iCode < 0) { if (info) info.textContent = '❌ Sai cấu trúc cột (cần: Chức danh, Họ và tên, User)'; return; }
+    let n = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i]; if (!r) continue;
+      const rank = String(r[iRank]||'').trim();
+      const name = String(r[iName]||'').trim();
+      const code = String(r[iCode]||'').trim();
+      if (!rank || !name || !code) continue;
+      const phone = (iPass >= 0 ? String(r[iPass]||'').trim() : '12345678') || '12345678';
+      const ex = USERS.find(x => x.code === code);
+      if (ex) { ex.rank = rank; ex.name = name; ex.phone = phone; if(rank==='TKMB'){ex.tkmb=name;}else{ex.gdv=name;} }
+      else { USERS.push({ rank, name, code, phone, gdv: rank==='GĐV'?name:'', tkmb: rank==='TKMB'?name:'', phamviMB:[], phamviQH:[] }); }
+      n++;
+    }
+    if (info) info.textContent = '✅ Đã import ' + n + ' user';
+    renderSettings();
+  };
+  if (/\.csv$/i.test(file.name)) reader.readAsText(file, 'utf-8');
+  else reader.readAsArrayBuffer(file);
 }
 function loadSettings() {
   try { return JSON.parse(localStorage.getItem('tkmb_settings')||'{}'); } catch(e) { return {}; }
