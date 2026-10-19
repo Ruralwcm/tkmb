@@ -49,8 +49,11 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:var(--font); background:var(--bg); color:var(--ink); line-height:1.5; font-size:14px; }
 
+/* ─── APP HEADER (sticky: topbar + nav luôn cố định khi cuộn) ─── */
+.app-header { position:sticky; top:0; z-index:1000; }
+
 /* ─── TOPBAR ─── */
-.topbar { background:#d71920; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(215,25,32,.3); }
+.topbar { background:#d71920; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(215,25,32,.3); }
 .topbar .logo-area { display:flex; align-items:center; gap:10px; }
 .topbar .logo-icon { font-size:24px; }
 .topbar h1 { font-size:15px; font-weight:700; letter-spacing:-.3px; font-family:var(--font-cond); }
@@ -78,7 +81,7 @@ body { font-family:var(--font); background:var(--bg); color:var(--ink); line-hei
 .login-card .error { color:var(--red); font-size:12px; text-align:center; margin-top:8px; }
 
 /* ─── NAV ─── */
-.nav { display:flex; background:var(--surface); border-bottom:1px solid var(--line); overflow-x:auto; position:sticky; top:54px; z-index:50; gap:0; scrollbar-width:none; -ms-overflow-style:none; box-shadow:var(--shadow-sm); }
+.nav { display:flex; background:var(--surface); border-bottom:1px solid var(--line); overflow-x:auto; gap:0; scrollbar-width:none; -ms-overflow-style:none; box-shadow:var(--shadow-sm); }
 .nav::-webkit-scrollbar { display:none; }
 .nav button { flex-shrink:0; padding:10px 14px; border:none; background:none; font-size:12px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-1px; transition:.15s; white-space:nowrap; letter-spacing:-.1px; font-family:var(--font); }
 .nav button:hover { color:var(--teal); background:var(--teal-bg); }
@@ -355,6 +358,7 @@ tbody tr { transition:background .12s; }
 </head>
 <body>
 
+<div class="app-header">
 <div class="topbar">
   <div>
     <h1>🏪 TKMB Web App by HaoDT v2.74</h1>
@@ -401,6 +405,7 @@ tbody tr { transition:background .12s; }
   <button data-tab="dsmb">📑 Danh sách MB</button>
   <button data-tab="settings" id="navSettings" style="display:none">⚙️ Cài đặt</button>
 </div>
+</div>
 
 <div class="main">
 
@@ -424,7 +429,7 @@ tbody tr { transition:background .12s; }
   <div class="card">
     <div class="sec-header" onclick="toggleSection(this)" style="margin-bottom:0">
       <span class="arr">▼</span>
-      <h3 style="margin:0">📋 MB gần đây <span class="sub">10 MB mới nhất</span></h3>
+      <h3 style="margin:0">📋 MB gần đây <span class="sub">10 MB mới nhất theo ngày tiếp nhận</span></h3>
     </div>
     <div class="sec-body" style="max-height:2000px">
       <div style="overflow-x:auto;margin-top:8px"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Tiến độ</th><th>%</th><th>Quá hạn</th></tr></thead><tbody></tbody></table></div>
@@ -468,8 +473,7 @@ tbody tr { transition:background .12s; }
 <!-- ===== TIẾN ĐỘ MB ===== -->
 <section class="section" id="sec-tiendo">
   <div class="card">
-    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h · B2=48h · B3=24h · B4=Thứ4/5 · B5=21ng · B6=7ng</span>
-    <button class="btn btn-sm btn-outline" onclick="syncGDVQLKVTuQH()" id="syncQHBtn" style="margin-left:12px;font-size:10px">🔄 Đồng bộ GĐV/QLKV từ QH</button></h3>
+    <h3>🔄 Tiến độ xử lý Mặt Bằng <span class="sub">⏱ Hạn: B1=24h · B2=48h · B3=24h · B4=Thứ4/5 · B5=21ng · B6=7ng</span></h3>
     <div class="filter-bar">
       <input type="text" id="tdSearch" placeholder="🔍 Tìm MB..." oninput="renderTienDo()">
       <select id="tdMien" onchange="onTDMienChange()"><option value="">Tất cả Miền</option><option>Hà Nội</option><option>Đông Tây Bắc</option><option>Đồng Bằng Sông Hồng</option><option>Bắc Trung Bộ</option><option>Nam Trung Bộ</option><option>Tây Nguyên</option><option>Đông Nam Bộ</option><option>ĐBSCL</option></select>
@@ -507,7 +511,6 @@ tbody tr { transition:background .12s; }
       <button class="btn btn-sm btn-primary" onclick="openQHEdit()">➕ Thêm điểm QH</button>
       <button class="btn btn-sm btn-outline" onclick="document.getElementById('qmImportFile').click()">📤 Upload hàng loạt</button>
       <button class="btn btn-sm btn-outline" onclick="qhDownloadTemplate()">📥 Tải cấu trúc</button>
-      <button class="btn btn-sm btn-outline" onclick="qhSyncStoreslist()" id="qhSyncBtn" style="border-color:#16a34a;color:#16a34a">🔄 Đồng bộ Storeslist</button>
       <span id="qhSyncInfo" style="font-size:11px;color:var(--muted)"></span>
       <input type="file" id="qmImportFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleQMImport(this)">
       <span id="qmImportMsg" style="font-size:11px;color:var(--muted);align-self:center"></span>
@@ -619,7 +622,7 @@ tbody tr { transition:background .12s; }
 <section class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt</h3>
     <!-- Scan radius -->
-    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH</h4>
+    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH <span style="font-size:10px;color:var(--muted);font-weight:400">(chưa hiệu lực)</span></h4>
     <div style="display:flex;gap:8px;align-items:center;margin:4px 0 16px">
       <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1;max-width:300px" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
       <span id="cfgScanRadiusVal" style="font-weight:700;min-width:40px">100</span><span>m</span>
@@ -638,7 +641,7 @@ tbody tr { transition:background .12s; }
 
 
 
-        <table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Pass</th><th>Nhóm</th><th></th></tr></thead>
+        <table style="font-size:12px"><thead><tr><th>Chức danh</th><th>Họ và tên</th><th>Pass</th><th>Nhóm</th><th></th></tr></thead>
         <tbody id="cfgUserTable"></tbody></table>
         </div>
         <button class="btn btn-sm btn-primary" onclick="cfgAddUser()" style="margin-top:8px">➕ Thêm</button>
@@ -1695,7 +1698,7 @@ function populateDashGDV() {
   populateDashTinh();
 }
 function renderDash() {
-  const list = getDashFilteredMB();
+  const list = [...getDashFilteredMB()].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
   const total = list.length;
   const done = list.filter(m=>m.steps[5].r==='Done').length;
   const failMB = list.filter(m=>m.steps.some(s=>s.r==='Fail')).length;
@@ -2859,12 +2862,12 @@ function qhDownloadTemplate() {
 async function qhSyncStoreslist() {
   const btn = document.getElementById('qhSyncBtn');
   const info = document.getElementById('qhSyncInfo');
-  btn.disabled = true; info.textContent = 'Đang tải Storelist...';
+  if(btn) btn.disabled = true; info.textContent = 'Đang tải Storelist...';
   try {
     const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_LIVE_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('Storeslist');
     const txt = await fetch(url).then(r => r.text());
     const rows = csvParse(txt);
-    if (rows.length < 2) { info.textContent = '❌ Storeslist trống'; btn.disabled = false; return; }
+    if (rows.length < 2) { info.textContent = '❌ Storeslist trống'; if(btn) btn.disabled = false; return; }
     const hdr = rows[0]; const si = {}; hdr.forEach((h,i)=>si[h.replace(/^\uFEFF/,'')]=i);
     // Build CH list: [{lat,lng,gdv,qlkv,tinh,huyen}]
     const stores = [];
@@ -2912,7 +2915,7 @@ async function qhSyncStoreslist() {
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'batchImportQH', points: pts }), headers: { 'Content-Type': 'text/plain' } });
     } catch(e) {}
   } catch(e) { info.textContent = '❌ Lỗi: ' + e.message; }
-  btn.disabled = false;
+  if(btn) btn.disabled = false;
 }
 
 // Haversine (nếu chưa có ở scope này)
@@ -2976,14 +2979,14 @@ function cfgSearchUsers() {
     const idx = USERS.indexOf(u);
     return `<tr>
       <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
-      <td>${u.name}</td><td><code>${u.code}</code></td><td>••••••••</td>
+      <td>${u.name}</td><td>••••••••</td>
       <td>${u.rank}${u.phamvi&&u.phamvi.length?" <span style=font-size:9px;color:var(--muted)>("+u.phamvi.length+" tỉnh)</span>":""}</td>
       <td style="white-space:nowrap">
         <button class="btn btn-xs btn-outline" onclick="cfgEditUser(${idx})" title="Sửa">✏️</button>
         <button class="btn btn-xs" style="background:#fee2e2;color:#b91c1c" onclick="cfgDeleteUser(${idx})" title="Xóa">✕</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">Không tìm thấy</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px">Không tìm thấy</td></tr>';
 }
 function loadSettings() {
   try { return JSON.parse(localStorage.getItem('tkmb_settings')||'{}'); } catch(e) { return {}; }
