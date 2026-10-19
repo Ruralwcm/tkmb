@@ -15,8 +15,8 @@
   --ink: #1a1f26;
   --muted: #6b7280;
   --red: #dc2626;
-  --orange: #d97706;
-  --green: #16a34a;
+  --orange: #1a3c6e;
+  --green: #1a3c6e;
   --teal: #d71920;
   --teal-light: #1a3c6e;
   --teal-bg: #e8f0fe;
@@ -168,15 +168,15 @@ tbody tr { transition:background .12s; }
 
 /* ─── TAGS ─── */
 .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; letter-spacing:.2px; line-height:1.6; }
-.tag-g { background:#dcfce7; color:#15803d; }
-.tag-o { background:#fef3c7; color:#92400e; }
+.tag-g { background:#e8f0fe; color:#1a3c6e; }
+.tag-o { background:#fef9c3; color:#1a3c6e; }
 .tag-p { background:#dbeafe; color:#1d4ed8; }
 .tag-r { background:#fee2e2; color:#b91c1c; }
 .tag-gray { background:var(--bg); color:var(--muted); }
 
 .sla-badge { font-size:9px; padding:1px 5px; border-radius:3px; font-weight:600; }
-.sla-ok { background:#dcfce7; color:#15803d; }
-.sla-warn { background:#fef3c7; color:#92400e; }
+.sla-ok { background:#e8f0fe; color:#1a3c6e; }
+.sla-warn { background:#fef9c3; color:#1a3c6e; }
 .sla-over { background:#fee2e2; color:#991b1b; }
 
 .mini-bar { height:5px; background:var(--line); border-radius:3px; overflow:hidden; min-width:50px; }
@@ -190,7 +190,7 @@ tbody tr { transition:background .12s; }
 .step-node:hover { transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,.08); }
 .step-node.None { background:var(--bg); color:var(--muted); border-color:var(--line); }
 .step-node.Pending { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
-.step-node.Done { background:#dcfce7; color:#15803d; border-color:#86efac; }
+.step-node.Done { background:#e8f0fe; color:#1a3c6e; border-color:#86efac; }
 .step-node.Fail { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; }
 .step-node.\— { background:var(--bg); color:#d1d5db; border-color:var(--line); opacity:.5; }
 .step-node .sn { font-size:20px; display:block; margin-bottom:2px; }
@@ -237,7 +237,7 @@ tbody tr { transition:background .12s; }
 .filter-bar input { flex:1; min-width:160px; }
 
 /* ─── PENDING ALERT ─── */
-.pending-approval { background:#fffbeb; border:1px solid var(--orange); border-radius:8px; padding:10px 14px; margin:12px 0; font-size:11px; color:#92400e; }
+.pending-approval { background:#fffbeb; border:1px solid var(--orange); border-radius:8px; padding:10px 14px; margin:12px 0; font-size:11px; color:#1a3c6e; }
 
 /* ─── RESPONSIVE ─── */
 @media(max-width:768px) {
@@ -275,7 +275,7 @@ tbody tr { transition:background .12s; }
 .kpi-mini.orange .kpi-mini-num { color:var(--orange); }
 .kpi-mini.red .kpi-mini-num { color:var(--red); }
 .kpi-mini.blue .kpi-mini-num { color:#2563eb; }
-.kpi-mini.purple .kpi-mini-num { color:#7c3aed; }
+.kpi-mini.purple .kpi-mini-num { color:#1a3c6e; }
 
 /* ═══ CHECKLIST NSO ═══ */
 .chk-view { display:none; }
@@ -302,9 +302,9 @@ tbody tr { transition:background .12s; }
 .chk-progress .chk-progress-fill { height:100%; border-radius:3px; transition:.3s; }
 .chk-progress .chk-progress-txt { font-size:10px; color:var(--muted); white-space:nowrap; }
 
-.chk-status-ok { background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+.chk-status-ok { background:#e8f0fe; color:#1a3c6e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
 .chk-status-overdue { background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
-.chk-status-warn { background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+.chk-status-warn { background:#fef9c3; color:#1a3c6e; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
 
 .chk-detail-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding:14px 16px; background:var(--teal-bg); border-radius:var(--radius); }
 .chk-detail-header h2 { font-size:16px; color:var(--teal); margin:0; }
@@ -320,20 +320,20 @@ tbody tr { transition:background .12s; }
 .chk-detail-table .chk-chi-tiet { font-size:10px; color:var(--muted); max-width:280px; line-height:1.4; }
 .chk-detail-table .chk-deadline { font-size:10.5px; text-align:center; white-space:nowrap; font-weight:600; }
 .chk-detail-table .chk-deadline-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; }
-.chk-deadline-duhan { background:#dcfce7; color:#15803d; }
-.chk-deadline-hom-nay { background:#fef3c7; color:#92400e; }
+.chk-deadline-duhan { background:#e8f0fe; color:#1a3c6e; }
+.chk-deadline-hom-nay { background:#fef9c3; color:#1a3c6e; }
 .chk-deadline-quahan { background:#fee2e2; color:#b91c1c; }
 .chk-deadline-future { background:#dbeafe; color:#1d4ed8; }
 
 .chk-detail-table .chk-status-sel { padding:4px 6px; border:1px solid var(--line); border-radius:5px; font-size:10.5px; background:var(--bg); cursor:pointer; color:var(--ink); }
-.chk-detail-table .chk-status-sel.done { background:#dcfce7; border-color:#86efac; color:#15803d; }
+.chk-detail-table .chk-status-sel.done { background:#e8f0fe; border-color:#86efac; color:#1a3c6e; }
 .chk-detail-table .chk-status-sel.pending { background:var(--surface); border-color:var(--line); }
 .chk-detail-table .chk-status-sel.na { background:var(--bg); border-color:var(--line); color:var(--muted); }
 
 .chk-summary { margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; }
 .chk-summary-item { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; }
-.chk-summary-done { background:#dcfce7; color:#15803d; }
-.chk-summary-pending { background:#fef3c7; color:#92400e; }
+.chk-summary-done { background:#e8f0fe; color:#1a3c6e; }
+.chk-summary-pending { background:#fef9c3; color:#1a3c6e; }
 .chk-summary-na { background:var(--bg); color:var(--muted); }
 
 .chk-cat-header td { background:var(--teal-bg) !important; color:var(--teal) !important; font-weight:700; font-size:12px; padding:8px 8px !important; }
@@ -362,7 +362,7 @@ tbody tr { transition:background .12s; }
 <div class="topbar">
   <div>
     <h1>🏪 TKMB Web App by HaoDT v2.74</h1>
-    <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#fbbf24">⏳ Đang tải dữ liệu...</span></div>
+    <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#ffc107">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
     <div class="user-info">
@@ -854,7 +854,7 @@ function startScanGPS() {
     function(pos) {
       scanGPS.lat = pos.coords.latitude;
       scanGPS.lng = pos.coords.longitude;
-      document.getElementById('scanGpsStatus').innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-right:4px"></span> GPS OK (±' + Math.round(pos.coords.accuracy) + 'm)';
+      document.getElementById('scanGpsStatus').innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a3c6e;margin-right:4px"></span> GPS OK (±' + Math.round(pos.coords.accuracy) + 'm)';
       document.getElementById('scanGpsCoords').textContent = scanGPS.lat.toFixed(6) + ', ' + scanGPS.lng.toFixed(6);
     },
     function(err) {
@@ -880,7 +880,7 @@ function doScanQH() {
   if (!scanGPS.lat) { alert('⚠️ Đang chờ tín hiệu GPS...'); return; }
   if (QH_POINTS.length === 0) { alert('⚠️ Chưa tải dữ liệu QH'); return; }
 
-  btn.style.background = 'linear-gradient(145deg,#d97706,#f59e0b)';
+  btn.style.background = 'linear-gradient(145deg,#1a3c6e,#f59e0b)';
   btn.querySelector('span:last-child').textContent = 'Đang quét...';
   results.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted)"><div class="spinner" style="display:inline-block;width:24px;height:24px;border:3px solid #e5e7eb;border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite"></div><div style="margin-top:6px;font-size:12px">Đang quét ' + QH_POINTS.length + ' điểm QH...</div></div>';
 
@@ -895,19 +895,19 @@ function doScanQH() {
     }
     nearby.sort(function(a,b) { return a.dist - b.dist; });
 
-    btn.style.background = 'linear-gradient(145deg,#16a34a,#22c55e)';
+    btn.style.background = 'linear-gradient(145deg,#1a3c6e,#22c55e)';
     btn.querySelector('span:last-child').textContent = 'Scan QH';
 
     if (nearby.length > 0) {
       detail.style.display = 'none';
-      results.innerHTML = '<div style="font-weight:600;font-size:13px;color:#7c3aed;margin-bottom:6px">✅ Tìm thấy ' + nearby.length + ' điểm QH trong ' + SCAN_RADIUS + 'm</div>' +
+      results.innerHTML = '<div style="font-weight:600;font-size:13px;color:#1a3c6e;margin-bottom:6px">✅ Tìm thấy ' + nearby.length + ' điểm QH trong ' + SCAN_RADIUS + 'm</div>' +
         nearby.map(function(p) {
-          return '<div onclick="openScanDetail(\'' + p.qh + '\')" style="background:#fff;border-radius:8px;padding:12px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;border:1px solid #ede9fe;transition:transform .15s" onmousedown="this.style.transform=\'scale(.98)\'" onmouseup="this.style.transform=\'\'">' +
-            '<div style="font-weight:700;font-size:14px;color:#7c3aed">' + p.qh + '</div>' +
+          return '<div onclick="openScanDetail(\'' + p.qh + '\')" style="background:#fff;border-radius:8px;padding:12px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;border:1px solid #e8f0fe;transition:transform .15s" onmousedown="this.style.transform=\'scale(.98)\'" onmouseup="this.style.transform=\'\'">' +
+            '<div style="font-weight:700;font-size:14px;color:#1a3c6e">' + p.qh + '</div>' +
             '<div style="font-size:11px;color:var(--muted)">📍 ' + [p.x, p.h, p.t].filter(Boolean).join(', ') + '</div>' +
             '<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">' +
-              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#dcfce7;color:#15803d">📏 ' + Math.round(p.dist) + 'm</span>' +
-              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#ede9fe;color:#7c3aed">' + (p.gdv||'') + '</span>' +
+              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#e8f0fe;color:#1a3c6e">📏 ' + Math.round(p.dist) + 'm</span>' +
+              '<span style="padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;background:#e8f0fe;color:#1a3c6e">' + (p.gdv||'') + '</span>' +
             '</div></div>';
         }).join('');
       if (navigator.vibrate) navigator.vibrate(200);
@@ -1006,8 +1006,8 @@ function renderScanTimeline(surveys, el) {
     return;
   }
   el.innerHTML = surveys.map(function(s,i) {
-    let h = '<div style="position:relative;padding:0 0 12px 20px;border-left:' + (i<surveys.length-1?'2px solid #ede9fe':'2px solid transparent') + '">';
-    h += '<div style="position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:#7c3aed"></div>';
+    let h = '<div style="position:relative;padding:0 0 12px 20px;border-left:' + (i<surveys.length-1?'2px solid #e8f0fe':'2px solid transparent') + '">';
+    h += '<div style="position:absolute;left:-5px;top:3px;width:8px;height:8px;border-radius:50%;background:#1a3c6e"></div>';
     h += '<div style="font-size:10px;color:#aaa">📅 ' + s.ngayKS + ' · ' + (s.nguoiKS||'') + '</div>';
     if (s.diaChiNha) {
       h += '<div style="font-size:12px;margin-top:2px">🏠 ' + s.diaChiNha;
@@ -1634,8 +1634,8 @@ function showSuccessToast(mbId) {
   const old = document.getElementById('successBanner'); if (old) old.remove();
   const banner = document.createElement('div');
   banner.id = 'successBanner';
-  banner.style.cssText = 'background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
-  banner.innerHTML = '<div><strong style="color:#15803d;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#166534">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · Hạn: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
+  banner.style.cssText = 'background:#e8f0fe;border:1px solid #86efac;border-radius:8px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
+  banner.innerHTML = '<div><strong style="color:#1a3c6e;font-size:14px">✅ Thành công — Chờ phê duyệt</strong><br><span style="font-size:12px;color:#1a3c6e">' + mbId + ' đã ghi nhận vào hệ thống · Chờ GĐV duyệt (B1) · Hạn: 24h</span></div><button class="btn btn-sm btn-outline" onclick="this.parentElement.remove()">✕</button>';
   card.appendChild(banner);
   
   renderDash(); renderTienDo(); renderDSMB();
@@ -1947,7 +1947,7 @@ function renderTienDo() {
     }).join('') + '</div>';
     const statusLabel = getStatusLabel(m);
     const statusTag = statusTagHtml(m);
-    const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef3c7;color:#92400e'}">⚠️ ${warning}</span>` : '';
+    const warnBadge = warning ? `<span class="warn-tag" style="background:${warning==='QUÁ HẠN'?'#fee2e2;color:#991b1b':'#fef9c3;color:#1a3c6e'}">⚠️ ${warning}</span>` : '';
     // Trạng thái + Bước hiện tại + Quá hạn
     const stCls = hasFail ? 'tag-r' : (m.steps[5].r==='Done' ? 'tag-g' : 'tag-p');
     const stShort = hasFail ? 'Fail' : (m.steps[5].r==='Done' ? 'Done' : 'Pending');
@@ -2071,10 +2071,10 @@ function renderChkDashboard() {
     if (stF === 'warn' && !warn) return '';
     if (stF === 'ok' && (overdue || warn)) return '';
 
-    const pctColor = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+    const pctColor = pct >= 80 ? '#1a3c6e' : pct >= 50 ? '#1a3c6e' : '#dc2626';
     const statusHtml = overdue ? '<span style="color:#dc2626;font-weight:700">🔴 Quá hạn</span>'
-      : warn ? '<span style="color:#d97706;font-weight:700">🟡 Sắp hết</span>'
-      : '<span style="color:#16a34a;font-weight:700">🟢 Đúng hạn</span>';
+      : warn ? '<span style="color:#1a3c6e;font-weight:700">🟡 Sắp hết</span>'
+      : '<span style="color:#1a3c6e;font-weight:700">🟢 Đúng hạn</span>';
 
     return '<tr onclick="openChkDetail(\'' + escJS(m.id) + '\')" style="cursor:pointer" class="chk-row">' +
       '<td>' + (m.siteCode || '-') + '</td>' +
@@ -2125,13 +2125,13 @@ function openChkDetail(nsoId) {
   document.getElementById('chkDetailTbody').innerHTML = CHK_TEMPLATE.map((item, i) => {
     let dauMucRow = '';
     if (item.dauMuc && item.dauMuc !== currentDauMuc) {
-      dauMucRow = '<tr style="background:#f5f3ff"><td colspan="5" style="font-weight:700;color:var(--primary);padding:8px 12px;font-size:12px">📂 ' + item.dauMuc + '</td></tr>';
+      dauMucRow = '<tr style="background:#e8f0fe"><td colspan="5" style="font-weight:700;color:var(--primary);padding:8px 12px;font-size:12px">📂 ' + item.dauMuc + '</td></tr>';
       currentDauMuc = item.dauMuc;
     }
 
     const status = (chkProgress[nsoId] && chkProgress[nsoId][item.congViec]) || 'pending';
     let statusHtml, statusColor;
-    if (status === 'done') { statusHtml = '✅ Đã xong'; statusColor = '#16a34a'; }
+    if (status === 'done') { statusHtml = '✅ Đã xong'; statusColor = '#1a3c6e'; }
     else if (status === 'na') { statusHtml = '❌ KAD'; statusColor = '#6b7280'; }
     else {
       let dlBadge = '';
@@ -2145,7 +2145,7 @@ function openChkDetail(nsoId) {
         }
       }
       statusHtml = '⏳ Chưa' + dlBadge;
-      statusColor = (dlBadge && dlBadge.includes('Quá hạn')) ? '#dc2626' : '#d97706';
+      statusColor = (dlBadge && dlBadge.includes('Quá hạn')) ? '#dc2626' : '#1a3c6e';
     }
 
     return dauMucRow + '<tr onclick="toggleChkItem(\'' + escJS(nsoId) + '\',\'' + escJS(item.congViec) + '\')" style="cursor:pointer" class="chk-row">' +
@@ -2228,7 +2228,7 @@ function openTracklog(mbId){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
     const step=mb.steps[s-1]||{};
     const r=step.r||'None';
-    const bg=r==='Done'?'#f0fdf4':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
+    const bg=r==='Done'?'#e8f0fe':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
     const detail=[info.nguoiThucHien,info.nguoiDuyet,info.thoiGian,info.vanDe].filter(Boolean);
     html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0">
       <td style="padding:4px 4px;text-align:center;width:22px">${icon[r]||icon.None}</td>
@@ -3115,7 +3115,7 @@ function renderTkmbMap() {
       <td><select onchange="cfgUpdateTkmbMap('${t}',this.value)" style="font-size:11px">
         <option value="">—</option><option ${tkmb==='Phi'?'selected':''}>Phi</option><option ${tkmb==='Huy Dũng'?'selected':''}>Huy Dũng</option><option ${tkmb==='Thái'?'selected':''}>Thái</option>
       </select></td>
-      <td>${isOverride?'<span style="font-size:9px;color:#16a34a">đã sửa</span>':''}</td>
+      <td>${isOverride?'<span style="font-size:9px;color:#1a3c6e">đã sửa</span>':''}</td>
     </tr>`);
   });
   document.getElementById('cfgTkmbMap').innerHTML = rows.join('') || '<tr><td colspan="4">Không có dữ liệu</td></tr>';
