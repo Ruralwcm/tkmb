@@ -621,17 +621,9 @@ tbody tr { transition:background .12s; }
 <!-- ===== CÀI ĐẶT ===== -->
 <section class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt</h3>
-    <!-- Scan radius -->
-    <h4 style="margin-top:12px">📏 Khoảng cách check-in QH</h4>
-    <div style="display:flex;gap:8px;align-items:center;margin:4px 0 16px">
-      <input type="range" id="cfgScanRadius" min="50" max="500" value="100" style="flex:1;max-width:300px" oninput="document.getElementById('cfgScanRadiusVal').textContent=this.value">
-      <span id="cfgScanRadiusVal" style="font-weight:700;min-width:40px">100</span><span>m</span>
-      <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾</button>
-    </div>
-
     <!-- Users -->
     <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:500px">
+      <div style="flex:1;min-width:500px;order:2">
         <h4 style="margin-bottom:8px">👥 Users</h4>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
           <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm kiếm" style="width:100%;max-width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px" oninput="cfgSearchUsers()">
@@ -646,8 +638,14 @@ tbody tr { transition:background .12s; }
         <tbody id="cfgUserTable"></tbody></table>
         </div>
       </div>
-      <!-- Matrix -->
-      <div style="flex:1;min-width:280px">
+      <!-- Matrix + cài đặt khác -->
+      <div style="flex:1;min-width:300px;order:1">
+        <h4 style="margin-bottom:8px">📏 Khoảng cách check-in QH</h4>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px">
+          <input type="number" id="cfgScanRadius" min="50" max="500" value="100" style="width:90px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px">
+          <span>m</span>
+          <button class="btn btn-sm btn-primary" onclick="saveSettings()">💾</button>
+        </div>
         <h4 style="margin-bottom:8px">🔐 Phân quyền truy cập Tab</h4>
         <div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th>Nhóm</th><th>📊 Dash</th><th>📋 Tiếp nhận</th><th>🔄 Tiến độ</th><th>🗺 Scan</th><th>🗂 QH</th><th>✅ Checklist</th><th>🏢 ĐP</th><th>📑 DS MB</th><th>⚙️ Cài đặt</th></tr></thead>
         <tbody id="cfgPermMatrix"></tbody></table></div>
@@ -3098,7 +3096,6 @@ function renderSettings() {
   const s = loadSettings();
   const r = s.scanRadius || 100;
   document.getElementById('cfgScanRadius').value = r;
-  document.getElementById('cfgScanRadiusVal').textContent = r;
   SCAN_RADIUS = r;
   applyScanRadius();
   cfgSearchUsers();
