@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.75</title>
+<title>TKMB Web App by HaoDT v2.76</title>
 <style>
 /* ═══ DESIGN SYSTEM v2.75 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
@@ -361,7 +361,7 @@ tbody tr { transition:background .12s; }
 <div class="app-header">
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.75</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.76</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#ffc107">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
@@ -650,14 +650,6 @@ tbody tr { transition:background .12s; }
         <h4 style="margin-bottom:8px">🔐 Phân quyền truy cập Tab</h4>
         <div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th>Nhóm</th><th>📊 Dash</th><th>📋 Tiếp nhận</th><th>🔄 Tiến độ</th><th>🗺 Scan</th><th>🗂 QH</th><th>✅ Checklist</th><th>🏢 ĐP</th><th>📑 DS MB</th><th>⚙️ Cài đặt</th></tr></thead>
         <tbody id="cfgPermMatrix"></tbody></table></div>
-
-        <h4 style="margin:14px 0 6px">🔄 Đồng bộ người quản lý hiện tại</h4>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Tự tính GĐV/QLKV hiện tại theo chuỗi <b>Storelist (CH) → Điểm QH → MB</b>. Ưu tiên cùng tỉnh → cùng huyện → gần nhất. Khác tỉnh / thiếu tọa độ / ngoài bán kính → "cần review".</p>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-          <button class="btn btn-primary btn-sm" onclick="syncAllManagers()" id="syncAllBtn">🔄 Đồng bộ tất cả</button>
-          <span id="syncAllInfo" style="font-size:11px;color:var(--muted)"></span>
-        </div>
-        <div id="syncAllLog" style="font-size:11px;color:var(--muted);margin-bottom:12px"></div>
 
         <h4 style="margin:8px 0 6px">🏢 MB (GĐV/QLKV hiện tại)</h4>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
@@ -1378,7 +1370,7 @@ window.addEventListener('message', function(e) {
 });
 
 // ═══ USERS (đăng nhập) ═══
-const USERS = [
+let USERS = [
   {rank:'GĐV',name:'Phạm Minh Thu',code:'thupm@winmart.masangroup.com',phone:'928615',gdv:'Phạm Minh Thu'},
   {rank:'GĐV',name:'Lạc Nhật Minh',code:'minhln@winmart.masangroup.com',phone:'978573',gdv:'Lạc Nhật Minh'},
   {rank:'GĐV',name:'Lê Thị Hồng Thu',code:'thulth@winmart.masangroup.com',phone:'960421',gdv:'Lê Thị Hồng Thu'},
@@ -3023,7 +3015,10 @@ function init() {
   // Preload QH data + start GPS in background
   loadQHData();
   startScanGPS();
-  loadLiveData();
+  loadLiveData().then(function() {
+    autoDetectUsers();
+    if (typeof renderSettings === 'function') renderSettings();
+  });
 }
 
 // ═══ SETTINGS ═══
@@ -3310,95 +3305,6 @@ function cfgSyncStoreslist() {
   }
 }
 
-// ═══ ĐỒNG BỘ NGƯỜI QUẢN LÝ HIỆN TẠI (Cài đặt) ═══
-function parseMBCoord(mapLink) {
-  if (!mapLink) return null;
-  const s = String(mapLink);
-  const dms = s.match(/(\d{1,2})°(\d{1,2})'([\d.]+)"\s*([NS])\s*(\d{1,3})°(\d{1,2})'([\d.]+)"\s*([EW])/);
-  if (dms) {
-    let lat = parseFloat(dms[1]) + parseFloat(dms[2])/60 + parseFloat(dms[3])/3600;
-    let lng = parseFloat(dms[5]) + parseFloat(dms[6])/60 + parseFloat(dms[7])/3600;
-    if (dms[4] === 'S') lat = -lat;
-    if (dms[8] === 'W') lng = -lng;
-    return { lat, lng };
-  }
-  const m = s.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
-  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-  return null;
-}
-
-async function syncAllManagers() {
-  const btn = document.getElementById('syncAllBtn');
-  const info = document.getElementById('syncAllInfo');
-  const log = document.getElementById('syncAllLog');
-  if (btn) btn.disabled = true;
-  if (info) info.textContent = '⏳ Đang đồng bộ QH ← Storelist...';
-
-  // B1: QH ← Storelist (CH gần nhất, ưu tiên cùng tỉnh/huyện)
-  let qhChanged = 0, qhReview = 0;
-  try {
-    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_LIVE_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent('Storeslist');
-    const txt = await fetch(url).then(r => r.text());
-    const rows = csvParse(txt);
-    if (rows.length >= 2) {
-      const hdr = rows[0]; const si = {}; hdr.forEach((h,i) => si[h.replace(/^\uFEFF/,'')] = i);
-      const stores = [];
-      for (let i = 1; i < rows.length; i++) {
-        const r = rows[i];
-        const lat = parseFloat(r[si['Vĩ độ']||si['Lat']||si['lat']]);
-        const lng = parseFloat(r[si['Kinh độ']||si['Lng']||si['lng']]);
-        if (!lat || !lng) continue;
-        stores.push({ lat, lng, gdv: r[si['GĐV']]||'', qlkv: r[si['QLKV']]||'', tinh: (r[si['Tỉnh/TP']||si['Tỉnh']]||'').replace(/^(T\.|TP\.)\s*/, '').trim(), huyen: r[si['Quận/huyện']||si['Huyện/Quận']||si['Huyện']]||'' });
-      }
-      for (const qh of QH_DATA) {
-        if (!qh.lat || !qh.lng) continue;
-        const qhTinh = (qh.tinh || '').replace(/^(T\.|TP\.)\s*/, '').trim();
-        let best = null, bestD = Infinity, bestSame = null, bestSameD = Infinity;
-        for (const s of stores) {
-          const d = haversine(qh.lat, qh.lng, s.lat, s.lng);
-          if (d < bestD) { bestD = d; best = s; }
-          if (s.tinh === qhTinh && d < bestSameD) { bestSameD = d; bestSame = s; }
-        }
-        if (!best && !bestSame) continue;
-        const pick = bestSame || best;
-        if (!bestSame) qhReview++;
-        if (qh.gdv !== pick.gdv || qh.qlkv !== pick.qlkv) { qh.gdv = pick.gdv; qh.qlkv = pick.qlkv; qhChanged++; }
-      }
-    }
-  } catch(e) {}
-
-  if (info) info.textContent = '⏳ Đang đồng bộ MB ← QH...';
-
-  // B2: MB ← QH (điểm QH gần nhất, trong bán kính ~5km)
-  let mbChanged = 0, mbReview = 0;
-  for (const mb of MB_DATA) {
-    const c = parseMBCoord(mb.mapLink);
-    if (!c) { mbReview++; continue; }
-    let best = null, bestD = Infinity;
-    for (const qh of QH_DATA) {
-      if (!qh.lat || !qh.lng) continue;
-      const d = haversine(c.lat, c.lng, qh.lat, qh.lng);
-      if (d < bestD) { bestD = d; best = qh; }
-    }
-    if (!best || bestD > 5000) { mbReview++; continue; }
-    if (mb.gdvHienTai !== best.gdv || mb.qlkvHienTai !== best.qlkv) { mb.gdvHienTai = best.gdv; mb.qlkvHienTai = best.qlkv; mbChanged++; }
-  }
-
-  // Lưu về GAS (tái dùng actions có sẵn)
-  try {
-    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'syncGDVQLKV', gdvs: MB_DATA.map(m => [m.gdvHienTai||'', m.qlkvHienTai||'']) }), headers: { 'Content-Type':'text/plain' } });
-  } catch(e) {}
-  try {
-    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ action:'batchImportQH', points: QH_DATA.map(q => ({ qh:q.qh, gdv:q.gdv, qlkv:q.qlkv })) }), headers: { 'Content-Type':'text/plain' } });
-  } catch(e) {}
-
-  if (info) info.textContent = '✅ QH: ' + qhChanged + ' điểm đổi · MB: ' + mbChanged + ' đổi · ⚠ ' + (qhReview + mbReview) + ' cần review';
-  if (log) log.textContent = 'Lần chạy cuối: ' + new Date().toLocaleString('vi-VN');
-  if (btn) btn.disabled = false;
-  if (typeof renderQHManage === 'function') renderQHManage();
-  if (typeof renderTienDo === 'function') renderTienDo();
-}
-
 function managerCSV(type) {
   if (type === 'MB') {
     return 'MB ID,GĐV hiện tại,QLKV hiện tại\n' + MB_DATA.map(m => m.id + ',' + (m.gdvHienTai||'') + ',' + (m.qlkvHienTai||'')).join('\n');
@@ -3471,6 +3377,60 @@ function importManagerMapping(type, input) {
   };
   if (/\.csv$/i.test(file.name)) reader.readAsText(file, 'utf-8');
   else reader.readAsArrayBuffer(file);
+}
+
+// ═══ AUTO-DETECT USERS FROM MB_Data + QH_Points ═══
+function autoDetectUsers() {
+  const gdvSet = new Map(), qlkvSet = new Map(), tkmbSet = new Map();
+  
+  // Scan MB_Data for GĐV + QLKV
+  for (const mb of MB_DATA) {
+    if (mb.gdv) gdvSet.set(mb.gdv, (gdvSet.get(mb.gdv)||0) + 1);
+    if (mb.qlkv) qlkvSet.set(mb.qlkv, (qlkvSet.get(mb.qlkv)||0) + 1);
+  }
+  // Scan QH_Points for GĐV + QLKV + TKMB
+  for (const qh of QH_DATA) {
+    if (qh.gdv) gdvSet.set(qh.gdv, (gdvSet.get(qh.gdv)||0) + 1);
+    if (qh.qlkv) qlkvSet.set(qh.qlkv, (qlkvSet.get(qh.qlkv)||0) + 1);
+    if (qh.tkmb) tkmbSet.set(qh.tkmb, (tkmbSet.get(qh.tkmb)||0) + 1);
+  }
+  
+  // Hardcoded base users (GĐM + GĐTKMB never auto-detected)
+  const hard = [
+    {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678'},
+    {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678'}
+  ];
+  
+  const merged = new Map();
+  for (const u of hard) merged.set(u.name, {...u});
+  
+  // Add GĐVs from data
+  for (const [name, count] of gdvSet) {
+    const code = (name || '').toLowerCase().replace(/\s+/g,'');
+    merged.set(name, {rank:'GĐV', name, code, phone:'12345678', gdv:name, tkmb:'', count});
+  }
+  
+  // Add QLKVs from data (only if not already added as GĐV)
+  for (const [name, count] of qlkvSet) {
+    const code = (name || '').toLowerCase().replace(/\s+/g,'');
+    if (!merged.has(name)) {
+      let parentGdv = '';
+      for (const [gdv, qlkvs] of Object.entries(CASCADE_DATA)) {
+        if (qlkvs[name]) { parentGdv = gdv; break; }
+      }
+      merged.set(name, {rank:'QLKV', name, code, phone:'12345678', gdv:parentGdv, tkmb:'', count});
+    }
+  }
+  
+  // Add TKMB from QH_Points
+  for (const [tkmb, count] of tkmbSet) {
+    if (!tkmb || !['Phi','Huy Dũng','Thái'].includes(tkmb)) continue;
+    if (!merged.has(tkmb)) {
+      merged.set(tkmb, {rank:'TKMB', name:tkmb, code:tkmb.toLowerCase().replace(/\s+/g,''), phone:'12345678', gdv:'', tkmb, count});
+    }
+  }
+  
+  USERS = [...merged.values()];
 }
 
 init();
