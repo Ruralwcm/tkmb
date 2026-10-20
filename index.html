@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TKMB Web App by HaoDT v2.74</title>
+<title>TKMB Web App by HaoDT v2.75</title>
 <style>
-/* ═══ DESIGN SYSTEM v2.74 — Teal/Green ═══ */
+/* ═══ DESIGN SYSTEM v2.75 — Teal/Green ═══ */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap');
 
 :root {
@@ -361,12 +361,13 @@ tbody tr { transition:background .12s; }
 <div class="app-header">
 <div class="topbar">
   <div>
-    <h1>🏪 TKMB Web App by HaoDT v2.74</h1>
+    <h1>🏪 TKMB Web App by HaoDT v2.75</h1>
     <div class="meta">📅 14/10/2026 · <span id="dataStatus" style="color:#ffc107">⏳ Đang tải dữ liệu...</span></div>
   </div>
   <div class="header-right">
     <div class="user-info">
       <span id="userDisplay">Chưa đăng nhập</span>
+      <button onclick="openChangePass()" id="btnChangePass" style="display:none">🔑 Đổi mật khẩu</button>
       <button onclick="doLogout()">Đăng xuất</button>
     </div>
   </div>
@@ -378,8 +379,8 @@ tbody tr { transition:background .12s; }
     <div class="lock-icon">🔐</div>
     <h2>Đăng nhập</h2>
     <div class="input-group">
-      <label>Email</label>
-      <input type="text" id="loginCode" placeholder="Nhập email..." oninput="onCodeInput()" autocomplete="off">
+      <label>User</label>
+      <input type="text" id="loginCode" placeholder="Nhập user..." oninput="onCodeInput()" autocomplete="off">
       <div class="user-found" id="userHint"></div>
     </div>
     <div class="input-group">
@@ -634,7 +635,7 @@ tbody tr { transition:background .12s; }
           <span id="impUserInfo" style="font-size:11px;color:var(--muted)"></span>
         </div>
         <div style="overflow-x:auto">
-        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>Email</th><th>Role</th><th>Mã NV</th><th></th></tr></thead>
+        <table style="font-size:12px"><thead><tr><th>STT</th><th>Chức danh</th><th>Họ và tên</th><th>User</th><th>Role</th><th>Mã NV</th><th></th></tr></thead>
         <tbody id="cfgUserTable"></tbody></table>
         </div>
       </div>
@@ -761,7 +762,7 @@ tbody tr { transition:background .12s; }
     <h3 id="userEditTitle">✏️ Sửa User</h3>
     <input type="hidden" id="userEditIdx">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
-      <div class="form-group"><label>Email</label><input id="ueCode" placeholder="Email đăng nhập"></div>
+      <div class="form-group"><label>User</label><input id="ueCode" placeholder="User đăng nhập"></div>
       <div class="form-group"><label>Họ tên</label><input id="ueName"></div>
     </div>
     <div class="form-group"><label>Vai trò</label><select id="ueRank"><option>GĐM</option><option>GĐTKMB</option><option>GĐV</option><option>TKMB</option><option>CV TKMB</option><option>QLKV</option></select></div>
@@ -773,6 +774,22 @@ tbody tr { transition:background .12s; }
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="document.getElementById('userEditModal').style.display='none'">Hủy</button>
       <button class="btn btn-primary" onclick="ueSave()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="changePassModal" style="display:none">
+  <div class="modal-card">
+    <h3>🔑 Đổi mật khẩu</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Đang đổi mật khẩu cho: <strong id="cpUserName"></strong></p>
+    <div class="form-group"><label>Mật khẩu hiện tại</label><input type="password" id="cpOld" placeholder="Nhập mật khẩu hiện tại"></div>
+    <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="cpNew" placeholder="Nhập mật khẩu mới"></div>
+    <div class="form-group"><label>Xác nhận mật khẩu mới</label><input type="password" id="cpConfirm" placeholder="Nhập lại mật khẩu mới"></div>
+    <div id="cpError" style="font-size:12px;color:#b91c1c;margin-bottom:8px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeChangePass()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveChangePass()">💾 Lưu</button>
     </div>
   </div>
 </div>
@@ -1385,21 +1402,32 @@ const USERS = [
 ];
 let currentUser = null;
 
+// ═══ USERNAME HELPER (Email → User: lấy phần tên, bỏ đuôi @domain) ═══
+function getUserName(u) {
+  const c = (u && u.code ? String(u.code) : '').trim();
+  return c.includes('@') ? c.split('@')[0] : c;
+}
+function matchUser(input) {
+  const c = (input || '').trim().toLowerCase();
+  if (!c) return null;
+  return USERS.find(x => getUserName(x).toLowerCase() === c || String(x.code||'').toLowerCase() === c);
+}
+
 // ═══ LOGIN ═══
 function onCodeInput() {
   const code = document.getElementById('loginCode').value.trim();
   const hint = document.getElementById('userHint');
   hint.classList.remove('error');
   if (!code) { hint.textContent = ''; return; }
-  const u = USERS.find(x => x.code === code);
+  const u = matchUser(code);
   if (u) { hint.textContent = '👋 ' + u.name + ' (' + u.rank + ')'; hint.classList.remove('error'); }
-  else { hint.textContent = '❌ Không tìm thấy mã nhân viên'; hint.classList.add('error'); }
+  else { hint.textContent = '❌ Không tìm thấy user'; hint.classList.add('error'); }
 }
 function doLogin() {
   const code = document.getElementById('loginCode').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
-  const u = USERS.find(x => x.code === code && x.phone === pass);
-  if (!u) { document.getElementById('loginError').textContent = 'Sai mã NV hoặc mật khẩu!'; return; }
+  const u = matchUser(code);
+  if (!u || u.phone !== pass) { document.getElementById('loginError').textContent = 'Sai user hoặc mật khẩu!'; return; }
   setCurrentUser(u);
 }
 
@@ -1408,9 +1436,9 @@ function autoLoginFromPortal() {
   if (!pu) return false;
   try {
     const portalUser = JSON.parse(pu);
-    // Find matching user by name or code
+    // Find matching user by name or username
     let u = USERS.find(x => x.name === portalUser.name);
-    if (!u) u = USERS.find(x => x.code === portalUser.id);
+    if (!u) u = matchUser(portalUser.id);
     if (u) { setCurrentUser(u); return true; }
   } catch(e) {}
   return false;
@@ -1418,12 +1446,14 @@ function autoLoginFromPortal() {
 
 function setCurrentUser(u) {
   currentUser = u;
-  localStorage.setItem('portal_user', JSON.stringify({id:u.code,name:u.name,role:u.rank,gdv:u.gdv||'',ts:Date.now()}));
+  localStorage.setItem('portal_user', JSON.stringify({id:getUserName(u),name:u.name,role:u.rank,gdv:u.gdv||'',ts:Date.now()}));
   document.getElementById('loginOverlay').style.display = 'none';
   document.getElementById('userDisplay').textContent = u.name + ' (' + u.rank + ')';
   document.getElementById('loginError').textContent = '';
   // Show settings tab for GĐM
   if (u.rank === 'GĐM') document.getElementById('navSettings').style.display = '';
+  // Show change-password button for logged-in users
+  document.getElementById('btnChangePass').style.display = '';
 }
 
 function doLogout() {
@@ -1434,6 +1464,7 @@ function doLogout() {
   document.getElementById('loginCode').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('userHint').textContent = '';
+  document.getElementById('btnChangePass').style.display = 'none';
 }
 
 // ═══ HELPERS ═══
@@ -3016,7 +3047,7 @@ function cfgSearchUsers() {
       <td style="color:var(--muted)">${ri+1}</td>
       <td><span class="tag ${u.rank==='GĐM'?'tag-r':u.rank==='GĐTKMB'?'tag-o':u.rank==='TKMB'?'tag-p':'tag-g'}">${u.rank}</span></td>
       <td>${u.name}</td>
-      <td><code>${u.code}</code></td>
+      <td><code>${getUserName(u)}</code></td>
       <td style="font-size:11px;color:var(--muted)">${roleLabel(u)}</td>
       <td>••••••••</td>
       <td style="white-space:nowrap">
@@ -3057,7 +3088,8 @@ function importUsers(input) {
       const r = rows[i]; if (!r) continue;
       const rank = String(r[iRank]||'').trim();
       const name = String(r[iName]||'').trim();
-      const code = String(r[iCode]||'').trim();
+      let code = String(r[iCode]||'').trim();
+      if (code.includes('@')) code = code.split('@')[0];
       if (!rank || !name || !code) continue;
       const phone = (iPass >= 0 ? String(r[iPass]||'').trim() : '12345678') || '12345678';
       const ex = USERS.find(x => x.code === code);
@@ -3137,7 +3169,7 @@ function cfgEditUser(i) {
   const u=USERS[i];
   document.getElementById('userEditIdx').value = i;
   document.getElementById('userEditTitle').textContent = 'Sửa: ' + u.name;
-  document.getElementById('ueCode').value = u.code;
+  document.getElementById('ueCode').value = getUserName(u);
   document.getElementById('ueName').value = u.name;
   document.getElementById('ueRank').value = u.rank;
   document.getElementById('uePhamviMB').value = (u.phamviMB||[]).join(',');
@@ -3148,7 +3180,9 @@ function cfgEditUser(i) {
 function ueSave() {
   const i = parseInt(document.getElementById('userEditIdx').value);
   const u = USERS[i];
-  u.code = document.getElementById('ueCode').value.trim();
+  let newCode = document.getElementById('ueCode').value.trim();
+  if (newCode.includes('@')) newCode = newCode.split('@')[0];
+  u.code = newCode;
   u.name = document.getElementById('ueName').value.trim();
   u.rank = document.getElementById('ueRank').value;
   u.phamviMB = document.getElementById('uePhamviMB').value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -3183,6 +3217,36 @@ function cfgDeleteUser(i) {
   if(!confirm('Xóa user '+USERS[i].name+'?'))return;
   USERS.splice(i,1);
   renderSettings();
+}
+
+// ═══ CHANGE PASSWORD (người dùng tự đổi mật khẩu) ═══
+function openChangePass() {
+  if (!currentUser) return;
+  document.getElementById('cpUserName').textContent = currentUser.name;
+  document.getElementById('cpOld').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpConfirm').value = '';
+  document.getElementById('cpError').textContent = '';
+  document.getElementById('changePassModal').style.display = 'flex';
+}
+function closeChangePass() {
+  document.getElementById('changePassModal').style.display = 'none';
+}
+function saveChangePass() {
+  const oldP = document.getElementById('cpOld').value.trim();
+  const newP = document.getElementById('cpNew').value.trim();
+  const conf = document.getElementById('cpConfirm').value.trim();
+  const err = document.getElementById('cpError');
+  err.textContent = '';
+  if (!currentUser) { err.textContent = 'Chưa đăng nhập'; return; }
+  if (oldP !== currentUser.phone) { err.textContent = '❌ Mật khẩu hiện tại không đúng'; return; }
+  if (!newP || newP.length < 6) { err.textContent = '❌ Mật khẩu mới tối thiểu 6 ký tự'; return; }
+  if (newP !== conf) { err.textContent = '❌ Xác nhận mật khẩu không khớp'; return; }
+  currentUser.phone = newP;
+  const idx = USERS.indexOf(currentUser);
+  if (idx >= 0) USERS[idx].phone = newP;
+  closeChangePass();
+  alert('✅ Đã đổi mật khẩu thành công');
 }
 
 // ═══ TKMB Map Management ═══
