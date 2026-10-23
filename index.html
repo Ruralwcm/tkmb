@@ -496,9 +496,9 @@ tr:hover{background:var(--teal-bg)}
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
   <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.0.6</span></h3>
-  <div style="display:flex;gap:16px;flex-wrap:wrap">
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
-  <div style="flex:1;min-width:300px">
+  <div style="flex:2;min-width:320px;max-width:580px">
     <h4 style="margin-bottom:8px">🔍 Khoảng cách Scan QH</h4>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
       <input type="number" id="cfgScanRadius" min="10" max="1000" step="10" style="width:100px">
@@ -507,7 +507,7 @@ tr:hover{background:var(--teal-bg)}
     </div>
 
     <h4 style="margin-bottom:8px">🔐 Phân quyền Tab</h4>
-    <table style="font-size:10px"><thead><tr><th>Nhóm</th><th>Dash</th><th>Tiếp nhận</th><th>Tiến độ</th><th>Scan</th><th>QH</th><th>Checklist</th><th>ĐP</th><th>DS MB</th><th>Cài đặt</th></tr></thead><tbody id="cfgPermMatrix"></tbody></table>
+    <div style="overflow-x:auto"><table style="font-size:9px"><thead><tr><th>Nhóm</th><th>Dash</th><th>TN</th><th>TĐ</th><th>Scan</th><th>QH</th><th>CK</th><th>ĐP</th><th>DS</th><th>CĐ</th></tr></thead><tbody id="cfgPermMatrix"></tbody></table></div>
 
     <h4 style="margin:12px 0 8px">🏢 MB (GĐV/QLKV hiện tại)</h4>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
@@ -525,7 +525,7 @@ tr:hover{background:var(--teal-bg)}
   </div>
 
   <!-- RIGHT PANEL -->
-  <div style="flex:1;min-width:400px">
+  <div style="flex:3;min-width:380px">
     <h4 style="margin-bottom:8px">👥 Quản lý Users</h4>
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
       <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm user..." oninput="cfgSearchUsers()" style="max-width:150px;font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:4px">
