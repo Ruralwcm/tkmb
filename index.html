@@ -2243,18 +2243,22 @@ function importManagerMapping(type, input){
 // AUTO-DETECT USERS FROM MB_Data + QH_Points
 // ═══════════════════════════════════════════════════════
 function autoDetectUsers(){
-  const gdvSet=new Map(), qlkvSet=new Map(), tkmbSet=new Map();
-  for(const mb of MB_DATA){ if(mb.gdv)gdvSet.set(mb.gdv,(gdvSet.get(mb.gdv)||0)+1); if(mb.qlkv)qlkvSet.set(mb.qlkv,(qlkvSet.get(mb.qlkv)||0)+1); }
-  for(const qh of QH_DATA){ if(qh.gdv)gdvSet.set(qh.gdv,(gdvSet.get(qh.gdv)||0)+1); if(qh.qlkv)qlkvSet.set(qh.qlkv,(qlkvSet.get(qh.qlkv)||0)+1); if(qh.tkmb)tkmbSet.set(qh.tkmb,(tkmbSet.get(qh.tkmb)||0)+1); }
-  const hard=[{rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678'},{rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678'}];
-  const merged=new Map(); for(const u of hard)merged.set(u.name,{...u});
-  for(const [name,count] of gdvSet){ const code=(name||'').toLowerCase().replace(/\s+/g,''); merged.set(name,{rank:'GĐV',name,code,phone:'12345678',gdv:name,tkmb:'',count}); }
-  // QLKV users removed per owner request — chỉ giữ GĐV, GĐM, TKMB
-  for(const [tkmb,count] of tkmbSet){ if(!tkmb||!['Phi','Huy Dũng','Thái'].includes(tkmb))continue;
-    if(!merged.has(tkmb)) merged.set(tkmb,{rank:'TKMB',name:tkmb,code:tkmb.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:'',tkmb,count});
+  // Scan data for auto-detected users
+  const gdvSet=new Map(), tkmbSet=new Map();
+  for(const mb of MB_DATA){ if(mb.gdv)gdvSet.set(mb.gdv,(gdvSet.get(mb.gdv)||0)+1); }
+  for(const qh of QH_DATA){ if(qh.gdv)gdvSet.set(qh.gdv,(gdvSet.get(qh.gdv)||0)+1); if(qh.tkmb)tkmbSet.set(qh.tkmb,(tkmbSet.get(qh.tkmb)||0)+1); }
+  // Merge vào USERS hiện tại (additive, không xóa user đã có)
+  for(const [name] of gdvSet){
+    if(!USERS.find(u=>u.name===name)){
+      USERS.push({rank:'GĐV',name,code:name.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:name,tkmb:''});
+    }
   }
-  // Keep manually added USERS not in merged (avoid wiping custom edits entirely) - merge on top of hard defaults
-  USERS=[...merged.values()];
+  for(const [tkmb] of tkmbSet){
+    if(!tkmb||!['Phi','Huy Dũng','Thái'].includes(tkmb))continue;
+    if(!USERS.find(u=>u.name===tkmb)){
+      USERS.push({rank:'TKMB',name:tkmb,code:tkmb.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:'',tkmb});
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════
