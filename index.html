@@ -197,17 +197,82 @@ tr:hover{background:var(--teal-bg)}
 
 /* ─── RESPONSIVE ─── */
 @media(max-width:768px){
-  .topbar{padding:8px 12px}
-  .topbar h1{font-size:13px}
-  .nav button{padding:8px 10px;font-size:10px}
-  .main{padding:10px 8px}
-  .gr3{grid-template-columns:1fr}
-  .gr2{grid-template-columns:1fr}
-  .kpi-num{font-size:18px}
-  .modal-card{width:95%;padding:16px}
-  .login-card{width:320px;padding:20px}
+  /* topbar */
+  .topbar{padding:6px 10px;flex-wrap:wrap}
+  .topbar .logo-area{gap:6px}
+  .topbar .logo-icon{font-size:18px}
+  .topbar h1{font-size:12px}
+  .topbar .meta{font-size:8px}
+  .topbar .header-right{flex-direction:row;width:100%;justify-content:flex-end;margin-top:4px}
+  .topbar .user-info{font-size:10px;gap:4px}
+  .topbar .user-info button{padding:3px 7px;font-size:9px;border-radius:4px}
+
+  /* nav tabs */
+  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{padding:8px 9px;font-size:10px}
+
+  /* main content */
+  .main{padding:8px 10px}
+
+  /* KPI cards */
+  .kpi-card{flex:0 0 calc(50% - 5px);min-width:0;padding:8px 10px}
+  .kpi-row{gap:6px}
+  .kpi-num{font-size:17px}
+  .kpi-label{font-size:9px}
+
+  /* form grids — all collapse to 1 col */
+  .gr2,.gr3,.gr4{grid-template-columns:1fr;gap:6px 8px}
+
+  /* tables */
   table{font-size:10px}
-  th,td{padding:6px 8px}
+  th,td{padding:4px 5px}
+  th{font-size:9px}
+
+  /* modals */
+  .modal-card{width:95%;max-width:95vw;padding:14px}
+  .modal-card h3{font-size:14px}
+  .login-card{width:310px;padding:20px}
+
+  /* step strip */
+  .step-seg{width:16px;height:5px}
+  .mini-bar{width:50px;height:5px}
+
+  /* tracklog modal buttons */
+  #tracklogModal .modal-card{max-width:95vw}
+  #tracklogModal .btn-xs{padding:3px 6px;font-size:9px}
+
+  /* edit MB modal */
+  #editMBModal .modal-card{max-width:95vw;padding:14px}
+  #editMBModal h3{font-size:14px}
+
+  /* settings 2-column collapse */
+  #sec-settings .card > div[style*="flex"]{flex-direction:column !important;gap:12px}
+  #sec-settings .card > div[style*="flex"] > div{min-width:0 !important;max-width:none !important;width:100% !important}
+
+  /* card padding */
+  .card{padding:12px 10px}
+  .card h3{font-size:13px}
+
+  /* filter bars */
+  .card > div[style*="display:flex"][style*="flex-wrap:wrap"],
+  .card > div[style*="display:flex"][style*="gap"]{
+    gap:4px !important;
+  }
+  .card select,.card input[type="text"]{
+    font-size:10px !important;
+  }
+
+  /* scan hero */
+  .scan-btn{width:90px;height:90px;font-size:11px}
+  .qhbs-btn{padding:8px 14px;font-size:11px}
+
+  /* modals content */
+  .modal-btns{gap:6px}
+  .modal-btns .btn{padding:6px 12px;font-size:12px}
+
+  /* settings user table buttons */
+  #cfgUserTable .btn-xs{min-width:24px}
 }
 
 /* ─── COLLAPSIBLE SECTION ─── */
@@ -253,7 +318,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.0.6</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.0</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -294,7 +359,7 @@ tr:hover{background:var(--teal-bg)}
         <select id="dashGDV" onchange="onDashGDVChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả GĐV</option></select>
         <select id="dashQLKV" onchange="renderDash()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
       </div>
-      <table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody></tbody></table>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody></tbody></table></div>
     </div>
   </div>
 </div>
@@ -420,7 +485,7 @@ tr:hover{background:var(--teal-bg)}
       <select id="tdTKMB" onchange="renderTienDo()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả TKMB</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
       <select id="tdStatus" onchange="renderTienDo()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
-    <table id="tdTable"><thead><tr><th data-key="id" onclick="sortTD('id')">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')">Tỉnh<span class="sarr"></span></th><th>Địa chỉ</th><th>B1→B6</th><th>Bước</th><th data-key="status" onclick="sortTD('status')">T.Thái<span class="sarr"></span></th><th>SLA</th><th></th></tr></thead><tbody id="tdTbody"></tbody></table>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="tdTable"><thead><tr><th data-key="id" onclick="sortTD('id')">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')">Tỉnh<span class="sarr"></span></th><th>Địa chỉ</th><th>B1→B6</th><th>Bước</th><th data-key="status" onclick="sortTD('status')">T.Thái<span class="sarr"></span></th><th>SLA</th><th></th></tr></thead><tbody id="tdTbody"></tbody></table></div>
   </div>
 </div>
 
@@ -441,7 +506,7 @@ tr:hover{background:var(--teal-bg)}
       <button class="btn btn-sm btn-outline" id="qhSyncBtn" onclick="qhSyncStoreslist()">🔄 Sync Storelist</button>
       <span id="qhSyncInfo" style="font-size:10px;color:var(--muted)"></span>
     </div>
-    <table><thead><tr><th>Mã QH</th><th>Tỉnh</th><th>Huyện</th><th>Xã</th><th>GĐV</th><th>QLKV</th><th>TT</th><th>TKMB p.trách</th><th>Đội TKMB</th><th></th></tr></thead><tbody id="qmTbody"></tbody></table>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr><th>Mã QH</th><th>Tỉnh</th><th>Huyện</th><th>Xã</th><th>GĐV</th><th>QLKV</th><th>TT</th><th>TKMB p.trách</th><th>Đội TKMB</th><th></th></tr></thead><tbody id="qmTbody"></tbody></table></div>
   </div>
 </div>
 
@@ -455,13 +520,13 @@ tr:hover{background:var(--teal-bg)}
       <select id="chkFilterQLKV" onchange="renderChkDashboard()" disabled style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
       <select id="chkFilterStatus" onchange="renderChkDashboard()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả</option><option value="overdue">Quá hạn</option><option value="warn">Sắp hết</option><option value="ok">Đúng hạn</option></select>
     </div>
-    <table><thead><tr><th>Site</th><th>Địa chỉ</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Ngày KT</th><th>Tiến độ</th><th>Tình trạng</th></tr></thead><tbody id="chkTbody"></tbody></table></div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr><th>Site</th><th>Địa chỉ</th><th>GĐV</th><th>QLKV</th><th>Tỉnh</th><th>Ngày KT</th><th>Tiến độ</th><th>Tình trạng</th></tr></thead><tbody id="chkTbody"></tbody></table></div></div>
   </div>
   <div id="chkDetail" style="display:none">
     <button class="back-btn" onclick="closeChkDetail()">← Quay lại</button>
     <div class="card"><h3 id="chkDetailTitle">📋 NSO Detail</h3>
     <div id="chkDetailMeta" style="margin-bottom:10px"></div>
-    <table><thead><tr><th></th><th>Công việc</th><th>Chi tiết</th><th>Deadline</th><th>Tình trạng</th></tr></thead><tbody id="chkDetailTbody"></tbody></table></div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr><th></th><th>Công việc</th><th>Chi tiết</th><th>Deadline</th><th>Tình trạng</th></tr></thead><tbody id="chkDetailTbody"></tbody></table></div></div>
   </div>
 </div>
 
@@ -476,7 +541,7 @@ tr:hover{background:var(--teal-bg)}
     <button class="btn btn-sm btn-outline" onclick="dpDownloadTemplate()">📥 Mẫu</button>
     <label class="btn btn-sm btn-outline" style="cursor:pointer">📤 Import<input type="file" accept=".csv" onchange="handleDPImport(this)" style="display:none"></label>
   </div>
-  <table id="dpTable"><thead><tr><th>SAP</th><th>Tên CH</th><th>GĐV</th><th>Loại ĐP</th><th>Ngày KB</th><th>Deadline</th><th>MT</th><th>DTKD</th><th>DT</th><th>Đánh giá</th><th>Tiến độ</th><th></th></tr></thead><tbody></tbody></table></div>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dpTable"><thead><tr><th>SAP</th><th>Tên CH</th><th>GĐV</th><th>Loại ĐP</th><th>Ngày KB</th><th>Deadline</th><th>MT</th><th>DTKD</th><th>DT</th><th>Đánh giá</th><th>Tiến độ</th><th></th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 <!-- ═══ SECTION: DANH SÁCH MB ═══ -->
@@ -490,12 +555,12 @@ tr:hover{background:var(--teal-bg)}
     <select id="dsQLKV" onchange="renderDSMB()" disabled style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
     <select id="dsTT" onchange="renderDSMB()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả TT</option><option>Đang hiệu lực</option><option>Sắp hết hạn</option><option>Đã hết hạn</option></select>
   </div>
-  <table id="dsTable"><thead><tr><th>SAP</th><th>Tên</th><th>Địa chỉ</th><th>Miền</th><th>GĐV</th><th>MT</th><th>DT thuê</th><th>DTKD</th><th>Giá</th><th>Ký HĐ</th><th>Hết hạn</th><th>TT HĐ</th><th></th></tr></thead><tbody></tbody></table></div>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dsTable"><thead><tr><th>SAP</th><th>Tên</th><th>Địa chỉ</th><th>Miền</th><th>GĐV</th><th>MT</th><th>DT thuê</th><th>DTKD</th><th>Giá</th><th>Ký HĐ</th><th>Hết hạn</th><th>TT HĐ</th><th></th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.0.6</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.0</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -534,7 +599,7 @@ tr:hover{background:var(--teal-bg)}
       <label class="btn btn-sm btn-outline" style="cursor:pointer">📤 Import<input type="file" accept=".csv,.xls,.xlsx" onchange="importUsers(this)" style="display:none"></label>
       <span id="impUserInfo" style="font-size:10px;color:var(--muted)"></span>
     </div>
-    <table><thead><tr><th>#</th><th>Vai trò</th><th>Họ tên</th><th>User</th><th>Vùng/KV</th><th>Mật khẩu</th><th></th></tr></thead><tbody id="cfgUserTable"></tbody></table>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr><th>#</th><th>Vai trò</th><th>Họ tên</th><th>User</th><th>Vùng/KV</th><th>Mật khẩu</th><th></th></tr></thead><tbody id="cfgUserTable"></tbody></table></div>
 
     <h4 style="margin-top:16px">🗺 TKMB Map (Tỉnh → TKMB)</h4>
     <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -542,7 +607,7 @@ tr:hover{background:var(--teal-bg)}
       <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
       <input type="file" id="cfgTkmbImport" accept=".csv" onchange="cfgHandleTkmbImport(this)" style="display:none">
     </div>
-    <table id="cfgTkmbMapTable"><thead><tr><th>Tỉnh</th><th>Huyện</th><th>TKMB</th><th></th></tr></thead><tbody id="cfgTkmbMap"></tbody></table>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="cfgTkmbMapTable"><thead><tr><th>Tỉnh</th><th>Huyện</th><th>TKMB</th><th></th></tr></thead><tbody id="cfgTkmbMap"></tbody></table></div>
   </div>
   </div>
   </div>
@@ -576,7 +641,7 @@ tr:hover{background:var(--teal-bg)}
 <!-- ═══ TRACKLOG MODAL ═══ -->
 <div class="modal-overlay" id="tracklogModal" style="display:none">
   <div class="modal-card" style="max-width:700px"><h3 id="tracklogTitle">📋 Tracklog MB</h3>
-  <div id="tracklogBody"></div>
+  <div id="tracklogBody" style="overflow-x:auto;-webkit-overflow-scrolling:touch"></div>
   <div style="text-align:right;margin-top:12px"><button class="btn btn-outline" onclick="closeTracklog()">Đóng</button></div></div>
 </div>
 
