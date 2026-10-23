@@ -253,7 +253,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT</h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.0.6</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -495,37 +495,59 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt</h3>
-  <h4>🔍 Bán kính Scan QH</h4>
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
-    <input type="number" id="cfgScanRadius" min="10" max="1000" step="10" style="width:100px">
-    <span>mét</span>
-    <button class="btn btn-sm" style="background:var(--teal);color:#fff" onclick="saveSettings()">💾 Lưu</button>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.0.6</span></h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+  <!-- LEFT PANEL -->
+  <div style="flex:1;min-width:300px">
+    <h4 style="margin-bottom:8px">🔍 Khoảng cách Scan QH</h4>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+      <input type="number" id="cfgScanRadius" min="10" max="1000" step="10" style="width:100px">
+      <span>mét</span>
+      <button class="btn btn-sm" style="background:var(--teal);color:#fff" onclick="saveSettings()">💾 Lưu</button>
+    </div>
+
+    <h4 style="margin-bottom:8px">🔐 Phân quyền Tab</h4>
+    <table style="font-size:10px"><thead><tr><th>Nhóm</th><th>Dash</th><th>Tiếp nhận</th><th>Tiến độ</th><th>Scan</th><th>QH</th><th>Checklist</th><th>ĐP</th><th>DS MB</th><th>Cài đặt</th></tr></thead><tbody id="cfgPermMatrix"></tbody></table>
+
+    <h4 style="margin:12px 0 8px">🏢 MB (GĐV/QLKV hiện tại)</h4>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('MB')">📤 Export MB</button>
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impMBFile').click()">📥 Import MB</button>
+      <input type="file" id="impMBFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('MB', this)">
+    </div>
+
+    <h4 style="margin:12px 0 8px">🗂 Điểm QH (GĐV/QLKV)</h4>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-sm btn-outline" onclick="exportManagerMapping('QH')">📤 Export QH</button>
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('impQHFile').click()">📥 Import QH</button>
+      <input type="file" id="impQHFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="importManagerMapping('QH', this)">
+    </div>
   </div>
-  <h4>👥 Quản lý Users</h4>
-  <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-    <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm user..." oninput="cfgSearchUsers()" style="max-width:150px;font-size:11px;padding:4px 8px">
-    <button class="btn btn-sm btn-outline" onclick="cfgAddUser()">+ Thêm</button>
-    <button class="btn btn-sm btn-outline" onclick="downloadUserTemplate()">📥 Mẫu</button>
-    <label class="btn btn-sm btn-outline" style="cursor:pointer">📤 Import<input type="file" accept=".csv,.xls,.xlsx" onchange="importUsers(this)" style="display:none"></label>
-    <span id="impUserInfo" style="font-size:10px;color:var(--muted)"></span>
+
+  <!-- RIGHT PANEL -->
+  <div style="flex:1;min-width:400px">
+    <h4 style="margin-bottom:8px">👥 Quản lý Users</h4>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <input type="text" id="cfgUserSearch" placeholder="🔍 Tìm user..." oninput="cfgSearchUsers()" style="max-width:150px;font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:4px">
+      <button class="btn btn-sm btn-outline" onclick="cfgAddUser()">+ Thêm</button>
+      <button class="btn btn-sm btn-outline" onclick="downloadUserTemplate()">📥 Mẫu</button>
+      <label class="btn btn-sm btn-outline" style="cursor:pointer">📤 Import<input type="file" accept=".csv,.xls,.xlsx" onchange="importUsers(this)" style="display:none"></label>
+      <span id="impUserInfo" style="font-size:10px;color:var(--muted)"></span>
+    </div>
+    <table><thead><tr><th>#</th><th>Vai trò</th><th>Họ tên</th><th>User</th><th>Vùng/KV</th><th>Mật khẩu</th><th></th></tr></thead><tbody id="cfgUserTable"></tbody></table>
+
+    <h4 style="margin-top:16px">🗺 TKMB Map (Tỉnh → TKMB)</h4>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <select id="cfgTkmbFilter" onchange="renderTkmbMap()" style="font-size:11px"><option value="">Tất cả</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
+      <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
+      <input type="file" id="cfgTkmbImport" accept=".csv" onchange="cfgHandleTkmbImport(this)" style="display:none">
+    </div>
+    <table id="cfgTkmbMapTable"><thead><tr><th>Tỉnh</th><th>Huyện</th><th>TKMB</th><th></th></tr></thead><tbody id="cfgTkmbMap"></tbody></table>
   </div>
-  <table><thead><tr><th>#</th><th>Vai trò</th><th>Họ tên</th><th>User</th><th>Vùng/KV</th><th>MK</th><th></th></tr></thead><tbody id="cfgUserTable"></tbody></table>
-  
-  <h4 style="margin-top:16px">🔐 Phân quyền Tab</h4>
-  <table><thead><tr><th>Role</th><th>Dash</th><th>Tiếp nhận</th><th>Tiến độ</th><th>Scan</th><th>QH</th><th>Checklist</th><th>ĐP</th><th>DS MB</th><th>Cài đặt</th></tr></thead><tbody id="cfgPermMatrix"></tbody></table>
-  
-  <h4 style="margin-top:16px">🗺 TKMB Map (Tỉnh → TKMB)</h4>
-  <div style="display:flex;gap:6px;margin-bottom:8px">
-    <select id="cfgTkmbFilter" onchange="renderTkmbMap()" style="font-size:11px"><option value="">Tất cả</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
-    <button class="btn btn-sm btn-outline" onclick="cfgImportTkmbMap()">📤 Import CSV</button>
-    <input type="file" id="cfgTkmbImport" accept=".csv" onchange="cfgHandleTkmbImport(this)" style="display:none">
   </div>
-  <table id="cfgTkmbMapTable"><thead><tr><th>Tỉnh</th><th>Huyện</th><th>TKMB</th><th></th></tr></thead><tbody id="cfgTkmbMap"></tbody></table>
   </div>
 </div>
 
-</div><!-- /main -->
 
 <!-- ═══ TOAST ═══ -->
 <div class="toast" id="toast"></div>
@@ -2179,6 +2201,42 @@ function cfgHandleTkmbImport(input){
     saveTkmbMap(map); renderTkmbMap(); alert('✅ Đã import '+Object.keys(map).length+' tỉnh');
   };
   reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / IMPORT MANAGER MAPPING (MB + QH)
+// ═══════════════════════════════════════════════════════
+function managerCSV(type){
+  if(type==='MB') return 'MB ID,GĐV hiện tại,QLKV hiện tại\n'+MB_DATA.map(m=>m.id+','+(m.gdvHienTai||'')+','+(m.qlkvHienTai||'')).join('\n');
+  else return 'Mã QH,GĐV,QLKV\n'+QH_DATA.map(q=>q.qh+','+(q.gdv||'')+','+(q.qlkv||'')).join('\n');
+}
+function exportManagerMapping(type){
+  const csv=managerCSV(type); const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(type==='MB'?'MB_QLHT.csv':'QH_QLHT.csv'); a.click();
+}
+function importManagerMapping(type, input){
+  const file=input.files[0]; if(!file)return; const reader=new FileReader();
+  reader.onload=function(e){
+    let rows;
+    if(/\.csv$/i.test(file.name)) rows=csvParse(e.target.result);
+    else{ try{ const wb=XLSX.read(e.target.result,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true}); }catch(err){ toast('Lỗi đọc file','err'); return; } }
+    if(!rows||rows.length<2){ toast('File trống','err'); return; }
+    const hdr=rows[0].map(h=>String(h||'').trim().toLowerCase());
+    const iId=Math.max(hdr.indexOf('mb id'),hdr.indexOf('mã qh'));
+    const iGdv=Math.max(hdr.indexOf('gđv hiện tại'),hdr.indexOf('gđv'));
+    const iQlkv=Math.max(hdr.indexOf('qlkv hiện tại'),hdr.indexOf('qlkv'));
+    if(iId<0||iGdv<0||iQlkv<0){ toast('Sai cấu trúc cột','err'); return; }
+    let n=0;
+    for(let i=1;i<rows.length;i++){ const r=rows[i]; if(!r||!String(r[iId]||'').trim())continue;
+      const id=String(r[iId]).trim(); const gdv=String(r[iGdv]||'').trim(); const qlkv=String(r[iQlkv]||'').trim();
+      if(type==='MB'){ const mb=MB_DATA.find(x=>x.id===id); if(mb){ mb.gdvHienTai=gdv; mb.qlkvHienTai=qlkv; n++; } }
+      else{ const q=QH_DATA.find(x=>x.qh===id); if(q){ q.gdv=gdv; q.qlkv=qlkv; n++; } }
+    }
+    toast('✅ Đã import '+n+' dòng','ok');
+    try{ if(type==='MB') fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'syncGDVQLKV',gdvs:MB_DATA.map(m=>[m.gdvHienTai||'',m.qlkvHienTai||''])}),headers:{'Content-Type':'text/plain'}});
+      else fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'batchImportQH',points:QH_DATA.map(q=>({qh:q.qh,gdv:q.gdv,qlkv:q.qlkv}))}),headers:{'Content-Type':'text/plain'}}); }catch(err){}
+  };
+  if(/\.csv$/i.test(file.name)) reader.readAsText(file,'utf-8'); else reader.readAsArrayBuffer(file);
 }
 
 // ═══════════════════════════════════════════════════════
