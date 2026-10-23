@@ -1499,7 +1499,7 @@ function renderDash(){
     const lastPending=m.steps.find(s=>s.r==='Pending');
     const slaCls=lastPending?getSLAColor(m,lastPending.s):'sla-ok';
     const slaText=lastPending?STEP_SLA[lastPending.s-1].slaLabel:'—';
-    return '<tr style="cursor:pointer" onclick="openTracklog(\''+m.id+'\')"><td><strong>'+m.id+'</strong></td><td><span class="tag tag-p">'+m.nguon+'</span></td><td>'+m.gdv+'</td><td>'+m.tinh+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="event.stopPropagation();editMB(\''+m.id+'\')">✏️</button></td></tr>';
+    return '<tr><td><strong>'+m.id+'</strong></td><td><span class="tag tag-p">'+m.nguon+'</span></td><td>'+m.gdv+'</td><td>'+m.tinh+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n        <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();editMB(\''+m.id+'\')" title="Sửa thông tin MB">✏️</button>\n        <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
   }).join('');
 }
 function toggleSection(el){
