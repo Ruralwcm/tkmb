@@ -2239,7 +2239,12 @@ function saveStep(){const mb=MB_DATA.find(m=>m.id===currentMBId);if(!mb)return;c
   if(result==='Fail'){st.failReason=document.getElementById('stepFailReason').value;st.failGroup=document.getElementById('stepFailGroup').value;for(let i=currentStepNum;i<6;i++)mb.steps[i].r='—';}
   else if(result==='Done'&&currentStepNum<6){if(mb.steps[currentStepNum].r==='None'||mb.steps[currentStepNum].r==='—')mb.steps[currentStepNum].r='Pending';}
   const dc=mb.steps.filter(s=>s.r==='Done').length;if(dc>=6)mb.status='Hoàn thành';else if(dc>=4)mb.status='GDM duyet';else if(dc>=1)mb.status='GDV duyet';
-  closeStepModal();renderDash();renderTienDo();renderDSMB();}
+  closeStepModal();
+  // Nếu đang có tracklog mở, refresh tracklog modal ngay
+  if(document.getElementById('tracklogModal').style.display==='flex' && tracklogMBId===currentMBId){
+    openTracklog(currentMBId);
+  }
+  renderDash();renderTienDo();renderDSMB();}
 
 // ═══ TRACKLOG (xem chi tiết từng bước) ═══
 function openTracklog(mbId){
@@ -2281,9 +2286,10 @@ function openTracklog(mbId){
       <td style="padding:4px 4px;font-weight:600;color:var(--primary);white-space:nowrap">B${s}</td>
       <td style="padding:4px 4px">${STEP_SLA[s-1].desc}</td>
       <td style="padding:4px 6px;color:var(--muted);text-align:right;white-space:nowrap;font-size:11px">${STEP_SLA[s-1].sla||''}</td>
+      <td style="padding:4px 4px;text-align:right;white-space:nowrap"><button class="btn btn-xs btn-outline" onclick="editTracklogStep('${mbId}',${s})" title="Sửa bước B${s}">✏️</button></td>
     </tr>`;
     if(detail.length){
-      html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0"><td></td><td></td><td colspan="2" style="padding:2px 4px 6px;font-size:10.5px;color:var(--muted)">
+      html+=`<tr style="background:${bg};border-bottom:1px solid #f0f0f0"><td></td><td></td><td colspan="3" style="padding:2px 4px 6px;font-size:10.5px;color:var(--muted)">
         ${info.nguoiThucHien?`👤 ${info.nguoiThucHien}`:''}${info.nguoiDuyet?` · ✅ ${info.nguoiDuyet}`:''}${info.thoiGian?` · 🗓 ${info.thoiGian}`:''}${info.vanDe?`<br>⚠️ ${info.vanDe}`:''}
       </td></tr>`;
     }
@@ -2293,6 +2299,11 @@ function openTracklog(mbId){
   document.getElementById('tracklogModal').style.display='flex';
 }
 function closeTracklog(){ document.getElementById('tracklogModal').style.display='none'; }
+let tracklogMBId=null;
+function editTracklogStep(mbId,step){
+  tracklogMBId=mbId;
+  openStepModal(mbId,step);
+}
 
 // ═══ DS MB ═══
 function populateDSGDV(){const sel=document.getElementById('dsGDV');sel.innerHTML='<option value="">Tất cả GĐV</option>';[...new Set(MB_DATA.map(m=>m.gdv).filter(Boolean))].sort().forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;sel.appendChild(o);});}
