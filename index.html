@@ -750,8 +750,6 @@ let USERS = [
   {rank:'GĐV',name:'Đỗ Quỳnh Thùy Trang',code:'trangdqt',phone:'961100',gdv:'Đỗ Quỳnh Thùy Trang'},
   {rank:'GĐV',name:'Hoàng Nguyễn Tú Anh',code:'anhhnt',phone:'3004547',gdv:'Hoàng Nguyễn Tú Anh'},
   {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678',gdv:'Đặng Trần Hảo'},
-  {rank:'QLKV',name:'Đinh Mạnh Tuân',code:'tuandm',phone:'12345678',gdv:'Nguyễn Duy Đoàn'},
-  {rank:'QLKV',name:'Trần Thu Trà',code:'trantt',phone:'12345678',gdv:'Phạm Minh Thu'},
   {rank:'TKMB',name:'Nguyễn Văn Phi',code:'phinv2',phone:'12345678',gdv:'',tkmb:'Phi'},
   {rank:'TKMB',name:'Trần Huy Dũng',code:'dungth',phone:'12345678',gdv:'',tkmb:'Huy Dũng'},
   {rank:'TKMB',name:'Lê Đình Thái',code:'thaild',phone:'12345678',gdv:'',tkmb:'Thái'},
@@ -2193,9 +2191,7 @@ function autoDetectUsers(){
   const hard=[{rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678'},{rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678'}];
   const merged=new Map(); for(const u of hard)merged.set(u.name,{...u});
   for(const [name,count] of gdvSet){ const code=(name||'').toLowerCase().replace(/\s+/g,''); merged.set(name,{rank:'GĐV',name,code,phone:'12345678',gdv:name,tkmb:'',count}); }
-  for(const [name,count] of qlkvSet){ const code=(name||'').toLowerCase().replace(/\s+/g,'');
-    if(!merged.has(name)){ let parentGdv=''; for(const [gdv,qlkvs] of Object.entries(CASCADE_DATA)){ if(qlkvs[name]){parentGdv=gdv;break;} } merged.set(name,{rank:'QLKV',name,code,phone:'12345678',gdv:parentGdv,tkmb:'',count}); }
-  }
+  // QLKV users removed per owner request — chỉ giữ GĐV, GĐM, TKMB
   for(const [tkmb,count] of tkmbSet){ if(!tkmb||!['Phi','Huy Dũng','Thái'].includes(tkmb))continue;
     if(!merged.has(tkmb)) merged.set(tkmb,{rank:'TKMB',name:tkmb,code:tkmb.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:'',tkmb,count});
   }
