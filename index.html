@@ -2048,7 +2048,7 @@ async function loadLiveData(){
   for(let i=1;i<mrows.length;i++){ const r=mrows[i]; const mid=r[idx['MB ID']]||''; if(!mid||seen[mid])continue; seen[mid]=1;
     const steps=[];
     for(let s=1;s<=6;s++){ const info=(td[mid]||{})[s]||{}; const st=(typeof info==='string')?info:(info.status||''); steps.push({s,actor:ACTOR_ARR[s-1][0],appr:ACTOR_ARR[s-1][1],r:toR(st),date:info.thoiGian||''}); }
-    out.push({ id:mid, nguon:r[idx['Nguồn']]||'', gdv:r[idx['GĐV']]||'', qlkv:r[idx['QLKV']]||'', tinh:r[idx['Tỉnh/TP']]||'', huyen:r[idx['Huyện/Quận']]||'', addr:r[idx['Địa chỉ']]||'', mapLink:r[idx['Map Link']]||'', lat:r[idx['Lat']]||'', lng:r[idx['Lng']]||'', area:r[idx['DT (m²)']]||'', front:r[idx['MT (m)']]||'', price:r[idx['Giá (tr/th)']]||'', payment:r[idx['Thanh toán']]||'', deposit:r[idx['Cọc (tr)']]||'', duration:r[idx['Thời hạn']]||'', legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'', gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'', status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]), gdvHienTai:r[idx['GĐV hiện tại']]||'', qlkvHienTai:r[idx['QLKV hiện tại']]||'', steps, tracklog:td[mid]||{} });
+    out.push({ id:mid, nguon:r[idx['Nguồn']]||'', gdv:r[idx['GĐV']]||'', qlkv:r[idx['QLKV']]||'', tinh:r[idx['Tỉnh/TP']]||'', huyen:r[idx['Huyện/Quận']]||'', addr:r[idx['Địa chỉ']]||'', mapLink:r[idx['Map Link']]||'', lat:r[idx['Lat']]||'', lng:r[idx['Lng']]||'', area:r[idx['DT (m²)']]||'', front:r[idx['MT (m)']]||'', price:r[idx['Giá (tr/th)']]||'', payment:r[idx['Thanh toán']]||'', deposit:r[idx['Cọc (tr)']]||'', duration:r[idx['Thời hạn']]||'', legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'', gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'', status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]), gdvHienTai:r[idx['GĐV hiện tại']]||'', qlkvHienTai:r[idx['QLKV hiện tại']]||'', tkmb:r[idx['TKMB phụ trách']]||getTKMB_JS(r[idx['Tỉnh/TP']]||'',r[idx['Huyện/Quận']]||''), steps, tracklog:td[mid]||{} });
   }
   if(out.length){
     MB_DATA=out;
@@ -2149,7 +2149,14 @@ function cfgAddUser(){
 function cfgEditUser(i){
   const u=USERS[i]; document.getElementById('userEditIdx').value=i; document.getElementById('userEditTitle').textContent='Sửa: '+u.name;
   document.getElementById('ueCode').value=getUserName(u); document.getElementById('ueName').value=u.name; document.getElementById('ueRank').value=u.rank;
-  document.getElementById('uePhamviMB').value=(u.phamviMB||[]).join(','); document.getElementById('uePhamviQH').value=(u.phamviQH||[]).join(',');
+  // Auto-detect phạm vi từ MB_DATA và QH_DATA
+  const gdvName=u.name||u.gdv||'';
+  const autoMB=MB_DATA.filter(m=>m.gdv===gdvName).map(m=>m.tinh).filter(Boolean);
+  const autoQH=QH_DATA.filter(q=>q.gdv===gdvName).map(q=>q.tinh).filter(Boolean);
+  const mbTinhs=[...new Set([...(u.phamviMB||[]),...autoMB])].sort().join(',');
+  const qhTinhs=[...new Set([...(u.phamviQH||[]),...autoQH])].sort().join(',');
+  document.getElementById('uePhamviMB').value=mbTinhs;
+  document.getElementById('uePhamviQH').value=qhTinhs;
   document.getElementById('uePass').value=u.phone||'12345678'; document.getElementById('userEditModal').style.display='flex';
 }
 function ueSave(){
