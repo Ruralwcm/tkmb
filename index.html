@@ -844,7 +844,7 @@ function enterDashboardMode() {
   initChkChecklist();
   populateDPGDV();
   renderDPTable();
-  loadLiveData().then(function(){ autoDetectUsers(); if (typeof renderSettings==='function') renderSettings(); });
+  loadLiveData().then(function(){ if (typeof renderSettings==='function') renderSettings(); });
 }
 function doLogout() {
   currentUser = null;
@@ -2237,28 +2237,6 @@ function importManagerMapping(type, input){
       else fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'batchImportQH',points:QH_DATA.map(q=>({qh:q.qh,gdv:q.gdv,qlkv:q.qlkv}))}),headers:{'Content-Type':'text/plain'}}); }catch(err){}
   };
   if(/\.csv$/i.test(file.name)) reader.readAsText(file,'utf-8'); else reader.readAsArrayBuffer(file);
-}
-
-// ═══════════════════════════════════════════════════════
-// AUTO-DETECT USERS FROM MB_Data + QH_Points
-// ═══════════════════════════════════════════════════════
-function autoDetectUsers(){
-  // Scan data for auto-detected users
-  const gdvSet=new Map(), tkmbSet=new Map();
-  for(const mb of MB_DATA){ if(mb.gdv)gdvSet.set(mb.gdv,(gdvSet.get(mb.gdv)||0)+1); }
-  for(const qh of QH_DATA){ if(qh.gdv)gdvSet.set(qh.gdv,(gdvSet.get(qh.gdv)||0)+1); if(qh.tkmb)tkmbSet.set(qh.tkmb,(tkmbSet.get(qh.tkmb)||0)+1); }
-  // Merge vào USERS hiện tại (additive, không xóa user đã có)
-  for(const [name] of gdvSet){
-    if(!USERS.find(u=>u.name===name)){
-      USERS.push({rank:'GĐV',name,code:name.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:name,tkmb:''});
-    }
-  }
-  for(const [tkmb] of tkmbSet){
-    if(!tkmb||!['Phi','Huy Dũng','Thái'].includes(tkmb))continue;
-    if(!USERS.find(u=>u.name===tkmb)){
-      USERS.push({rank:'TKMB',name:tkmb,code:tkmb.toLowerCase().replace(/\s+/g,''),phone:'12345678',gdv:'',tkmb});
-    }
-  }
 }
 
 // ═══════════════════════════════════════════════════════
