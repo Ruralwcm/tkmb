@@ -1596,7 +1596,10 @@ function renderTienDo(){
 let currentMBId=null, currentStepNum=null, tracklogMBId=null;
 function openStepModal(mbId,step){
   const mb=MB_DATA.find(m=>m.id===mbId); if(!mb)return;
-  const st=mb.steps[step-1]; currentMBId=mbId; currentStepNum=step;
+  const st=mb.steps[step-1]; 
+  // Chặn edit bước chưa đến (None)
+  if(!st || st.r==='None'){ toast('⚠️ Bước này chưa đến, chưa thể cập nhật','err'); return; }
+  currentMBId=mbId; currentStepNum=step;
   document.getElementById('stepModalTitle').textContent='B'+step+': '+STEP_SLA[step-1].desc;
   document.getElementById('stepInfo').innerHTML='MB: <strong>'+mbId+'</strong> · '+mb.tinh+' · Người duyệt: <strong>'+st.appr+'</strong>';
   const sla=STEP_SLA[step-1];
@@ -1640,7 +1643,11 @@ function openTracklog(mbId){
     const info=(typeof tl[s]==='string')?{}:(tl[s]||{});
     const step=mb.steps[s-1]||{}; const r=step.r||'None';
     const bg=r==='Done'?'#dcfce7':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
-    html+='<tr style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+'</td><td style="padding:4px;text-align:right"><button class="btn btn-xs btn-outline" onclick="editTracklogStep(\''+mbId+'\','+s+')">✏️</button></td></tr>';
+    // Chỉ bước đã đến (Done/Fail/Pending) mới edit được; bước chưa đến (None) không edit
+    const editBtn = (r==='None')
+      ? '<span style="color:var(--muted);font-size:10px">🔒</span>'
+      : '<button class="btn btn-xs btn-outline" onclick="editTracklogStep(\''+mbId+'\','+s+')">✏️</button>';
+    html+='<tr style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+'</td><td style="padding:4px;text-align:right">'+editBtn+'</td></tr>';
   }
   html+='</table>';
   document.getElementById('tracklogBody').innerHTML=html;
