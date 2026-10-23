@@ -267,8 +267,8 @@ tr:hover{background:var(--teal-bg)}
     </div>
   </div>
   <div class="nav" id="appNav">
-    <button data-tab="tkmb" class="active">📋 Tiếp nhận MB</button>
-    <button data-tab="scan">📍 Scan QH</button>
+    <button data-tab="tkmb">📋 Tiếp nhận MB</button>
+    <button data-tab="scan" class="active">📍 Scan QH</button>
     <button data-tab="dash" class="admin-only">📊 Dashboard</button>
     <button data-tab="tiendo" class="admin-only">🔄 Tiến độ MB</button>
     <button data-tab="qhmanage" class="admin-only">🗂 Quản lý QH</button>
@@ -300,7 +300,7 @@ tr:hover{background:var(--teal-bg)}
 </div>
 
 <!-- ═══ SECTION: NHẬN MB ═══ -->
-<div class="section active" id="sec-tkmb">
+<div class="section" id="sec-tkmb">
   <div class="card"><h3>📋 Thông tin Mặt bằng</h3>
   <div class="gr gr2"><div class="fg"><label>Nguồn</label><select id="mbNguon"><option>TKMB</option><option>VH</option></select></div>
   <div class="fg"><label>GĐV</label><select id="mbGDV" onchange="onGDVChange()"><option value="">-- Chọn GĐV --</option></select></div>
@@ -334,7 +334,7 @@ tr:hover{background:var(--teal-bg)}
 </div>
 
 <!-- ═══ SECTION: SCAN QH ═══ -->
-<div class="section" id="sec-scan">
+<div class="section active" id="sec-scan">
   <!-- SCAN HERO -->
   <div id="scanHero">
     <div class="scan-hero">
@@ -810,6 +810,11 @@ function enterDashboardMode() {
   document.querySelectorAll('.nav button.admin-only').forEach(b => b.style.display = 'inline-block');
   if (currentUser && currentUser.rank === 'GĐM') document.getElementById('navSettings').style.display = 'inline-block';
   else document.getElementById('navSettings').style.display = 'none';
+  // Switch to Dashboard tab mặc định
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-tab="dash"]').classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-dash').classList.add('active');
   // Initial loads for dashboard
   populateGDV();
   populateDashGDV();
@@ -830,11 +835,11 @@ function doLogout() {
   document.getElementById('btnLogout').style.display = 'none';
   document.getElementById('btnDashboard').style.display = 'inline-block';
   document.querySelectorAll('.nav button.admin-only').forEach(b => b.style.display = 'none');
-  // revert to field default tab
+  // revert to field default tab (Scan QH)
   document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
-  document.querySelector('[data-tab="tkmb"]').classList.add('active');
+  document.querySelector('[data-tab="scan"]').classList.add('active');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-tkmb').classList.add('active');
+  document.getElementById('sec-scan').classList.add('active');
 }
 function autoLoginFromPortal() {
   const pu = localStorage.getItem('portal_user');
