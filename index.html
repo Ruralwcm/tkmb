@@ -332,7 +332,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.4</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.5</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -595,7 +595,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.4</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.5</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1048,6 +1048,7 @@ let qhDataLoaded = false;
 let scanGPS = {lat:null,lng:null,watchId:null};
 let scanSel = null;
 let checkinQHRef = null;
+let qhbsPending = false;
 let mbIDSeq = parseInt(localStorage.getItem('tkmb_field_mb_seq')||'0');
 let mbSeqMonth = localStorage.getItem('tkmb_field_mb_month')||'';
 let qhbsSeq = JSON.parse(localStorage.getItem('tkmb_field_qhbs_seq')||'{}');
@@ -1126,20 +1127,17 @@ function doScanQH(){
 
 function triggerQHBS(){
   if(!scanGPS.lat){toast('⚠️ Đang chờ GPS...','err');return;}
-  let maTinh='GPS';
-  const nearestQH = scanSel || (qhPoints.length ? qhPoints.reduce((a,b)=>haversine(scanGPS.lat,scanGPS.lng,a.lat,a.lng)<haversine(scanGPS.lat,scanGPS.lng,b.lat,b.lng)?a:b) : null);
-  if(nearestQH && nearestQH.t){ maTinh = TINH_MA[nearestQH.t] || 'GPS'; }
-  if(!qhbsSeq[maTinh]) qhbsSeq[maTinh]=0;
-  qhbsSeq[maTinh]++; localStorage.setItem('tkmb_field_qhbs_seq',JSON.stringify(qhbsSeq));
-  const maQHBS='QHBS-'+maTinh+'_'+String(qhbsSeq[maTinh]).padStart(3,'0');
-  const syntheticPoint={qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguon:'QHBS'};
-  qhPoints.push(syntheticPoint);
-  qhbsLocal.push({qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguoiDeXuat:currentUser?.name||'',ngayDeXuat:new Date().toISOString(),nguon:'QHBS'});
-  localStorage.setItem('tkmb_field_qhbs',JSON.stringify(qhbsLocal));
-  toast('✅ Đã tạo '+maQHBS+' — Mở check-in','ok');
-  if(navigator.vibrate)navigator.vibrate([100,50,100]);
-  openCheckin(maQHBS);
-  try{fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'saveQHBS',qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguoiDeXuat:currentUser?.name||'',ngayDeXuat:new Date().toISOString(),nguon:'QHBS'}),headers:{'Content-Type':'text/plain'}});}catch(e){}
+  qhbsPending = true;
+  document.getElementById('scanHero').style.display='none';
+  document.getElementById('checkinView').style.display='block';
+  document.getElementById('ciQH').value = '(sẽ sinh khi Lưu)';
+  document.getElementById('ciTime').value = new Date().toLocaleString('vi-VN');
+  document.getElementById('ciUser').value = currentUser?.name||'';
+  document.getElementById('ciGPS').value = scanGPS.lat ? scanGPS.lat.toFixed(6)+', '+scanGPS.lng.toFixed(6) : '—';
+  document.getElementById('ciLastInfo').textContent = '📍 Tạo điểm QHBS mới từ vị trí hiện tại';
+  document.getElementById('priceSurveyContainer').innerHTML='';
+  mtnCount=0;
+  addPriceRow();
 }
 
 // ═══ CHECKIN FLOW ═══
@@ -1177,7 +1175,7 @@ function openCheckin(qh){
 function closeCheckin(){
   document.getElementById('checkinView').style.display='none';
   document.getElementById('scanHero').style.display='block';
-  checkinQHRef=null; scanSel=null;
+  checkinQHRef=null; scanSel=null; qhbsPending=false;
 }
 function loadCheckinHistory(qh){
   const el=document.getElementById('ciHistory');
@@ -1210,11 +1208,29 @@ function loadDacthu(qh){
   el.innerHTML=html;
 }
 async function saveCheckinOnly(){
-  if(!scanSel||!checkinQHRef) return;
-  if(!confirm('Xác nhận lưu check-in '+checkinQHRef+'?')) return;
+  if(!qhbsPending && (!scanSel||!checkinQHRef)) return;
+  if(!confirm('Xác nhận lưu check-in '+(qhbsPending?'QHBS mới':checkinQHRef)+'?')) return;
   tripSeq++; localStorage.setItem('tkmb_field_trip_seq',tripSeq);
   const now=new Date();
   const codeTrip='TRIP-'+String(now.getFullYear()).slice(2)+('0'+(now.getMonth()+1)).slice(-2)+now.getDate().toString().padStart(2,'0')+'-'+String(tripSeq).padStart(3,'0');
+
+  // Nếu là QHBS: sinh mã tại thời điểm Lưu
+  let maQHBS = '';
+  if(qhbsPending){
+    let maTinh='GPS';
+    const nearestQH = qhPoints.length ? qhPoints.reduce((a,b)=>haversine(scanGPS.lat,scanGPS.lng,a.lat,a.lng)<haversine(scanGPS.lat,scanGPS.lng,b.lat,b.lng)?a:b) : null;
+    if(nearestQH && nearestQH.t){ maTinh = TINH_MA[nearestQH.t] || 'GPS'; }
+    if(!qhbsSeq[maTinh]) qhbsSeq[maTinh]=0;
+    qhbsSeq[maTinh]++; localStorage.setItem('tkmb_field_qhbs_seq',JSON.stringify(qhbsSeq));
+    maQHBS='QHBS-'+maTinh+'_'+String(qhbsSeq[maTinh]).padStart(3,'0');
+    const syntheticPoint={qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguon:'QHBS'};
+    qhPoints.push(syntheticPoint);
+    qhbsLocal.push({qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguoiDeXuat:currentUser?.name||'',ngayDeXuat:now.toISOString(),nguon:'QHBS'});
+    localStorage.setItem('tkmb_field_qhbs',JSON.stringify(qhbsLocal));
+    scanSel = syntheticPoint;
+    checkinQHRef = maQHBS;
+    try{fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'saveQHBS',qh:maQHBS,x:'',h:'',t:'',gdv:'',lat:scanGPS.lat,lng:scanGPS.lng,nguoiDeXuat:currentUser?.name||'',ngayDeXuat:now.toISOString(),nguon:'QHBS'}),headers:{'Content-Type':'text/plain'}});}catch(e){}
+  }
   const dirs=[];
   document.querySelectorAll('#priorityDirContainer .priority-dir-row').forEach(row=>{
     const sel=row.querySelector('.priDir'); const dist=row.querySelector('.priDist');
@@ -1233,7 +1249,7 @@ async function saveCheckinOnly(){
   const d={action:'saveCheckin',qh:checkinQHRef,qhDist:(scanSel&&scanGPS.lat)?Math.round(haversine(scanGPS.lat,scanGPS.lng,scanSel.lat,scanSel.lng)):'',codeTrip:codeTrip,ts:now.toISOString(),user:currentUser?.name||'',lat:scanGPS.lat||0,lng:scanGPS.lng||0,mbtnCodes:'',mbtnCount:0,dirs:priority,dists:'',priceKV:priceKV,priceNote:'',nguon:'Scan'};
   checkinLocal.push(d); localStorage.setItem('tkmb_field_checkins',JSON.stringify(checkinLocal));
   try{await fetch(GAS_URL,{method:'POST',body:JSON.stringify(d),headers:{'Content-Type':'text/plain'}});}catch(e){}
-  toast('✅ Đã lưu check-in '+checkinQHRef,'ok');
+  toast('✅ Đã lưu check-in '+(qhbsPending?maQHBS:checkinQHRef),'ok');
   if(navigator.vibrate)navigator.vibrate(100);
   closeCheckin();
 }
