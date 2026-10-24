@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.0</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.1</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.0</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.1</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1734,7 +1734,7 @@ function loadMBCache(){
 function saveStep(){
   const mb=MB_DATA.find(m=>m.id===currentMBId); if(!mb)return;
   const st=mb.steps[currentStepNum-1]; const result=document.getElementById('stepResult').value;
-  st.r=result; st.date=new Date().toISOString();
+  st.r=result; st.date=new Date().toLocaleString('sv-SE',{timeZone:'Asia/Ho_Chi_Minh'}).replace('T',' ');
   if(result==='Fail'){ st.failReason=document.getElementById('stepFailReason').value; st.failGroup=document.getElementById('stepFailGroup').value; for(let i=currentStepNum;i<6;i++)mb.steps[i].r='—'; }
   else if(result==='Done'&&currentStepNum<6){ if(mb.steps[currentStepNum].r==='None'||mb.steps[currentStepNum].r==='—')mb.steps[currentStepNum].r='Pending'; }
   closeStepModal();
