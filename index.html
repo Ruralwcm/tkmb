@@ -318,7 +318,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.0</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.1</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -560,7 +560,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.0</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.1</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1554,7 +1554,7 @@ function getStatusLabel(m){
 function statusTagHtml(m){
   const hasFail=m.steps.some(s=>s.r==='Fail');
   const cls=hasFail?'tag-r':(m.steps[5].r==='Done'?'tag-g':'tag-p');
-  return '<span class="tag '+cls+'">'+getStatusLabel(m)+'</span>';
+  return '<span class="tag '+cls+'" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" style="cursor:pointer" title="Bấm để xem & duyệt">'+getStatusLabel(m)+'</span>';
 }
 function getUserFilterGDV(){
   if(!currentUser) return '';
