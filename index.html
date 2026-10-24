@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.3</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.4</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.3</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.4</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -643,7 +643,7 @@ tr:hover{background:var(--teal-bg)}
   <div id="stepSLA" style="font-size:11px;margin-bottom:10px"></div>
   <div class="fg"><label>Kết quả</label><select id="stepResult" onchange="onStepResultChange()"><option value="None">— Chưa đến</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option></select></div>
   <div id="failFields" style="display:none"><div class="fg"><label>Lý do Fail</label><input id="stepFailReason"></div>
-  <div class="fg"><label>Nhóm Fail</label><input id="stepFailGroup"></div></div>
+  <div class="fg"><label>Nhóm Fail</label><select id="stepFailGroup"><option value="">— Chọn nhóm —</option><option value="Vị trí không phù hợp">Vị trí không phù hợp</option><option value="Giá thuê quá cao">Giá thuê quá cao</option><option value="Diện tích không đủ">Diện tích không đủ</option><option value="Mặt tiền hẹp">Mặt tiền hẹp</option><option value="Pháp lý không rõ ràng">Pháp lý không rõ ràng</option><option value="Chủ nhà không hợp tác">Chủ nhà không hợp tác</option><option value="Cạnh tranh cao">Cạnh tranh cao</option><option value="Kết cấu/CSVC yếu">Kết cấu/CSVC yếu</option><option value="Khác">Khác</option></select></div></div>
   <div class="fg"><label>📝 Vấn đề / Ghi chú</label><textarea id="stepNote" rows="2" style="width:100%;font-size:12px;padding:6px;border-radius:6px;border:1px solid var(--line)" placeholder="Nhập ghi chú nếu có..."></textarea></div>
   <div class="modal-btns"><button class="btn btn-outline" onclick="closeStepModal()">Hủy</button><button class="btn" style="background:var(--teal);color:#fff" onclick="saveStep()">💾 Lưu</button></div></div>
 </div>
