@@ -330,7 +330,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.1</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.2</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -484,10 +484,6 @@ tr:hover{background:var(--teal-bg)}
     </div>
     <button class="btn btn-sm btn-outline" onclick="addPriceRow()" style="margin-bottom:16px">+ Thêm MB khảo sát</button>
 
-    <span class="block-label">🏢 MB Đang tiếp cận</span>
-    <div id="mtnContainer"></div>
-    <button class="btn btn-sm btn-outline" onclick="addMTNRow()" style="margin-bottom:12px">+ Thêm MB đang tiếp cận</button>
-
     <button class="btn btn-p" onclick="saveCheckinOnly()">✅ Lưu Check-in</button>
     </div>
   </div>
@@ -597,7 +593,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.1</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.2</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1158,7 +1154,6 @@ function openCheckin(qh){
   const prev = checkinLocal.filter(c=>c.qh===qh).slice(-1)[0];
   document.getElementById('ciLastInfo').textContent = prev ? '📋 Check-in gần nhất: '+new Date(prev.ts).toLocaleDateString('vi-VN')+' — '+prev.user : 'Chưa có check-in trước đó';
   document.getElementById('priceSurveyContainer').innerHTML='';
-  document.getElementById('mtnContainer').innerHTML='';
   mtnCount=0;
   if(prev && prev.priceKV){
     const prices = prev.priceKV.split(' | ');
@@ -1174,7 +1169,6 @@ function openCheckin(qh){
     });
   }
   if(!prev || !prev.priceKV) addPriceRow();
-  addMTNRow();
   loadCheckinHistory(qh);
   loadDacthu(qh);
 }
@@ -1200,11 +1194,6 @@ function loadDacthu(qh){
   const lastPrices=history.filter(c=>c.priceKV).slice(-3);
   const lastPriority=history.filter(c=>c.priority).slice(-3);
   let html='';
-  if(lastWithMB.length){
-    html+='<div class="dacthu-box"><div class="dt-title">🏠 MB đang tiếp cận (các lần gần nhất)</div>';
-    lastWithMB.reverse().forEach(h=>{ html+='<div style="font-size:10px;margin:2px 0">📅 '+new Date(h.ts).toLocaleDateString('vi-VN')+' — '+(h.mbAddr||'Chưa rõ địa chỉ')+' · '+(h.mbArea||'?')+'m² · '+(h.mbPrice||'?')+' tr</div>'; });
-    html+='</div>';
-  }
   if(lastPriority.length){
     html+='<div class="dacthu-box"><div class="dt-title">🎯 Hướng ưu tiên tìm MB</div>';
     lastPriority.reverse().forEach(h=>{ html+='<div style="font-size:10px;margin:2px 0">'+h.priority+' — '+(h.priorityNote||'')+'</div>'; });
@@ -1230,26 +1219,6 @@ async function saveCheckinOnly(){
     if(sel&&sel.value) dirs.push(sel.value+(dist&&dist.value?' ('+dist.value+'m)':''));
   });
   const priority=dirs.length?dirs.join(', '):'';
-  const mbtnCards=document.querySelectorAll('#mtnContainer .mtn-card');
-  const mbtnCodes=[];
-  mbtnCards.forEach(card=>{
-    const n=card.querySelector('.mtnName')?.value?.trim()||'';
-    const ownN=card.querySelector('.mtnOwnerName')?.value?.trim()||'';
-    const ownP=card.querySelector('.mtnOwnerPhone')?.value?.trim()||'';
-    const addr=card.querySelector('.mtnAddr')?.value?.trim()||'';
-    const note=card.querySelector('.mtnNote')?.value?.trim()||'';
-    const mt=card.querySelector('.mtnMT')?.value||'';
-    const dt=card.querySelector('.mtnDT')?.value||'';
-    const gt=card.querySelector('.mtnGT')?.value||'';
-    if(!n&&!ownN&&!ownP&&!addr&&!mt&&!dt&&!gt) return;
-    mbtnSeq++; localStorage.setItem('tkmb_field_mbtn_seq',mbtnSeq);
-    const codeMBTN='MBTN-'+String(now.getFullYear()).slice(2)+('0'+(now.getMonth()+1)).slice(-2)+now.getDate().toString().padStart(2,'0')+'-'+String(mbtnSeq).padStart(3,'0');
-    mbtnCodes.push(codeMBTN);
-    const mbtn={code:codeMBTN,trip:codeTrip,qh:checkinQHRef,name:n,addr:addr,note:note,ownerName:ownN,ownerPhone:ownP,mt:mt,dt:dt,gia:gt,status:'Đang tiếp cận',ts:now.toISOString(),user:currentUser?.name||'',lat:scanGPS.lat||0,lng:scanGPS.lng||0,gdv:scanSel.gdv||''};
-    mbtnList.push(mbtn);
-    try{fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'saveMBTN',...mbtn}),headers:{'Content-Type':'text/plain'}});}catch(e){}
-  });
-  localStorage.setItem('tkmb_field_mbtn',JSON.stringify(mbtnList));
   const priceRows=[];
   document.querySelectorAll('#priceSurveyContainer .price-survey-row').forEach(row=>{
     const n=row.querySelector('.ciPriceName')?.value?.trim()||'';
@@ -1259,10 +1228,10 @@ async function saveCheckinOnly(){
     if(n||mt||dt||gt) priceRows.push((n||'?')+' - MT: '+(mt||'?')+'m - DT: '+(dt||'?')+'m2 - GT: '+(gt||'?')+'tr');
   });
   const priceKV=priceRows.join(' | ');
-  const d={action:'saveCheckin',qh:checkinQHRef,qhDist:(scanSel&&scanGPS.lat)?Math.round(haversine(scanGPS.lat,scanGPS.lng,scanSel.lat,scanSel.lng)):'',codeTrip:codeTrip,ts:now.toISOString(),user:currentUser?.name||'',lat:scanGPS.lat||0,lng:scanGPS.lng||0,mbtnCodes:mbtnCodes.join(','),mbtnCount:mbtnCodes.length,dirs:priority,dists:'',priceKV:priceKV,priceNote:'',nguon:'Scan'};
+  const d={action:'saveCheckin',qh:checkinQHRef,qhDist:(scanSel&&scanGPS.lat)?Math.round(haversine(scanGPS.lat,scanGPS.lng,scanSel.lat,scanSel.lng)):'',codeTrip:codeTrip,ts:now.toISOString(),user:currentUser?.name||'',lat:scanGPS.lat||0,lng:scanGPS.lng||0,mbtnCodes:'',mbtnCount:0,dirs:priority,dists:'',priceKV:priceKV,priceNote:'',nguon:'Scan'};
   checkinLocal.push(d); localStorage.setItem('tkmb_field_checkins',JSON.stringify(checkinLocal));
   try{await fetch(GAS_URL,{method:'POST',body:JSON.stringify(d),headers:{'Content-Type':'text/plain'}});}catch(e){}
-  toast('✅ Đã lưu check-in '+checkinQHRef+(mbtnCodes.length?' + '+mbtnCodes.length+' MB đang tiếp cận':''),'ok');
+  toast('✅ Đã lưu check-in '+checkinQHRef,'ok');
   if(navigator.vibrate)navigator.vibrate(100);
   closeCheckin();
 }
