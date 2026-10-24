@@ -296,6 +296,9 @@ tr:hover{background:var(--teal-bg)}
 /* ─── CHECKLIST ─── */
 .chk-row{cursor:pointer}
 .chk-row:hover{background:var(--teal-bg)}
+.sarr{font-size:10px;margin-left:3px;opacity:.5}
+.sarr.asc::after{content:'▲'}
+.sarr.desc::after{content:'▼'}
 </style>
 </head>
 <body>
@@ -318,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.4</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.5</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -485,7 +488,7 @@ tr:hover{background:var(--teal-bg)}
       <select id="tdTKMB" onchange="renderTienDo()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả TKMB</option><option>Phi</option><option>Huy Dũng</option><option>Thái</option></select>
       <select id="tdStatus" onchange="renderTienDo()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="all">Tất cả</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option><option value="overdue">⚠️ Quá hạn</option></select>
     </div>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="tdTable"><thead><tr><th data-key="id" onclick="sortTD('id')">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')">Tỉnh<span class="sarr"></span></th><th>Địa chỉ</th><th>B1→B6</th><th>Bước</th><th data-key="status" onclick="sortTD('status')">T.Thái<span class="sarr"></span></th><th>SLA</th><th></th></tr></thead><tbody id="tdTbody"></tbody></table></div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="tdTable"><thead><tr><th data-key="id" onclick="sortTD('id')">MB ID<span class="sarr"></span></th><th data-key="gdv" onclick="sortTD('gdv')">GĐV<span class="sarr"></span></th><th data-key="tinh" onclick="sortTD('tinh')">Tỉnh<span class="sarr"></span></th><th data-key="addr" onclick="sortTD('addr')">Địa chỉ<span class="sarr"></span></th><th data-key="step" onclick="sortTD('step')">B1→B6<span class="sarr"></span></th><th data-key="curStep" onclick="sortTD('curStep')">Bước<span class="sarr"></span></th><th data-key="status" onclick="sortTD('status')">T.Thái<span class="sarr"></span></th><th data-key="sla" onclick="sortTD('sla')">SLA<span class="sarr"></span></th><th></th></tr></thead><tbody id="tdTbody"></tbody></table></div>
   </div>
 </div>
 
@@ -560,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.4</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.5</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1652,8 +1655,12 @@ function populateTDGDV(){
   fillMienOptions('tdMien'); populateTDTinh();
 }
 let tdSort={key:null,dir:1};
-function tdSortVal(m,key){ switch(key){case 'id':return m.id;case 'gdv':return m.gdv||'';case 'tinh':return m.tinh||'';case 'status':return getStatusLabel(m);default:return '';} }
-function sortTD(key){ if(tdSort.key===key)tdSort.dir*=-1; else{tdSort.key=key;tdSort.dir=1;} renderTienDo(); }
+function tdSortVal(m,key){ switch(key){case 'id':return m.id;case 'gdv':return m.gdv||'';case 'tinh':return m.tinh||'';case 'addr':return m.addr||'';case 'step':{ const p=getPct(m.steps); return p.done||0; }case 'curStep':{ const cs=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None')||{s:99}; return cs.s; }case 'status':return getStatusLabel(m);case 'sla':{ const ps=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None'); if(!ps)return 99; const st=slaState(m,ps.s); return st==='over'?0:st==='warn'?1:2; }default:return '';} }
+function sortTD(key){ if(tdSort.key===key)tdSort.dir*=-1; else{tdSort.key=key;tdSort.dir=1;} 
+  document.querySelectorAll('#tdTable .sarr').forEach(el=>{el.classList.remove('asc','desc');el.textContent='';});
+  const activeTh=document.querySelector('#tdTable th[data-key=\"'+key+'\"] .sarr');
+  if(activeTh){ activeTh.classList.add(tdSort.dir===1?'asc':'desc'); activeTh.style.opacity='1'; }
+  renderTienDo(); }
 function renderTienDo(){
   const q=(document.getElementById('tdSearch')?.value||'').toLowerCase();
   const mienF=document.getElementById('tdMien')?.value||''; const tinhF=document.getElementById('tdTinh')?.value||'';
