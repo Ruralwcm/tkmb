@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.2</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.3</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.2</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.3</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -644,6 +644,7 @@ tr:hover{background:var(--teal-bg)}
   <div class="fg"><label>Kết quả</label><select id="stepResult" onchange="onStepResultChange()"><option value="None">— Chưa đến</option><option value="Pending">⏳ Đang xử lý</option><option value="Done">✅ Đã xong</option><option value="Fail">❌ Fail</option></select></div>
   <div id="failFields" style="display:none"><div class="fg"><label>Lý do Fail</label><input id="stepFailReason"></div>
   <div class="fg"><label>Nhóm Fail</label><input id="stepFailGroup"></div></div>
+  <div class="fg"><label>📝 Vấn đề / Ghi chú</label><textarea id="stepNote" rows="2" style="width:100%;font-size:12px;padding:6px;border-radius:6px;border:1px solid var(--line)" placeholder="Nhập ghi chú nếu có..."></textarea></div>
   <div class="modal-btns"><button class="btn btn-outline" onclick="closeStepModal()">Hủy</button><button class="btn" style="background:var(--teal);color:#fff" onclick="saveStep()">💾 Lưu</button></div></div>
 </div>
 
@@ -1724,6 +1725,7 @@ function openStepModal(mbId,step){
   const sla=STEP_SLA[step-1];
   document.getElementById('stepSLA').innerHTML=sla.calendar?'⏱ Hạn: <strong>'+sla.slaLabel+'</strong>':'⏱ Hạn: <strong>'+sla.slaLabel+'</strong>';
   document.getElementById('stepResult').value=st.r||'None'; document.getElementById('stepFailReason').value=st.failReason||''; document.getElementById('stepFailGroup').value=st.failGroup||'';
+  document.getElementById('stepNote').value=st.note||'';
   document.getElementById('stepModal').style.display='flex'; onStepResultChange();
 }
 function onStepResultChange(){ document.getElementById('failFields').style.display=document.getElementById('stepResult').value==='Fail'?'block':'none'; }
@@ -1741,6 +1743,7 @@ function saveStep(){
   const mb=MB_DATA.find(m=>m.id===currentMBId); if(!mb)return;
   const st=mb.steps[currentStepNum-1]; const result=document.getElementById('stepResult').value;
   st.r=result; st.date=new Date().toLocaleString('sv-SE',{timeZone:'Asia/Ho_Chi_Minh'}).replace('T',' ');
+  st.note=document.getElementById('stepNote').value.trim();
   if(result==='Fail'){ st.failReason=document.getElementById('stepFailReason').value; st.failGroup=document.getElementById('stepFailGroup').value; for(let i=currentStepNum;i<6;i++)mb.steps[i].r='—'; }
   else if(result==='Done'&&currentStepNum<6){ if(mb.steps[currentStepNum].r==='None'||mb.steps[currentStepNum].r==='—')mb.steps[currentStepNum].r='Pending'; }
   closeStepModal();
@@ -1750,7 +1753,7 @@ function saveStep(){
   try{
     fetch(GAS_URL,{method:'POST',body:JSON.stringify({
       action:'updateStep', id:currentMBId, step:currentStepNum, result:result,
-      actor:st.actor||'', appr:st.appr||'', note:result==='Fail'?st.failReason:''
+      actor:st.actor||'', appr:st.appr||'', note:st.note||''
     }),headers:{'Content-Type':'text/plain'}});
   }catch(e){}
   renderDash();renderTienDo();if(typeof renderDSMB==='function')renderDSMB();
@@ -1780,7 +1783,8 @@ function openTracklog(mbId,highlightStep){
     const editBtn = (r==='None')
       ? '<span style="color:var(--muted);font-size:10px">🔒</span>'
       : '<button class="btn btn-xs btn-outline" onclick="editTracklogStep(\''+mbId+'\','+s+')">✏️</button>';
-    html+='<tr'+hid+' style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+dateStr+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+'</td><td style="padding:4px;text-align:right">'+editBtn+'</td></tr>';
+    const noteStr=(step.note||(info.vanDe||''))?(' <span style="font-size:10px;color:var(--muted)">'+((step.note||(info.vanDe||'')).slice(0,40))+((step.note||(info.vanDe||'')).length>40?'...':'')+'</span>'):'';
+    html+='<tr'+hid+' style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+dateStr+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+noteStr+'</td><td style="padding:4px;text-align:right">'+editBtn+'</td></tr>';
   }
   html+='</table>';
   document.getElementById('tracklogBody').innerHTML=html;
@@ -2253,7 +2257,7 @@ async function loadLiveData(){
   const out=[]; const seen={};
   for(let i=1;i<mrows.length;i++){ const r=mrows[i]; const mid=r[idx['MB ID']]||''; if(!mid||seen[mid])continue; seen[mid]=1;
     const steps=[];
-    for(let s=1;s<=6;s++){ const info=(td[mid]||{})[s]||{}; const st=(typeof info==='string')?info:(info.status||''); steps.push({s,actor:ACTOR_ARR[s-1][0],appr:ACTOR_ARR[s-1][1],r:toR(st),date:info.thoiGian||''}); }
+    for(let s=1;s<=6;s++){ const info=(td[mid]||{})[s]||{}; const st=(typeof info==='string')?info:(info.status||''); steps.push({s,actor:ACTOR_ARR[s-1][0],appr:ACTOR_ARR[s-1][1],r:toR(st),date:info.thoiGian||'',note:info.vanDe||''}); }
     // B1 luôn mở (Pending) nếu chưa có trạng thái
     if(steps[0] && steps[0].r==='None') steps[0].r='Pending';
     out.push({ id:mid, nguon:r[idx['Nguồn']]||'', gdv:r[idx['GĐV']]||'', qlkv:r[idx['QLKV']]||'', tinh:r[idx['Tỉnh/TP']]||'', huyen:r[idx['Huyện/Quận']]||'', addr:r[idx['Địa chỉ']]||'', mapLink:r[idx['Map Link']]||'', lat:r[idx['Lat']]||'', lng:r[idx['Lng']]||'', area:r[idx['DT (m²)']]||'', front:r[idx['MT (m)']]||'', price:r[idx['Giá (tr/th)']]||'', payment:r[idx['Thanh toán']]||'', deposit:r[idx['Cọc (tr)']]||'', duration:r[idx['Thời hạn']]||'', legal:r[idx['Pháp lý']]||'', condition:r[idx['Hiện trạng']]||'', handover:r[idx['TG bàn giao']]||'', gtName:r[idx['Người GT']]||'', gtMNV:r[idx['MNV']]||'', bct:r[idx['BCT Tên']]||'', bctPhone:r[idx['BCT SĐT']]||'', status:r[idx['Trạng thái']]||'', createdAt:normDate(r[idx['Ngày nhận']]), gdvHienTai:r[idx['GĐV hiện tại']]||'', qlkvHienTai:r[idx['QLKV hiện tại']]||'', tkmb:r[idx['TKMB phụ trách']]||getTKMB_JS(r[idx['Tỉnh/TP']]||'',r[idx['Huyện/Quận']]||''), steps, tracklog:td[mid]||{} });
