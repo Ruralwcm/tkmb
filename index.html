@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.6</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.7</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.6</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.7</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1408,6 +1408,7 @@ async function doSubmitMB(){
   const mb={ id:mbId, nguon:pendingMBData.nguon, gdv:pendingMBData.gdv, qlkv:pendingMBData.qlkv, tinh:pendingMBData.tinh, huyen:pendingMBData.huyen, addr:pendingMBData.addr, mapLink:pendingMBData.mapLink, area:pendingMBData.area, front:pendingMBData.front, price:pendingMBData.price, payment:pendingMBData.payment, deposit:pendingMBData.deposit, duration:pendingMBData.duration, legal:pendingMBData.legal, condition:pendingMBData.condition, handover:pendingMBData.handover, gtName:pendingMBData.gtName, gtMNV:pendingMBData.gtMNV, bct:pendingMBData.bct, bctPhone:pendingMBData.bctPhone, status:'Chưa duyệt', createdAt:now.toISOString(),
     steps:[{s:1,actor:'QLKV',appr:'GĐV',r:'Pending',date:''},{s:2,actor:'TKMB',appr:'GĐ TKMB',r:'None',date:''},{s:3,actor:'TKMB',appr:'HĐ',r:'None',date:''},{s:4,actor:'GĐV/TKMB',appr:'GĐV/TKMB',r:'None',date:''},{s:5,actor:'GĐV',appr:'GĐV',r:'None',date:''},{s:6,actor:'System',appr:'—',r:'None',date:''}] };
   MB_DATA.unshift(mb);
+  saveMBCache();
   closeConfirm(); showSuccessToast(mbId);
 }
 function showSuccessToast(mbId){
@@ -1725,6 +1726,11 @@ function closeStepModal(){
   // Nếu sửa từ tracklog và bấm Hủy → mở lại tracklog
   if(tracklogMBId){ const reopenId=tracklogMBId; tracklogMBId=null; openTracklog(reopenId); }
 }
+function saveMBCache(){ try{ localStorage.setItem('tkmb_mbdata',JSON.stringify(MB_DATA)); }catch(e){} }
+function loadMBCache(){
+  try{ const raw=localStorage.getItem('tkmb_mbdata'); if(raw){ const cached=JSON.parse(raw); if(Array.isArray(cached))return cached; } }catch(e){}
+  return null;
+}
 function saveStep(){
   const mb=MB_DATA.find(m=>m.id===currentMBId); if(!mb)return;
   const st=mb.steps[currentStepNum-1]; const result=document.getElementById('stepResult').value;
@@ -1732,8 +1738,8 @@ function saveStep(){
   if(result==='Fail'){ st.failReason=document.getElementById('stepFailReason').value; st.failGroup=document.getElementById('stepFailGroup').value; for(let i=currentStepNum;i<6;i++)mb.steps[i].r='—'; }
   else if(result==='Done'&&currentStepNum<6){ if(mb.steps[currentStepNum].r==='None'||mb.steps[currentStepNum].r==='—')mb.steps[currentStepNum].r='Pending'; }
   closeStepModal();
-  // Nếu sửa từ tracklog → mở lại tracklog (đã ẩn trước đó)
   if(tracklogMBId===currentMBId){ const reopenId=tracklogMBId; tracklogMBId=null; openTracklog(reopenId); }
+  saveMBCache();
   renderDash();renderTienDo();if(typeof renderDSMB==='function')renderDSMB();
 }
 function openTracklog(mbId,highlightStep){
@@ -1848,6 +1854,7 @@ function saveEditMB(){
           Object.assign(mb,data);
           delete mb.action;
         }
+        saveMBCache();
         toast('✅ Đã cập nhật '+mbId,'ok');
         renderDash(); renderTienDo();
         if(typeof renderDSMB==='function') renderDSMB();
@@ -2240,6 +2247,16 @@ async function loadLiveData(){
   }
   if(out.length){
     MB_DATA=out;
+    // Merge cached step changes (localStorage) — local edits survive refresh
+    const cached=loadMBCache();
+    if(cached){
+      cached.forEach(cm=>{
+        const fresh=MB_DATA.find(m=>m.id===cm.id);
+        if(fresh){ fresh.steps=cm.steps; if(cm.status)fresh.status=cm.status; }
+      });
+      // Also keep cached MBs that are no longer in sheet (user-submitted, not yet synced)
+      cached.forEach(cm=>{ if(!MB_DATA.find(m=>m.id===cm.id)) MB_DATA.push(cm); });
+    }
     if(typeof populateDashGDV==='function')populateDashGDV();
     if(typeof renderDash==='function')renderDash();
     if(typeof renderTienDo==='function')renderTienDo();
