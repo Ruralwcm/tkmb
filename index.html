@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.5</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.6</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.5</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.6</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -876,6 +876,10 @@ let USERS = [
   {rank:'TKMB',name:'Lê Đình Thái',code:'thaild',phone:'12345678',gdv:'',tkmb:'Thái'},
   {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678',gdv:'',tkmb:''}
 ];
+// Load saved users from localStorage if available
+(function(){
+  try{ const saved=localStorage.getItem('tkmb_users'); if(saved){ const arr=JSON.parse(saved); if(Array.isArray(arr)&&arr.length)USERS=arr; } }catch(e){}
+})();
 let currentUser = null;
 
 function getUserName(u) {
@@ -2295,7 +2299,7 @@ function importUsers(input){
       else{ USERS.push({rank,name,code,phone,gdv:rank==='GĐV'?name:'',tkmb:rank==='TKMB'?name:'',phamviMB:[],phamviQH:[]}); }
       n++;
     }
-    if(info)info.textContent='✅ Đã import '+n+' user'; renderSettings();
+    if(info)info.textContent='✅ Đã import '+n+' user'; saveUsers(); renderSettings();
   };
   if(/\.csv$/i.test(file.name)) reader.readAsText(file,'utf-8'); else reader.readAsArrayBuffer(file);
 }
@@ -2328,7 +2332,7 @@ function cfgAddUser(){
   const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV):','TKMB'); if(!rank)return;
   const gdv=prompt('GĐV phụ trách hoặc TKMB (Phi/Huy Dũng/Thái):','');
   USERS.push({rank,name,code,phone:'12345678',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:'',phamviMB:[],phamviQH:[]});
-  renderSettings();
+  saveUsers(); renderSettings();
 }
 function cfgEditUser(i){
   const u=USERS[i]; document.getElementById('userEditIdx').value=i; document.getElementById('userEditTitle').textContent='Sửa: '+u.name;
@@ -2353,9 +2357,10 @@ function ueSave(){
   else if(u.rank==='TKMB'||u.rank==='CV TKMB'){ u.tkmb=getTKMB_JS(u.phamviQH[0]||u.phamviMB[0]||'','')||u.tkmb||''; u.gdv=''; }
   else if(u.rank==='GĐTKMB'||u.rank==='GĐM'){ u.gdv=''; u.tkmb=''; }
   u.phone=document.getElementById('uePass').value.trim();
-  document.getElementById('userEditModal').style.display='none'; renderSettings();
+  document.getElementById('userEditModal').style.display='none'; saveUsers(); renderSettings();
 }
-function cfgDeleteUser(i){ if(!confirm('Xóa user '+USERS[i].name+'?'))return; USERS.splice(i,1); renderSettings(); }
+function saveUsers(){ try{ localStorage.setItem('tkmb_users',JSON.stringify(USERS)); }catch(e){} }
+function cfgDeleteUser(i){ if(!confirm('Xóa user '+USERS[i].name+'?'))return; USERS.splice(i,1); saveUsers(); renderSettings(); }
 
 function openChangePass(){
   if(!currentUser)return; document.getElementById('cpUserName').textContent=currentUser.name;
@@ -2368,7 +2373,7 @@ function saveChangePass(){
   const err=document.getElementById('cpError'); err.textContent='';
   if(!currentUser){err.textContent='Chưa đăng nhập';return;} if(oldP!==currentUser.phone){err.textContent='❌ Mật khẩu hiện tại không đúng';return;}
   if(!newP||newP.length<6){err.textContent='❌ Mật khẩu mới tối thiểu 6 ký tự';return;} if(newP!==conf){err.textContent='❌ Xác nhận không khớp';return;}
-  currentUser.phone=newP; const idx=USERS.indexOf(currentUser); if(idx>=0)USERS[idx].phone=newP;
+  currentUser.phone=newP; saveUsers(); const idx=USERS.indexOf(currentUser); if(idx>=0)USERS[idx].phone=newP;
   closeChangePass(); alert('✅ Đã đổi mật khẩu');
 }
 
