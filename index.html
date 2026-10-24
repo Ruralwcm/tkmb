@@ -318,7 +318,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.3</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.1.4</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -560,7 +560,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.3</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.1.4</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1680,7 +1680,7 @@ function renderTienDo(){
   document.getElementById('tdCount').textContent=list.length+' MB';
   document.getElementById('tdTbody').innerHTML=list.map(m=>{
     const p=getPct(m.steps); const hasFail=m.steps.some(s=>s.r==='Fail');
-    const strip='<div class="step-strip">'+m.steps.map(s=>'<div class="step-seg '+s.r+'" onclick="openStepModal(\''+m.id+'\','+s.s+')" title="B'+s.s+': '+STEP_SLA[s.s-1].desc+'"></div>').join('')+'</div>';
+    const strip='<div class="step-strip">'+m.steps.map(s=>{ const d=s.date?new Date(s.date):null; const ds=d?' ('+d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+')':''; return '<div class="step-seg '+s.r+'" onclick="openStepModal(\''+m.id+'\','+s.s+')" title="B'+s.s+': '+STEP_SLA[s.s-1].desc+ds+'"></div>'; }).join('')+'</div>';
     const stCls=hasFail?'tag-r':(m.steps[5].r==='Done'?'tag-g':'tag-p');
     const stShort=hasFail?'Fail':(m.steps[5].r==='Done'?'Done':'Pending');
     const curStep=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None')||{s:1,appr:'—'};
@@ -1745,11 +1745,12 @@ function openTracklog(mbId,highlightStep){
     const step=mb.steps[s-1]||{}; const r=step.r||'None';
     const bg=r==='Done'?'#dcfce7':r==='Fail'?'#fef2f2':r==='Pending'?'#fffbeb':'transparent';
     const hid=(s===highlightStep)?' id=\"tracklogStepPending\"':'';
+    let dateStr=''; if(step.date){ const d=new Date(step.date); dateStr=' ('+d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+')'; }
     // Chỉ bước đã đến (Done/Fail/Pending) mới edit được; bước chưa đến (None) không edit
     const editBtn = (r==='None')
       ? '<span style="color:var(--muted);font-size:10px">🔒</span>'
       : '<button class="btn btn-xs btn-outline" onclick="editTracklogStep(\''+mbId+'\','+s+')">✏️</button>';
-    html+='<tr'+hid+' style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+'</td><td style="padding:4px;text-align:right">'+editBtn+'</td></tr>';
+    html+='<tr'+hid+' style="background:'+bg+'"><td style="padding:4px;text-align:center;width:22px">'+(icon[r]||icon.None)+'</td><td style="padding:4px;font-weight:600;color:var(--teal)">B'+s+dateStr+'</td><td style="padding:4px">'+STEP_SLA[s-1].desc+'</td><td style="padding:4px;text-align:right">'+editBtn+'</td></tr>';
   }
   html+='</table>';
   document.getElementById('tracklogBody').innerHTML=html;
