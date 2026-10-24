@@ -82,12 +82,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1
 .fg .hint{font-size:9px;color:var(--red);margin-top:1px;display:none}
 .fg .hint.show{display:block}
 .gr{display:grid;gap:8px 12px}
+.gr{display:grid;gap:8px 12px}
 .gr2{grid-template-columns:1fr 1fr}
 .gr3{grid-template-columns:1fr 1fr 1fr}
 .gr4{grid-template-columns:repeat(4,1fr)}
 .gr6{grid-template-columns:repeat(6,1fr)}
 .sec-hdr{font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)}
-.map-box{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.map-box{background:linear-gradient(135deg,#eff6ff,#f0f9ff);border:2px dashed #93c5fd;border-radius:var(--radius);padding:10px 14px;margin:8px 0;display:flex;align-items:center;gap:10px}
 .map-box .map-icon{font-size:24px;flex-shrink:0}
 .map-box .fg{flex:1;min-width:0;margin-bottom:0}
 .qh-result-cards{display:flex;gap:8px;margin-top:6px}
@@ -329,7 +330,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.9</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.0</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -382,35 +383,41 @@ tr:hover{background:var(--teal-bg)}
   <button style="float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px" onclick="clearQHRef()" title="Bỏ liên kết">✕</button>
  </div>
  <div class="card">
-  <h3>📋 Tiếp nhận Mặt Bằng</h3>
-  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">👥 GĐV → QLKV → Tỉnh → Huyện</div>
-  <div class="gr gr2">
-   <div class="fg"><label>GĐV *</label><select id="mbGDV" onchange="onGDVChange()"><option value="">-- Chọn GĐV --</option></select></div>
-   <div class="fg"><label>QLKV *</label><select id="mbQLKV" onchange="onQLKVChange()" disabled><option value="">-- Chọn QLKV --</option></select></div>
-   <div class="fg"><label>Tỉnh/TP *</label><select id="mbTinh" onchange="onTinhChange()" disabled><option value="">-- Chọn Tỉnh/TP --</option></select></div>
-   <div class="fg"><label>Huyện/Quận *</label><select id="mbHuyen" disabled><option value="">-- Chọn Huyện/Quận --</option></select></div>
-  </div>
-
-  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">📍 Địa chỉ & Thông số</div>
-  <div class="fg"><label>Địa chỉ cụ thể *</label><input type="text" id="mbAddr" placeholder="VD: Thôn Dục Tú, xã Dục Tú, Đông Anh"></div>
-  <div class="gr gr6">
-   <div class="fg"><label>DT (m²) *</label><input type="number" inputmode="decimal" id="mbArea" placeholder="120" min="10" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintArea">DT phải &gt;0 m²</span></div>
-   <div class="fg"><label>MT (m) *</label><input type="number" inputmode="decimal" id="mbFront" placeholder="8" min="1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintFront">MT phải &gt;0 m</span></div>
-   <div class="fg"><label>Giá (tr/th) *</label><input type="number" inputmode="decimal" id="mbPrice" placeholder="15.5" min="0.1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintPrice">Giá phải &gt;0 tr/th</span></div>
-   <div class="fg"><label>Thanh toán (tháng/lần) *</label><input type="number" id="mbPayment" placeholder="3" min="1" max="12" oninput="validateNum(this)"><span class="hint" id="hintPayment">1-12 tháng/lần</span></div>
-   <div class="fg"><label>Cọc (tr)</label><input type="number" inputmode="decimal" id="mbDeposit" placeholder="30" min="0" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintDeposit">Cọc phải &gt;= 0 tr</span></div>
-   <div class="fg"><label>Thời hạn</label><input type="text" id="mbDuration" placeholder="5 năm"></div>
-  </div>
+<h3>📋 Giới thiệu Mặt Bằng</h3>
+  <div style="font-size:10px;color:#dc2626;margin-bottom:8px">⚠️ Tất cả các trường đều bắt buộc</div>
 
   <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">🗺 Định vị Map</div>
-  <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:8px 10px">
+  <div class="map-box">
    <div style="font-size:24px;flex-shrink:0">📍</div>
    <div style="flex:1;min-width:0"><div class="fg"><label>Link Google Maps hoặc Tọa độ (lat, lng)</label><input type="text" id="mbMapLink" placeholder="VD: 21.0179, 105.9650" oninput="onMapInput()"></div></div>
   </div>
-  <div id="mapResult" style="display:none"><div style="display:flex;gap:6px;margin-top:6px">
-   <div style="background:var(--surface);border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📍 Điểm QH gần nhất</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhName">—</div><div style="font-size:9px;color:var(--muted)" id="qhDetail"></div></div>
-   <div style="background:var(--surface);border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📏 Khoảng cách</div><div style="font-size:20px;font-weight:800;color:var(--green)" id="qhDistance">—</div></div>
+  <div id="mapResult" style="display:none"><div class="qh-result-cards" style="flex-wrap:wrap">
+   <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📍 Điểm QH gần nhất</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhName">—</div><div style="font-size:9px;color:var(--muted)" id="qhDetail"></div></div>
+   <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📏 Khoảng cách</div><div style="font-size:20px;font-weight:800;color:var(--green)" id="qhDistance">—</div></div>
+   <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1" id="qhGDVBox" style="display:none"><div style="font-size:8px;color:var(--muted)">👤 GĐV</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhDetectedGDV">—</div></div>
   </div></div>
+
+  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">🏢 Chọn MB Đang Tiếp Cận</div>
+  <div class="fg"><label>Chọn MB từ danh sách đang tiếp cận</label><select id="mbMTNRef" onchange="onMTNSelect()"><option value="">-- Không chọn (nhập mới) --</option></select></div>
+
+  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">👥 GĐV → QLKV → Tỉnh → Huyện</div>
+  <div class="gr gr2">
+   <div class="fg"><label>GĐV</label><select id="mbGDV" onchange="onGDVChange()"><option value="">-- Chọn GĐV --</option></select></div>
+   <div class="fg"><label>QLKV</label><select id="mbQLKV" onchange="onQLKVChange()" disabled><option value="">-- Chọn QLKV --</option></select></div>
+   <div class="fg"><label>Tỉnh/TP</label><select id="mbTinh" onchange="onTinhChange()" disabled><option value="">-- Chọn Tỉnh/TP --</option></select></div>
+   <div class="fg"><label>Huyện/Quận</label><select id="mbHuyen" disabled><option value="">-- Chọn Huyện/Quận --</option></select></div>
+  </div>
+
+  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">📍 Địa chỉ & Thông số</div>
+  <div class="fg"><label>Địa chỉ cụ thể</label><input type="text" id="mbAddr" placeholder="VD: Thôn Dục Tú, xã Dục Tú, Đông Anh"></div>
+  <div class="gr gr6">
+   <div class="fg"><label>DT (m²)</label><input type="number" inputmode="decimal" id="mbArea" placeholder="120" min="10" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintArea">DT phải >0 m²</span></div>
+   <div class="fg"><label>MT (m)</label><input type="number" inputmode="decimal" id="mbFront" placeholder="8" min="1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintFront">MT phải >0 m</span></div>
+   <div class="fg"><label>Giá (tr/th)</label><input type="number" inputmode="decimal" id="mbPrice" placeholder="15.5" min="0.1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintPrice">Giá phải >0 tr/th</span></div>
+   <div class="fg"><label>Kỳ TT (Tháng)</label><input type="number" id="mbPayment" placeholder="3" min="1" max="12" oninput="validateNum(this)"><span class="hint" id="hintPayment">1-12 tháng/lần</span></div>
+   <div class="fg"><label>Cọc (tr)</label><input type="number" inputmode="decimal" id="mbDeposit" placeholder="30" min="0" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintDeposit">Cọc phải >= 0 tr</span></div>
+   <div class="fg"><label>Thời hạn (Năm)</label><input type="text" id="mbDuration" placeholder="5"></div>
+  </div>
 
   <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">📋 Pháp lý · Hiện trạng · Bàn giao</div>
   <div class="gr gr3">
@@ -427,9 +434,7 @@ tr:hover{background:var(--teal-bg)}
    <div class="fg"><label>BCT - SĐT</label><input type="text" id="mbBCTPhone" placeholder="SĐT"></div>
   </div>
 
-  <div class="fg"><label>MBTN Tham chiếu</label><select id="mbMTNRef" onchange="onMTNSelect()"><option value="">-- Không chọn (nhập mới) --</option></select></div>
-  <div class="fg"><label>Nguồn</label><select id="mbNguon"><option>TKMB</option><option>VH</option></select></div>
-  <button class="btn btn-p" onclick="submitMB()" style="margin-top:12px">📤 Gửi Mặt Bằng → Chờ GĐV duyệt</button>
+  <button class="btn-s" onclick="submitMB()">📤 Gửi Mặt Bằng → Chờ GĐV duyệt</button>
  </div>
 </div>
 
@@ -595,7 +600,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.9</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.0</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1400,7 +1405,7 @@ function submitMB(){
   const gdv=document.getElementById('mbGDV').value, qlkv=document.getElementById('mbQLKV').value, tinh=document.getElementById('mbTinh').value, huyen=document.getElementById('mbHuyen').value;
   const addr=document.getElementById('mbAddr').value;
   const data={
-    nguon:document.getElementById('mbNguon').value, gdv,qlkv,tinh,huyen,addr,
+    nguon:'TKMB', gdv,qlkv,tinh,huyen,addr,
     mapLink:document.getElementById('mbMapLink').value,
     area:document.getElementById('mbArea').value, front:document.getElementById('mbFront').value,
     price:document.getElementById('mbPrice').value, payment:document.getElementById('mbPayment').value,
