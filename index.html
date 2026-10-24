@@ -330,7 +330,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.0</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.3.1</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -396,9 +396,6 @@ tr:hover{background:var(--teal-bg)}
    <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📏 Khoảng cách</div><div style="font-size:20px;font-weight:800;color:var(--green)" id="qhDistance">—</div></div>
    <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1" id="qhGDVBox" style="display:none"><div style="font-size:8px;color:var(--muted)">👤 GĐV</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhDetectedGDV">—</div></div>
   </div></div>
-
-  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">🏢 Chọn MB Đang Tiếp Cận</div>
-  <div class="fg"><label>Chọn MB từ danh sách đang tiếp cận</label><select id="mbMTNRef" onchange="onMTNSelect()"><option value="">-- Không chọn (nhập mới) --</option></select></div>
 
   <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">👥 GĐV → QLKV → Tỉnh → Huyện</div>
   <div class="gr gr2">
@@ -600,7 +597,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.0</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.3.1</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1415,7 +1412,7 @@ function submitMB(){
     qhPoint:document.getElementById('qhName')?.textContent||'', qhDistance:document.getElementById('qhDistance')?.textContent?.replace('m','')||'',
     gtName:document.getElementById('mbGTName').value, gtMNV:document.getElementById('mbGTMNV').value,
     bct:document.getElementById('mbBCT').value, bctPhone:document.getElementById('mbBCTPhone').value,
-    mbtnRef:document.getElementById('mbMTNRef').value, submitter:currentUser?.name||'', ts:new Date().toISOString()
+    mbtnRef:'', submitter:currentUser?.name||'', ts:new Date().toISOString()
   };
   const lines=['<strong>🏪 '+data.addr+'</strong>','📍 '+data.huyen+', '+data.tinh,'👤 GĐV: '+data.gdv+' · QLKV: '+data.qlkv];
   if(data.area) lines.push('📐 DT: '+data.area+'m² · MT: '+(data.front||'—')+'m');
@@ -1434,10 +1431,6 @@ async function doSubmitMB(){
   mbIDSeq++; localStorage.setItem('tkmb_field_mb_seq',mbIDSeq);
   const mbId='MB-'+curMonth+'-'+String(mbIDSeq).padStart(3,'0');
   const d={action:'submitMB',id:mbId,...pendingMBData};
-  if(pendingMBData.mbtnRef){
-    const idx=mbtnList.findIndex(m=>m.code===pendingMBData.mbtnRef);
-    if(idx>=0){mbtnList[idx].status='Chuyển duyệt';mbtnList[idx].mbRef=mbId;localStorage.setItem('tkmb_field_mbtn',JSON.stringify(mbtnList));}
-  }
   try{
     const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(d),headers:{'Content-Type':'text/plain'}});
     const j=await r.json();
@@ -1502,7 +1495,8 @@ function addMTNRow(){
   container.appendChild(card);
 }
 function populateMTNDropdown(){
-  const sel=document.getElementById('mbMTNRef'); const cur=sel.value;
+  const sel=document.getElementById('mbMTNRef'); if(!sel)return;
+  const cur=sel.value;
   sel.innerHTML='<option value="">-- Không chọn (nhập mới) --</option>';
   mbtnList.filter(m=>m.status==='Đang tiếp cận'||m.status==='Đạt').forEach(m=>{
     const o=document.createElement('option'); o.value=m.code; o.textContent=m.code+' — '+(m.name||'Chưa đặt tên')+' ('+(m.gia||'?')+'tr)'; sel.appendChild(o);
@@ -1510,7 +1504,8 @@ function populateMTNDropdown(){
   if(cur) sel.value=cur;
 }
 function onMTNSelect(){
-  const code=document.getElementById('mbMTNRef').value; if(!code)return;
+  const sel=document.getElementById('mbMTNRef'); if(!sel)return;
+  const code=sel.value; if(!code)return;
   const m=mbtnList.find(x=>x.code===code); if(!m)return;
   document.getElementById('mbAddr').value=m.addr||''; document.getElementById('mbArea').value=m.dt||'';
   document.getElementById('mbFront').value=m.mt||''; document.getElementById('mbPrice').value=m.gia||'';
@@ -1570,7 +1565,7 @@ function failMBTN(code){
 function convertMBTN(code){
   const m=mbtnList.find(x=>x.code===code); if(!m) return;
   document.querySelector('[data-tab="tkmb"]').click();
-  document.getElementById('mbMTNRef').value=code;
+  const mbtnRefEl=document.getElementById('mbMTNRef'); if(mbtnRefEl) mbtnRefEl.value=code;
   document.getElementById('mbAddr').value=m.addr||''; document.getElementById('mbArea').value=m.dt||'';
   document.getElementById('mbFront').value=m.mt||''; document.getElementById('mbPrice').value=m.gia||'';
   document.getElementById('mbBCT').value=m.ownerName||''; document.getElementById('mbBCTPhone').value=m.ownerPhone||'';
