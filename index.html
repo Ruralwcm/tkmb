@@ -321,7 +321,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.1</span></h1>
+        <h1>TKMB by HaoDT <span style="font-size:10px;font-weight:400;opacity:.7">v3.2.2</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -563,7 +563,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.1</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.2.2</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -572,6 +572,12 @@ tr:hover{background:var(--teal-bg)}
       <input type="number" id="cfgScanRadius" min="10" max="1000" step="10" style="width:100px">
       <span>mét</span>
       <button class="btn btn-sm" style="background:var(--teal);color:#fff" onclick="saveSettings()">💾 Lưu</button>
+    </div>
+
+    <h4 style="margin-bottom:8px">🔄 Dữ liệu</h4>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-sm btn-outline" onclick="clearMBCache()">🗑 Clear cache MB</button>
+      <span style="font-size:10px;color:var(--muted);align-self:center">Xóa bộ nhớ tạm, đồng bộ lại từ Sheet</span>
     </div>
 
     <h4 style="margin-bottom:8px">🔐 Phân quyền Tab</h4>
@@ -2383,6 +2389,7 @@ function ueSave(){
   u.phone=document.getElementById('uePass').value.trim();
   document.getElementById('userEditModal').style.display='none'; saveUsers(); renderSettings();
 }
+function clearMBCache(){ localStorage.removeItem('tkmb_mbdata'); toast('✅ Đã xóa cache, đang tải lại từ Sheet...','ok'); setTimeout(()=>location.reload(),800); }
 function saveUsers(){ try{ localStorage.setItem('tkmb_users',JSON.stringify(USERS)); }catch(e){} }
 function cfgDeleteUser(i){ if(!confirm('Xóa user '+USERS[i].name+'?'))return; USERS.splice(i,1); saveUsers(); renderSettings(); }
 
