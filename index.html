@@ -1384,11 +1384,11 @@ let USERS = [
   {rank:'GĐV',name:'Tạ Quốc Huy',code:'huytq@winmart.masangroup.com',phone:'309425',gdv:'Tạ Quốc Huy'},
   {rank:'GĐM',name:'Đặng Trần Hảo',code:'haodt',phone:'pink123',gdv:'Đặng Trần Hảo'},
   {rank:'S2',name:'Phạm Bích Hồng',code:'hongpb',phone:'pink123',gdv:''},
-  {rank:'QLKV',name:'Đinh Mạnh Tuân',code:'tuandm',phone:'pink123',gdv:'Nguyễn Duy Đoàn'},
-  {rank:'TKMB',name:'Nguyễn Văn Phi',code:'phinv2',phone:'pink123',gdv:'',tkmb:'Phi'},
-  {rank:'TKMB',name:'Trần Huy Dũng',code:'dungth',phone:'pink123',gdv:'',tkmb:'Huy Dũng'},
-  {rank:'TKMB',name:'Lê Đình Thái',code:'thaild',phone:'pink123',gdv:'',tkmb:'Thái'},
-  {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'pink123',gdv:'',tkmb:''}
+  {rank:'QLKV',name:'Đinh Mạnh Tuân',code:'tuandm',phone:'12345678',gdv:'Nguyễn Duy Đoàn'},
+  {rank:'TKMB',name:'Nguyễn Văn Phi',code:'phinv2',phone:'12345678',gdv:'',tkmb:'Phi'},
+  {rank:'TKMB',name:'Trần Huy Dũng',code:'dungth',phone:'12345678',gdv:'',tkmb:'Huy Dũng'},
+  {rank:'TKMB',name:'Lê Đình Thái',code:'thaild',phone:'12345678',gdv:'',tkmb:'Thái'},
+  {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678',gdv:'',tkmb:''}
 ];
 let currentUser = null;
 
@@ -3135,7 +3135,7 @@ function importUsers(input) {
       let code = String(r[iCode]||'').trim();
       if (code.includes('@')) code = code.split('@')[0];
       if (!rank || !name || !code) continue;
-      const phone = (iPass >= 0 ? String(r[iPass]||'').trim() : 'pink123') || 'pink123';
+      const phone = (iPass >= 0 ? String(r[iPass]||'').trim() : '12345678') || '12345678';
       const ex = USERS.find(x => x.code === code);
       if (ex) { ex.rank = rank; ex.name = name; ex.phone = phone; if(rank==='TKMB'){ex.tkmb=name;}else{ex.gdv=name;} }
       else { USERS.push({ rank, name, code, phone, gdv: rank==='GĐV'?name:'', tkmb: rank==='TKMB'?name:'', phamviMB:[], phamviQH:[] }); }
@@ -3206,7 +3206,7 @@ function cfgAddUser() {
   const name=prompt('Họ tên:','');if(!name)return;
   const rank=prompt('Vai trò (GĐV/TKMB/GĐTKMB/GĐM/QLKV):','TKMB');if(!rank)return;
   const gdv=prompt('GĐV phụ trách (nếu là GĐV) hoặc TKMB (Phi/Huy Dũng/Thái):','');
-  USERS.push({rank,name,code,phone:'pink123',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:'',phamviMB:[],phamviQH:[]});
+  USERS.push({rank,name,code,phone:'12345678',gdv:gdv||'',tkmb:rank==='TKMB'?gdv:'',phamviMB:[],phamviQH:[]});
   renderSettings();
 }
 function cfgEditUser(i) {
@@ -3218,7 +3218,7 @@ function cfgEditUser(i) {
   document.getElementById('ueRank').value = u.rank;
   document.getElementById('uePhamviMB').value = (u.phamviMB||[]).join(',');
   document.getElementById('uePhamviQH').value = (u.phamviQH||[]).join(',');
-  document.getElementById('uePass').value = u.phone||'pink123';
+  document.getElementById('uePass').value = u.phone||'12345678';
   document.getElementById('userEditModal').style.display = 'flex';
 }
 function ueSave() {
@@ -3446,8 +3446,8 @@ function autoDetectUsers() {
   
   // Hardcoded base users (GĐM + GĐTKMB never auto-detected)
   const hard = [
-    {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'pink123'},
-    {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'pink123'}
+    {rank:'GĐM',name:'Đặng Trần Hảo',code:'963956',phone:'12345678'},
+    {rank:'GĐTKMB',name:'Trần Hải Nam',code:'namth2',phone:'12345678'}
   ];
   
   const merged = new Map();
@@ -3456,7 +3456,7 @@ function autoDetectUsers() {
   // Add GĐVs from data
   for (const [name, count] of gdvSet) {
     const code = (name || '').toLowerCase().replace(/\s+/g,'');
-    merged.set(name, {rank:'GĐV', name, code, phone:'pink123', gdv:name, tkmb:'', count});
+    merged.set(name, {rank:'GĐV', name, code, phone:'12345678', gdv:name, tkmb:'', count});
   }
   
   // Add QLKVs from data (only if not already added as GĐV)
@@ -3467,7 +3467,7 @@ function autoDetectUsers() {
       for (const [gdv, qlkvs] of Object.entries(CASCADE_DATA)) {
         if (qlkvs[name]) { parentGdv = gdv; break; }
       }
-      merged.set(name, {rank:'QLKV', name, code, phone:'pink123', gdv:parentGdv, tkmb:'', count});
+      merged.set(name, {rank:'QLKV', name, code, phone:'12345678', gdv:parentGdv, tkmb:'', count});
     }
   }
   
@@ -3475,7 +3475,7 @@ function autoDetectUsers() {
   for (const [tkmb, count] of tkmbSet) {
     if (!tkmb || !['Phi','Huy Dũng','Thái'].includes(tkmb)) continue;
     if (!merged.has(tkmb)) {
-      merged.set(tkmb, {rank:'TKMB', name:tkmb, code:tkmb.toLowerCase().replace(/\s+/g,''), phone:'pink123', gdv:'', tkmb, count});
+      merged.set(tkmb, {rank:'TKMB', name:tkmb, code:tkmb.toLowerCase().replace(/\s+/g,''), phone:'12345678', gdv:'', tkmb, count});
     }
   }
   
