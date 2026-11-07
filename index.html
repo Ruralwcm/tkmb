@@ -417,7 +417,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.4</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.5</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -754,7 +754,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.4</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.5</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -3484,9 +3484,13 @@ function storeInfoHTML(sap){
     L.push('<span style="font-size:11px;color:var(--muted)">% so với cùng kỳ năm trước (LY)</span>');
   } else L.push('📈 Chưa có dữ liệu doanh số');
   const B=d.bhx;
-  if(B){ const net=B.netW12!=null?B.netW12:B.netW4, wk=B.netW12!=null?'W12':'W4';
-    L.push('🟢 <b>BHX:</b> '+fmtNum(B.kc)+' m · KT '+esc(B.ngayKT||'—')+(net!=null?' · Affect DT: <span style="color:'+(net>=0?'#16a34a':'#dc2626')+';font-weight:700">'+(net>=0?'+':'')+Number(net).toFixed(1)+'%</span> ('+wk+')':' · Affect DT: chưa đủ dữ liệu')+(d.bhxCount>1?' <span style="font-size:11px;color:var(--muted)">+'+(d.bhxCount-1)+' BHX khác</span>':''));
-  } else L.push('🟢 BHX: không có trong bán kính khảo sát');
+  if(B){
+    const aff=B.affect, col=aff==null?'':(aff>=0?'#16a34a':'#dc2626');
+    L.push('🟢 <b>BHX:</b> '+fmtNum(B.kc)+' m · KT '+esc(B.ngayKT||'—')+' · Affect DT: '+(aff!=null?'<span style="color:'+col+';font-weight:700">'+(aff>=0?'+':'')+aff.toFixed(1)+'%</span>':'chưa đủ dữ liệu')
+      +(B.spdTruoc!=null&&B.spdSau!=null?' <span style="font-size:11px;color:var(--muted)">(SPD 4 tuần trước→sau KT: '+fmtNum(B.spdTruoc,1)+'→'+fmtNum(B.spdSau,1)+'tr)</span>':'')
+      +(d.bhxCount>1?' <span style="font-size:11px;color:var(--muted)">· +'+(d.bhxCount-1)+' BHX khác</span>':''));
+  } else L.push('🟢 BHX: không có BHX trong bán kính rà soát');
+  if(d.capNhat) L.push('<span style="font-size:10.5px;color:var(--muted)">Nguồn Bigdata · cập nhật '+esc(d.capNhat)+'</span>');
   return '<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#e5e7eb);font-size:12.5px;line-height:1.55">'+L.join('<br>')+'</div>';
 }
 function loadStoreInfo(sap,popup){
