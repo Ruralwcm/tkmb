@@ -233,6 +233,10 @@ tr:hover{background:var(--teal-bg)}
 .qhm-filters select{flex:1 1 0;min-width:0;font-size:12px;padding:6px 4px;border-radius:6px;border:1px solid var(--line,#e5e7eb);background:#fff}
 .qhm-sum{display:flex;flex-wrap:wrap;gap:4px 10px;padding:6px 10px;font-size:11.5px;color:var(--muted,#6b7280);border-bottom:1px solid var(--line,#e5e7eb)}
 .qhm-sum b{color:var(--text,#111827)}
+.qhm-btns{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line,#e5e7eb)}
+.qhm-btn{flex:1 1 0;min-width:0;border:none;border-radius:20px;padding:7px 6px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qhm-btn.mb{background:#2563eb}.qhm-btn.qh{background:var(--red,#d71920)}
+.qhm-btn:hover{filter:brightness(.95)}
 .qhm-search{margin:6px 8px;font-size:12px;padding:6px 8px;border:1px solid var(--line,#e5e7eb);border-radius:6px}
 #qhmList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:50vh}
 .qhm-item{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-bottom:1px solid #f1f5f9;cursor:pointer;font-size:12px;line-height:1.35}
@@ -413,7 +417,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.3</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.4</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -653,6 +657,10 @@ tr:hover{background:var(--teal-bg)}
    </select>
   </div>
   <div class="qhm-sum" id="qhmSum"></div>
+  <div class="qhm-btns">
+   <button type="button" class="qhm-btn mb" onclick="switchTab('tkmb')">📋 Giới thiệu MB</button>
+   <button type="button" class="qhm-btn qh" onclick="openQHBSForm()">＋ Bổ sung QH</button>
+  </div>
   <input class="qhm-search" id="qhmSearch" placeholder="🔍 Tìm mã, tên, địa chỉ…" oninput="clearTimeout(window._qhmT);window._qhmT=setTimeout(qhmRenderList,250)">
   <div id="qhmList"><div class="qhm-more">Đang tải dữ liệu…</div></div>
  </div>
@@ -664,7 +672,6 @@ tr:hover{background:var(--teal-bg)}
       <option value="all">Tất cả</option><option value="pending_gdv">⏳ Chờ GĐV duyệt</option><option value="approved_gdv">✅ GĐV đã duyệt</option><option value="rejected">❌ Từ chối</option><option value="pending_qh">⏳ Chờ QH duyệt</option><option value="approved_qh">✅ Đã duyệt QH</option>
     </select>
     <select id="qhbsGDV" onchange="renderQHBSList();renderQHBSMapMarkers()" style="font-size:12px;padding:6px 10px;border-radius:6px;border:1px solid var(--line)"><option value="">Tất cả GĐV</option></select>
-    <button class="btn btn-p" onclick="openQHBSForm()" style="margin-left:auto;font-size:12px;padding:6px 14px;border-radius:20px">＋ Đề xuất QHBS</button>
   </div>
     <div id="qhbsBuildingResult" class="building-result" style="display:none"></div>
   <!-- List -->
@@ -747,7 +754,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.3</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.4</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
