@@ -225,10 +225,31 @@ tr:hover{background:var(--teal-bg)}
 /* Map QHBS không dính sát header */
 #sec-qhbs{scroll-margin-top:70px}
 #sec-qhbs #qhbsMapContainer{margin-top:4px}
-/* PC: tab Map & Quy hoạch dùng toàn bộ chiều rộng + chiều cao màn hình */
+/* Map & Quy hoạch: trái = bản đồ (4/5), phải = dữ liệu MB / QH */
+.qhm-wrap{display:flex;flex-direction:column;gap:8px}
+.qhm-left{min-width:0}
+#qhmPanel{background:var(--surface,#fff);border:1px solid var(--line,#e5e7eb);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.qhm-filters{display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--line,#e5e7eb)}
+.qhm-filters select{flex:1 1 0;min-width:0;font-size:12px;padding:6px 4px;border-radius:6px;border:1px solid var(--line,#e5e7eb);background:#fff}
+.qhm-sum{display:flex;flex-wrap:wrap;gap:4px 10px;padding:6px 10px;font-size:11.5px;color:var(--muted,#6b7280);border-bottom:1px solid var(--line,#e5e7eb)}
+.qhm-sum b{color:var(--text,#111827)}
+.qhm-search{margin:6px 8px;font-size:12px;padding:6px 8px;border:1px solid var(--line,#e5e7eb);border-radius:6px}
+#qhmList{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:50vh}
+.qhm-item{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-bottom:1px solid #f1f5f9;cursor:pointer;font-size:12px;line-height:1.35}
+.qhm-item:hover{background:#f8fafc}
+.qhm-item img{flex:0 0 auto;margin-top:1px}
+.qhm-item .t{font-weight:700;color:var(--text,#111827)}
+.qhm-item .s{color:var(--muted,#6b7280);font-size:11px}
+.qhm-more{padding:8px 10px;font-size:11px;color:var(--muted,#6b7280);text-align:center}
+/* PC: toàn chiều rộng, 2 cột */
 @media(min-width:900px){
   .main:has(#sec-qhbs.active){max-width:none;padding-left:12px;padding-right:12px}
+  .qhm-wrap{flex-direction:row;align-items:stretch}
+  .qhm-left{flex:0 0 80%;max-width:80%}
+  #qhbsMapContainer{margin-bottom:0!important}
   #sec-qhbs #qhbsMapContainer{height:calc(100vh - 175px)!important;min-height:480px!important}
+  #qhmPanel{flex:1 1 auto;height:calc(100vh - 171px);min-height:480px}
+  #qhmList{max-height:none}
 }
 /* Success overlay */
 #successOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:12000;display:none;align-items:center;justify-content:center}
@@ -392,7 +413,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.2</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.3</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -613,6 +634,8 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: QUY HOẠCH BỔ SUNG ═══ -->
 <div class="section" id="sec-qhbs">
+ <div class="qhm-wrap">
+ <div class="qhm-left">
   <div id="qhbsMapContainer" style="position:relative;width:100%;height:60vh;min-height:350px;border-radius:12px;overflow:hidden;margin-bottom:8px">
     <div id="qhbsMap" style="width:100%;height:100%"></div>
     <div id="qhbsMapOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;cursor:pointer;z-index:10" onclick="initQHBSMap()">🗺️ Chạm để tải bản đồ</div>
@@ -620,6 +643,20 @@ tr:hover{background:var(--teal-bg)}
     <button id="qhbsGpsBtn" class="qhbs-gps-btn" title="Về vị trí hiện tại" onclick="qhbsGoToMyLocation()" style="display:none"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/><circle cx="12" cy="12" r="3.2" fill="#4da3ff" stroke="none"/></svg></button>
     <div id="qhbsPinHint" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(17,24,39,.88);color:#fff;font-size:12px;padding:6px 12px;border-radius:16px;white-space:nowrap">Kéo ghim tới vị trí cần chọn · <a href="javascript:void 0" onclick="qhbsCancelPin()" style="color:#fca5a5">Hủy</a></div>
   </div>
+ </div>
+ <div id="qhmPanel">
+  <div class="qhm-filters">
+   <select id="qhmPlace" onchange="qhmApply()" title="Tỉnh / Huyện"><option value="">Tỉnh/Huyện</option></select>
+   <select id="qhmPeople" onchange="qhmApply()" title="GĐV / QLKV"><option value="">GĐV/QLKV</option></select>
+   <select id="qhmGroup" onchange="qhmApply()" title="Nhóm điểm">
+    <option value="">Tất cả nhóm</option><option value="qh">★ Điểm QH</option><option value="qhbs">★ QHBS</option><option value="mb">▣ MB giới thiệu</option><option value="ch">W CH đang HĐ</option>
+   </select>
+  </div>
+  <div class="qhm-sum" id="qhmSum"></div>
+  <input class="qhm-search" id="qhmSearch" placeholder="🔍 Tìm mã, tên, địa chỉ…" oninput="clearTimeout(window._qhmT);window._qhmT=setTimeout(qhmRenderList,250)">
+  <div id="qhmList"><div class="qhm-more">Đang tải dữ liệu…</div></div>
+ </div>
+ </div>
 
   <!-- Filter bar -->
   <div id="qhbsAuthBar" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">
@@ -710,7 +747,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.2</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.3</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -1282,10 +1319,10 @@ function enterDashboardMode() {
 }
 function doLogout(expired) {
   if(SESSION_TOKEN && !expired){ const t=SESSION_TOKEN; fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'logout',token:t}),headers:{'Content-Type':'text/plain'}}).catch(()=>{}); }
-  setSessionToken(''); purgeLocalData(); try{ MB_DATA=MB_DATA.filter(m=>m._local); }catch(e){}
+  setSessionToken(''); purgeLocalData(); try{ MB_DATA=MB_DATA.filter(m=>m._local); }catch(e){} try{ Object.keys(STORE_INFO).forEach(k=>delete STORE_INFO[k]); }catch(e){}
   currentUser = null; sessionPh=''; USERS=[]; AUTH_PERMS=null; pendingFirstLogin=null;
   document.body.classList.add('guest');
-  qhPoints=[]; qhDataLoaded=false; _qhLoading=null; STORES=null; qhbsData=[]; _cascadeBuilt=false; _guestAreaKey=''; Object.keys(CASCADE_DATA).forEach(k=>delete CASCADE_DATA[k]); populateGDV(true);
+  qhPoints=[]; qhDataLoaded=false; _qhLoading=null; STORES=null; qhbsData=[]; try{ QHM.qh=[]; QHM.mb=[]; QHM.ch=[]; qhmRenderList(); }catch(e){} _cascadeBuilt=false; _guestAreaKey=''; Object.keys(CASCADE_DATA).forEach(k=>delete CASCADE_DATA[k]); populateGDV(true);
   isDashboardMode = false;
   document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
   document.getElementById('btnChangePass').style.display = 'none';
@@ -2727,6 +2764,7 @@ async function loadLiveData(){
   }
   if(out.length){
     MB_DATA=out;
+    try{ if(typeof QHM!=='undefined'&&currentUser){ QHM.mb=MB_DATA.filter(function(m){ return !isNaN(parseFloat(m.lat))&&!isNaN(parseFloat(m.lng)); }); qhmBuildFilters(); qhmApply(); } }catch(e){}
     // Merge ONLY pending local edits (unsynced to Sheet). Sheet data ALWAYS wins otherwise.
     const cached=loadMBCache();
     if(cached){
@@ -3130,6 +3168,7 @@ function loadQHBSData(){
     stepQueueLoad().forEach(it=>{ const pl=it.payload||{}; if(pl.type==='qhbs'&&pl.qh&&!out.find(d=>d.qh===pl.qh)){ const loc=qhbsData.find(d=>d.qh===pl.qh); if(loc) out.push(loc); } });
     var changed = JSON.stringify(out) !== JSON.stringify(qhbsData);
     qhbsData=out;
+    try{ qhmBuildFilters(); qhmRenderList(); }catch(e){}
     try{ localStorage.setItem(QHBS_CACHE_KEY,JSON.stringify(out)); }catch(e){}
     if(changed){ renderQHBSMapMarkers(); renderQHBSList(); populateQHBSGDV(); }
   }).catch(()=>{});
@@ -3248,6 +3287,7 @@ function initQHBSMap(){
     qhbsLayerStores=L.layerGroup().addTo(qhbsMap);
     qhbsLayerQH=L.layerGroup().addTo(qhbsMap);
     qhbsLayerQHBS=L.layerGroup().addTo(qhbsMap);
+    qhbsLayerMB=L.layerGroup().addTo(qhbsMap);
 
     // Điều khiển chọn lớp — đặt góc DƯỚI trái để không đè header
     L.control.layers(
@@ -3255,7 +3295,8 @@ function initQHBSMap(){
       {
         [mapIconHTML('ch')+' CH đang hoạt động']: qhbsLayerStores,
         [mapIconHTML('qh')+' Điểm quy hoạch']: qhbsLayerQH,
-        [mapIconHTML('qhbs')+' Điểm bổ sung (QHBS)']: qhbsLayerQHBS
+        [mapIconHTML('qhbs')+' Điểm bổ sung (QHBS)']: qhbsLayerQHBS,
+        [mapIconHTML('mb')+' MB giới thiệu']: qhbsLayerMB
       },
       { position:'bottomleft', collapsed:true }
     ).addTo(qhbsMap);
@@ -3269,7 +3310,7 @@ function initQHBSMap(){
     // Bấm vào bản đồ không mở form nữa — dùng nút 📌 Ghim để chọn vị trí
     var pinBtn=document.getElementById('qhbsPinBtn'); if(pinBtn) pinBtn.style.display='flex';
     // vẽ lại kích thước biểu tượng khi đổi zoom
-    qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
+    qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS,qhbsLayerMB].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
     loadQHBSData();
     _mapIconsReady.then(loadQHBSMapBase);
   }
@@ -3290,7 +3331,8 @@ function initQHBSMap(){
 var MAP_ICON_SVG={
   ch:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#E4202A" stroke="#fff" stroke-width="2"/><path d="M6 10 L11 23 L16 13.5 L21 23 L26 10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   qh:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#2E7D12" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>',
-  qhbs:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#EAB308" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>'
+  qhbs:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#EAB308" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>',
+  mb:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#2563EB" stroke="#fff" stroke-width="2"/><path d="M7 15.5 L16 8 L25 15.5 M10 14 V24 H22 V14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="18" width="4" height="6" fill="#fff"/></svg>'
 };
 var MAP_ICON_IMG={};
 var _mapIconsReady=Promise.all(Object.keys(MAP_ICON_SVG).map(function(k){
@@ -3319,30 +3361,132 @@ function iconPoint(latlng,icon,size,ring){ var C=makeIconPointClass(); return ne
 
 /* ══ Lớp dữ liệu nền: CH đang hoạt động + Điểm QH (vẽ bằng canvas → nhanh với ~3.000 điểm) ══ */
 var _qhbsRenderer=null;
+var qhbsLayerMB=null, QHM={qh:[],ch:[],mb:[]}, _qhmMarkers={};
 function loadQHBSMapBase(){
   if(!qhbsMap||!qhbsLayerQH) return;
   if(!_qhbsRenderer) _qhbsRenderer=L.canvas({padding:0.5});
-  qhbsLayerQH.clearLayers();
+  QHM.qh=[]; QHM.mb=[];
   if(currentUser) loadQHData().then(function(list){
     if(!currentUser) return; // đã đăng xuất trong lúc tải
-    qhbsLayerQH.clearLayers();
-    (list||[]).forEach(function(p){
-      var la=parseFloat(p.lat), ln=parseFloat(p.lng); if(isNaN(la)||isNaN(ln)) return;
-      iconPoint([la,ln],'qh',18)
-        .bindPopup(function(){ return '<div class="qhbs-map-info"><b>'+mapIconHTML('qh')+' '+esc(p.qh)+'</b><br>'+esc([p.x,p.h,p.t].filter(Boolean).join(', '))+'<br>GĐV: '+esc(p.gdv||'—')+' · QLKV: '+esc(p.qlkv||'—')+(p.cq?'<br>Tình trạng: '+esc(p.cq):'')+'</div>'; })
-        .addTo(qhbsLayerQH);
-    });
+    QHM.qh=(list||[]).filter(function(p){ return !isNaN(parseFloat(p.lat))&&!isNaN(parseFloat(p.lng)); });
+    qhmBuildFilters(); qhmApply();
   });
   loadStores_().then(function(list){
-    qhbsLayerStores.clearLayers();
-    (list||[]).forEach(function(r){
-      var la=parseFloat(r[6]), ln=parseFloat(r[7]); if(isNaN(la)||isNaN(ln)) return;
-      iconPoint([la,ln],'ch',22)
-        .bindPopup(function(){ return '<div class="qhbs-map-info"><b>'+mapIconHTML('ch')+' '+esc(r[0])+' — '+esc(r[1])+'</b><br>'+esc([r[3],r[2]].filter(Boolean).join(', '))+'<br>GĐV: '+esc(r[4]||'—')+' · QLKV: '+esc(r[5]||'—')+'</div>'; })
-        .addTo(qhbsLayerStores);
-    });
+    QHM.ch=(list||[]).filter(function(r){ return !isNaN(parseFloat(r[6]))&&!isNaN(parseFloat(r[7])); });
+    qhmBuildFilters(); qhmApply();
   });
-  renderQHBSMapMarkers();
+  if(currentUser){ QHM.mb=(MB_DATA||[]).filter(function(m){ return !isNaN(parseFloat(m.lat))&&!isNaN(parseFloat(m.lng)); }); }
+  qhmBuildFilters(); qhmApply();
+}
+
+/* ══ Bộ lọc chung cho bản đồ + bảng bên phải: Tỉnh/Huyện · GĐV/QLKV · Nhóm điểm ══ */
+function qhmRec(kind,o){
+  if(kind==='qh') return {k:'qh',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:o.cq||'',o:o};
+  if(kind==='ch') return {k:'ch',id:String(o[0]),name:o[1],t:o[2],h:o[3],gdv:o[4],qlkv:o[5],lat:+o[6],lng:+o[7],sub:'',o:o};
+  if(kind==='mb') return {k:'mb',id:o.id,name:o.addr||'',t:o.tinh,h:o.huyen,gdv:o.gdvHienTai||o.gdv,qlkv:o.qlkvHienTai||o.qlkv,lat:+o.lat,lng:+o.lng,sub:o.status||'',o:o};
+  return {k:'qhbs',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:(o.ttQH==='Đã duyệt'?'Đã duyệt QH':(o.ttGDV==='Từ chối'||o.ttQH==='Từ chối')?'Từ chối':o.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'),o:o};
+}
+function qhmAll(){
+  return [].concat(QHM.qh.map(function(o){return qhmRec('qh',o);}), (currentUser?qhbsData:[]).filter(function(d){return d.lat&&d.lng;}).map(function(o){return qhmRec('qhbs',o);}),
+    QHM.mb.map(function(o){return qhmRec('mb',o);}), QHM.ch.map(function(o){return qhmRec('ch',o);}));
+}
+function qhmBuildFilters(){
+  var all=qhmAll(), P={}, G={};
+  all.forEach(function(r){
+    var tk=normPlace(r.t), hk=normPlace(r.h); if(tk){ P[tk]=P[tk]||{label:r.t,h:{}}; if(hk) P[tk].h[hk]=P[tk].h[hk]||r.h; }
+    var g=String(r.gdv||'').trim(), q=String(r.qlkv||'').trim(); if(g){ G[g]=G[g]||{}; if(q) G[g][q]=1; }
+  });
+  function fill(id,first,html){ var el=document.getElementById(id); if(!el) return; var cur=el.value; el.innerHTML='<option value="">'+first+'</option>'+html; if(cur&&[].some.call(el.options,function(o){return o.value===cur;})) el.value=cur; }
+  var vi=function(a,b){ return String(a).localeCompare(String(b),'vi'); };
+  fill('qhmPlace','Tỉnh/Huyện',Object.keys(P).sort(function(a,b){return vi(P[a].label,P[b].label);}).map(function(tk){
+    return '<option value="T|'+esc(tk)+'" style="font-weight:700">'+esc(P[tk].label)+'</option>'+Object.keys(P[tk].h).sort(function(a,b){return vi(P[tk].h[a],P[tk].h[b]);}).map(function(hk){ return '<option value="H|'+esc(tk)+'|'+esc(hk)+'">&nbsp;&nbsp;↳ '+esc(P[tk].h[hk])+'</option>'; }).join('');
+  }).join(''));
+  fill('qhmPeople','GĐV/QLKV',Object.keys(G).sort(vi).map(function(g){
+    return '<option value="G|'+esc(g)+'" style="font-weight:700">'+esc(g)+'</option>'+Object.keys(G[g]).sort(vi).map(function(q){ return '<option value="Q|'+esc(g)+'|'+esc(q)+'">&nbsp;&nbsp;↳ '+esc(q)+'</option>'; }).join('');
+  }).join(''));
+}
+function qhmPass(r){
+  var pv=(document.getElementById('qhmPlace')||{}).value||'', gv=(document.getElementById('qhmPeople')||{}).value||'', kv=(document.getElementById('qhmGroup')||{}).value||'';
+  if(kv&&r.k!==kv) return false;
+  if(pv){ var a=pv.split('|'); if(normPlace(r.t)!==a[1]) return false; if(a[0]==='H'&&normPlace(r.h)!==a[2]) return false; }
+  if(gv){ var b=gv.split('|'); if(String(r.gdv||'').trim()!==b[1]) return false; if(b[0]==='Q'&&String(r.qlkv||'').trim()!==b[2]) return false; }
+  return true;
+}
+function qhmPopup(r){
+  if(r.k==='qh'){ var p=r.o; return '<div class="qhbs-map-info"><b>'+mapIconHTML('qh')+' '+esc(p.qh)+'</b><br>'+esc([p.x,p.h,p.t].filter(Boolean).join(', '))+'<br>GĐV: '+esc(p.gdv||'—')+' · QLKV: '+esc(p.qlkv||'—')+(p.cq?'<br>Tình trạng: '+esc(p.cq):'')+'</div>'; }
+  if(r.k==='mb'){ var m=r.o; return '<div class="qhbs-map-info"><b>'+mapIconHTML('mb')+' '+esc(m.id)+'</b>'+(m.status?' · '+esc(m.status):'')+'<br>'+esc(m.addr||'')+'<br>'+esc([m.huyen,m.tinh].filter(Boolean).join(', '))+'<br>GĐV: '+esc(r.gdv||'—')+' · QLKV: '+esc(r.qlkv||'—')+'<br>'+[m.area?'DT '+esc(m.area)+'m²':'',m.front?'MT '+esc(m.front)+'m':'',m.price?'Giá '+esc(m.price)+'tr/th':''].filter(Boolean).join(' · ')+'</div>'; }
+  var c=r.o; return '<div class="qhbs-map-info"><b>'+mapIconHTML('ch')+' '+esc(c[0])+' — '+esc(c[1])+'</b><br>'+esc([c[3],c[2]].filter(Boolean).join(', '))+'<br>GĐV: '+esc(c[4]||'—')+' · QLKV: '+esc(c[5]||'—')+'<div class="ch-more" data-sap="'+esc(c[0])+'">'+storeInfoHTML(c[0])+'</div></div>';
+}
+function qhmApply(){
+  if(qhbsMap&&qhbsLayerQH){
+    _qhmMarkers={};
+    [['qh',qhbsLayerQH,18],['ch',qhbsLayerStores,22],['mb',qhbsLayerMB,22]].forEach(function(x){
+      var kind=x[0], layer=x[1]; if(!layer) return; layer.clearLayers();
+      (QHM[kind]||[]).forEach(function(o){
+        var r=qhmRec(kind,o); if(!qhmPass(r)) return;
+        var mk=iconPoint([r.lat,r.lng],kind,x[2]).bindPopup(function(){ return qhmPopup(r); },{maxWidth:320});
+        if(kind==='ch') mk.on('popupopen',function(e){ loadStoreInfo(r.id,e.popup); });
+        mk.addTo(layer); _qhmMarkers[kind+'|'+r.id]=mk;
+      });
+    });
+    renderQHBSMapMarkers();
+  }
+  qhmRenderList();
+}
+function qhmRenderList(){
+  var el=document.getElementById('qhmList'); if(!el) return;
+  var q=normPlace((document.getElementById('qhmSearch')||{}).value||'');
+  var rows=qhmAll().filter(qhmPass), cnt={qh:0,qhbs:0,mb:0,ch:0};
+  rows.forEach(function(r){ cnt[r.k]++; });
+  var sum=document.getElementById('qhmSum');
+  if(sum) sum.innerHTML=mapIconHTML('qh',12)+' QH <b>'+cnt.qh+'</b>'+' '+mapIconHTML('qhbs',12)+' QHBS <b>'+cnt.qhbs+'</b>'+' '+mapIconHTML('mb',12)+' MB <b>'+cnt.mb+'</b>'+' '+mapIconHTML('ch',12)+' CH <b>'+cnt.ch+'</b>';
+  if(q) rows=rows.filter(function(r){ return normPlace([r.id,r.name,r.h,r.t,r.gdv,r.qlkv].join(' ')).indexOf(q)>=0; });
+  var order={mb:0,qhbs:1,qh:2,ch:3};
+  rows.sort(function(a,b){ return order[a.k]-order[b.k]||String(a.id).localeCompare(String(b.id),'vi'); });
+  if(!rows.length){ el.innerHTML='<div class="qhm-more">'+(currentUser?'Không có điểm nào khớp bộ lọc':'Đăng nhập để xem dữ liệu')+'</div>'; return; }
+  var LIM=400, html=rows.slice(0,LIM).map(function(r){
+    return '<div class="qhm-item" data-k="'+r.k+'" data-id="'+esc(r.id)+'">'+mapIconHTML(r.k,16)+'<div style="min-width:0"><div class="t">'+esc(r.id)+(r.k==='ch'&&r.name?' — '+esc(r.name):'')+'</div>'
+      +'<div class="s">'+esc([r.k!=='ch'?r.name:'',r.h,r.t].filter(Boolean).join(', '))+'</div><div class="s">'+esc([r.gdv,r.qlkv].filter(Boolean).join(' · '))+(r.sub?' · <i>'+esc(r.sub)+'</i>':'')+'</div></div></div>';
+  }).join('');
+  if(rows.length>LIM) html+='<div class="qhm-more">… và '+(rows.length-LIM)+' điểm khác — lọc thêm để thu hẹp</div>';
+  el.innerHTML=html;
+}
+document.addEventListener('click',function(e){
+  var it=e.target.closest&&e.target.closest('.qhm-item'); if(!it||!qhbsMap) return;
+  var k=it.dataset.k, id=it.dataset.id, mk=null;
+  if(k==='qhbs'){ var d=qhbsData.find(function(x){return x.qh===id;}); if(d){ qhbsMap.setView([+d.lat,+d.lng],17); (qhbsMarkers||[]).forEach(function(m){ if(m._qh===id) mk=m; }); } }
+  else { mk=_qhmMarkers[k+'|'+id]; if(mk) qhbsMap.setView(mk.getLatLng(),17); }
+  if(mk) setTimeout(function(){ mk.openPopup(); },250);
+  if(window.innerWidth<900){ var mc=document.getElementById('qhbsMapContainer'); if(mc) mc.scrollIntoView({behavior:'smooth',block:'start'}); }
+});
+
+/* ── Chi tiết CH (Ngày KT, MT/DT/Kho, SPD–Bill 3 tháng gần nhất, BHX gần nhất) — tải khi mở popup ── */
+const STORE_INFO={};
+function fmtNum(v,d){ return (v==null||isNaN(v))?'—':Number(v).toLocaleString('vi-VN',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+function pctTag(a,b){ if(!(b>0)||a==null) return ''; const p=(a/b-1)*100; return ' <span style="color:'+(p>=0?'#16a34a':'#dc2626')+';font-weight:700">('+(p>=0?'+':'')+p.toFixed(1)+'%)</span>'; }
+function monLabel(t){ const m=String(t||'').match(/^(\d{4})-(\d{2})/); return m?('T'+(+m[2])+'.'+m[1].slice(2)):String(t||''); }
+function storeInfoHTML(sap){
+  const d=STORE_INFO[sap];
+  if(!d) return '<div style="margin-top:6px;color:var(--muted);font-size:12px">⏳ Đang tải chi tiết…</div>';
+  if(!d.ok) return /Unknown action/.test(d.error||'')?'':'<div style="margin-top:6px;color:var(--muted);font-size:12px">'+esc(d.error||'Không tải được chi tiết')+'</div>';
+  const I=d.info||{}, L=[];
+  const dims=[I.mt?'MT '+esc(I.mt)+'m':'', I.dtThue?'DT '+esc(I.dtThue)+'m²'+(I.dtkd?' (KD '+esc(I.dtkd)+')':''):'', I.kho?'Kho '+esc(I.kho)+'m²':''].filter(Boolean).join(' | ');
+  L.push('📅 <b>KT:</b> '+esc(I.ngayKT||'—')+(dims?' · '+dims:''));
+  if(d.sales&&d.sales.length){
+    d.sales.forEach((m,i)=>{ L.push((i?'':'📈 ')+'<b>'+monLabel(m.thang)+'</b>'+(m.ngay&&m.ngay<28?' ('+m.ngay+' ngày)':'')+': SPD '+fmtNum(m.spd,1)+'tr'+pctTag(m.spd,m.spdLY)+' · Bill '+fmtNum(m.bill)+'/ngày'+pctTag(m.bill,m.billLY)); });
+    L.push('<span style="font-size:11px;color:var(--muted)">% so với cùng kỳ năm trước (LY)</span>');
+  } else L.push('📈 Chưa có dữ liệu doanh số');
+  const B=d.bhx;
+  if(B){ const net=B.netW12!=null?B.netW12:B.netW4, wk=B.netW12!=null?'W12':'W4';
+    L.push('🟢 <b>BHX:</b> '+fmtNum(B.kc)+' m · KT '+esc(B.ngayKT||'—')+(net!=null?' · Affect DT: <span style="color:'+(net>=0?'#16a34a':'#dc2626')+';font-weight:700">'+(net>=0?'+':'')+Number(net).toFixed(1)+'%</span> ('+wk+')':' · Affect DT: chưa đủ dữ liệu')+(d.bhxCount>1?' <span style="font-size:11px;color:var(--muted)">+'+(d.bhxCount-1)+' BHX khác</span>':''));
+  } else L.push('🟢 BHX: không có trong bán kính khảo sát');
+  return '<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#e5e7eb);font-size:12.5px;line-height:1.55">'+L.join('<br>')+'</div>';
+}
+function loadStoreInfo(sap,popup){
+  const paint=()=>{ try{ if(popup&&popup.isOpen()){ const el=popup.getElement()&&popup.getElement().querySelector('.ch-more'); if(el){ el.innerHTML=storeInfoHTML(sap); popup.update(); } } }catch(e){} };
+  if(STORE_INFO[sap]&&STORE_INFO[sap].ok){ paint(); return; }
+  gasPost({action:'storeInfo',sap:sap},20000).then(res=>{ STORE_INFO[sap]=res.j||{ok:false,error:'Không kết nối được máy chủ'}; paint(); })
+    .catch(()=>{ STORE_INFO[sap]={ok:false,error:'Không kết nối được máy chủ'}; paint(); delete STORE_INFO[sap]; });
 }
 
 function updateQHBSFormCoords(ll){
@@ -3405,7 +3549,7 @@ function renderQHBSMapMarkers(){
   qhbsMarkers=[];
   var f=document.getElementById('qhbsFilter')?document.getElementById('qhbsFilter').value:'all';
   var gF=document.getElementById('qhbsGDV')?document.getElementById('qhbsGDV').value:'';
-  var list=qhbsData.filter(function(d){ return d.lat&&d.lng&&(!gF||d.gdv===gF); });
+  var list=qhbsData.filter(function(d){ return d.lat&&d.lng&&(!gF||d.gdv===gF)&&qhmPass(qhmRec('qhbs',d)); });
   if(f==='pending_gdv') list=list.filter(function(d){return !d.ttGDV||d.ttGDV==='Chờ duyệt';});
   else if(f==='approved_gdv') list=list.filter(function(d){return d.ttGDV==='Đã duyệt';});
   else if(f==='rejected') list=list.filter(function(d){return d.ttGDV==='Từ chối'||d.ttQH==='Từ chối';});
@@ -3421,7 +3565,7 @@ function renderQHBSMapMarkers(){
     var chp = d.maCH ? ('<br>🏪 CH gần nhất: <b>'+d.maCH+'</b>'+(d.kcCH?' · '+d.kcCH+' m':'')) : '';
     // Sao vàng; viền màu theo trạng thái: xanh dương = đã duyệt QH, đỏ = từ chối, không viền = đang chờ
     var ring = d.ttQH==='Đã duyệt' ? '#2563eb' : ((d.ttGDV==='Từ chối'||d.ttQH==='Từ chối') ? '#dc2626' : null);
-    var marker=iconPoint([parseFloat(d.lat),parseFloat(d.lng)],'qhbs',24,ring).addTo(grp);
+    var marker=iconPoint([parseFloat(d.lat),parseFloat(d.lng)],'qhbs',24,ring).addTo(grp); marker._qh=d.qh;
     var canP=qhbsCanEdit(d);
     var popBtns='';
     if(canP) popBtns+='<button onclick="openQHBSEdit(\''+d.qh+'\')" style="margin-top:6px;padding:4px 10px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-size:11px;cursor:pointer;margin-right:4px">✏️ Sửa</button>';
