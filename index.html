@@ -226,6 +226,7 @@ tr:hover{background:var(--teal-bg)}
 #sec-qhbs{scroll-margin-top:70px}
 #sec-qhbs #qhbsMapContainer{margin-top:4px}
 /* Map & Quy hoạch: trái = bản đồ (4/5), phải = dữ liệu MB / QH */
+#qhbsAuthBar,#qhbsList{display:none!important}
 .qhm-wrap{display:flex;flex-direction:column;gap:8px}
 .qhm-left{min-width:0}
 #qhmPanel{background:var(--surface,#fff);border:1px solid var(--line,#e5e7eb);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -417,7 +418,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.6</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.7</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -653,7 +654,7 @@ tr:hover{background:var(--teal-bg)}
    <select id="qhmPlace" onchange="qhmApply()" title="Tỉnh / Huyện"><option value="">Tỉnh/Huyện</option></select>
    <select id="qhmPeople" onchange="qhmApply()" title="GĐV / QLKV"><option value="">GĐV/QLKV</option></select>
    <select id="qhmGroup" onchange="qhmApply()" title="Nhóm điểm">
-    <option value="">Tất cả nhóm</option><option value="qh">★ Điểm QH</option><option value="qhbs">★ QHBS</option><option value="mb">▣ MB giới thiệu</option><option value="ch">W CH đang HĐ</option><option value="bhx">■ Đối thủ BHX</option>
+    <option value="">Tất cả nhóm</option><option value="qh">★ Điểm QH</option><option value="qhbsp">★ QHBS chờ duyệt</option><option value="qhbs">★ QHBS đã duyệt/từ chối</option><option value="mb">▣ MB giới thiệu</option><option value="ch">W CH đang HĐ</option><option value="bhx">■ Đối thủ BHX</option>
    </select>
   </div>
   <div class="qhm-sum" id="qhmSum"></div>
@@ -754,7 +755,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.6</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.7</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -3234,6 +3235,7 @@ function openQHBSEdit(qh){
   document.getElementById('qhbsModal').style.display='flex';
 }
 function renderQHBSList(){
+  try{ if(typeof qhmBuildFilters==='function'){ qhmBuildFilters(); qhmRenderList(); } }catch(e){}
   const el=document.getElementById('qhbsList'); if(!el) return;
   if(!currentUser){ el.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">🔐 <a href="javascript:void 0" onclick="openDashboardLogin()">Đăng nhập</a> để xem điểm quy hoạch và đề xuất QHBS</div>'; return; }
   const f=document.getElementById('qhbsFilter')?.value||'all';
@@ -3294,6 +3296,7 @@ function initQHBSMap(){
     qhbsLayerStores=L.layerGroup().addTo(qhbsMap);
     qhbsLayerQH=L.layerGroup().addTo(qhbsMap);
     qhbsLayerQHBS=L.layerGroup().addTo(qhbsMap);
+    qhbsLayerQHBSP=L.layerGroup().addTo(qhbsMap);
     qhbsLayerMB=L.layerGroup().addTo(qhbsMap);
     qhbsLayerBHX=L.layerGroup().addTo(qhbsMap);
 
@@ -3303,7 +3306,8 @@ function initQHBSMap(){
       {
         [mapIconHTML('ch')+' CH đang hoạt động']: qhbsLayerStores,
         [mapIconHTML('qh')+' Điểm quy hoạch']: qhbsLayerQH,
-        [mapIconHTML('qhbs')+' Điểm bổ sung (QHBS)']: qhbsLayerQHBS,
+        [mapIconHTML('qhbsp')+' QHBS chờ duyệt']: qhbsLayerQHBSP,
+        [mapIconHTML('qhbs')+' QHBS đã duyệt / từ chối']: qhbsLayerQHBS,
         [mapIconHTML('mb')+' MB giới thiệu']: qhbsLayerMB,
         [mapIconHTML('bhx')+' Đối thủ BHX']: qhbsLayerBHX
       },
@@ -3319,7 +3323,7 @@ function initQHBSMap(){
     // Bấm vào bản đồ không mở form nữa — dùng nút 📌 Ghim để chọn vị trí
     var pinBtn=document.getElementById('qhbsPinBtn'); if(pinBtn) pinBtn.style.display='flex';
     // vẽ lại kích thước biểu tượng khi đổi zoom
-    qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS,qhbsLayerMB,qhbsLayerBHX].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
+    qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS,qhbsLayerQHBSP,qhbsLayerMB,qhbsLayerBHX].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
     loadQHBSData();
     _mapIconsReady.then(loadQHBSMapBase);
   }
@@ -3341,6 +3345,7 @@ var MAP_ICON_SVG={
   ch:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#E4202A" stroke="#fff" stroke-width="2"/><path d="M6 10 L11 23 L16 13.5 L21 23 L26 10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   qh:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#2E7D12" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>',
   qhbs:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#EAB308" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>',
+  qhbsp:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#DC2626" stroke="#fff" stroke-width="2"/><polygon points="16.0,5.5 18.9,13.0 26.9,13.4 20.7,18.5 22.8,26.3 16.0,21.9 9.2,26.3 11.3,18.5 5.1,13.4 13.1,13.0" fill="#fff"/></svg>',
   bhx:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#0B8A3E" stroke="#FFD400" stroke-width="2.4"/><text x="16" y="21.5" font-family="Arial,Helvetica,sans-serif" font-size="12.5" font-weight="900" fill="#fff" text-anchor="middle">BHX</text></svg>',
   mb:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="7" fill="#2563EB" stroke="#fff" stroke-width="2"/><path d="M7 15.5 L16 8 L25 15.5 M10 14 V24 H22 V14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="18" width="4" height="6" fill="#fff"/></svg>'
 };
@@ -3371,7 +3376,7 @@ function iconPoint(latlng,icon,size,ring){ var C=makeIconPointClass(); return ne
 
 /* ══ Lớp dữ liệu nền: CH đang hoạt động + Điểm QH (vẽ bằng canvas → nhanh với ~3.000 điểm) ══ */
 var _qhbsRenderer=null;
-var qhbsLayerMB=null, qhbsLayerBHX=null, QHM={qh:[],ch:[],mb:[],bhx:[]}, _qhmMarkers={};
+var qhbsLayerMB=null, qhbsLayerBHX=null, qhbsLayerQHBSP=null, QHM={qh:[],ch:[],mb:[],bhx:[]}, _qhmMarkers={};
 function loadQHBSMapBase(){
   if(!qhbsMap||!qhbsLayerQH) return;
   if(!_qhbsRenderer) _qhbsRenderer=L.canvas({padding:0.5});
@@ -3401,7 +3406,17 @@ function qhmRec(kind,o){
   if(kind==='ch') return {k:'ch',id:String(o[0]),name:o[1],t:o[2],h:o[3],gdv:o[4],qlkv:o[5],lat:+o[6],lng:+o[7],sub:'',o:o};
   if(kind==='bhx') return {k:'bhx',id:o[0],name:o[1],t:o[2],h:o[3],gdv:'',qlkv:'',lat:+o[4],lng:+o[5],sub:o[6]?'KT '+o[6]:'',o:o};
   if(kind==='mb') return {k:'mb',id:o.id,name:o.addr||'',t:o.tinh,h:o.huyen,gdv:o.gdvHienTai||o.gdv,qlkv:o.qlkvHienTai||o.qlkv,lat:+o.lat,lng:+o.lng,sub:o.status||'',o:o};
-  return {k:'qhbs',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:(o.ttQH==='Đã duyệt'?'Đã duyệt QH':(o.ttGDV==='Từ chối'||o.ttQH==='Từ chối')?'Từ chối':o.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'),o:o};
+  return {k:qhbsIsPending(o)?'qhbsp':'qhbs',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:(o.ttQH==='Đã duyệt'?'Đã duyệt QH':(o.ttGDV==='Từ chối'||o.ttQH==='Từ chối')?'Từ chối':o.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'),o:o};
+}
+function qhbsIsPending(d){ return d.ttQH!=='Đã duyệt'&&d.ttGDV!=='Từ chối'&&d.ttQH!=='Từ chối'; }
+function qhbsStatusText(d){ return d.ttQH==='Đã duyệt'?'Đã duyệt QH':(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối')?'Từ chối':d.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'; }
+function qhbsBadgeClass(d){ return d.ttQH==='Đã duyệt'?'synced':(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối')?'rejected':d.ttGDV==='Đã duyệt'?'approved':'pending'; }
+function qhbsActionBtns(d,pop){
+  var h='', lv=qhbsApproveLevel(d), can=qhbsCanEdit(d), st=pop?'margin:6px 4px 0 0;padding:4px 10px;border:none;border-radius:6px;font-size:11px;cursor:pointer;':'';
+  if(lv) h+='<button class="'+(pop?'':'btn btn-xs')+'" style="'+st+'background:#16a34a;color:#fff;border:none" onclick="event.stopPropagation();openQHBSApprove(\''+escJS(d.qh)+'\')">✔ '+(lv===1?'Duyệt (GĐV)':'Duyệt QH')+'</button>';
+  if(can) h+='<button class="'+(pop?'':'btn btn-xs btn-outline')+'" style="'+st+(pop?'background:#2563eb;color:#fff':'')+'" title="Sửa" onclick="event.stopPropagation();openQHBSEdit(\''+escJS(d.qh)+'\')">✏️'+(pop?' Sửa':'')+'</button>';
+  if(can) h+='<button class="'+(pop?'':'btn btn-xs')+'" style="'+st+(pop?'background:#dc2626;color:#fff':'background:#fee2e2;color:#b91c1c;border:none')+'" title="Xoá" onclick="event.stopPropagation();deleteQHBS(\''+escJS(d.qh)+'\')">🗑'+(pop?' Xoá':'')+'</button>';
+  return h;
 }
 function qhmAll(){
   return [].concat(QHM.qh.map(function(o){return qhmRec('qh',o);}), (currentUser?qhbsData:[]).filter(function(d){return d.lat&&d.lng;}).map(function(o){return qhmRec('qhbs',o);}),
@@ -3438,6 +3453,8 @@ function qhmPass(r){
     else { if(String(r.gdv||'').trim()!==b[1]) return false; if(b[0]==='Q'&&String(r.qlkv||'').trim()!==b[2]) return false; } }
   return true;
 }
+function gmapLinkHTML(lat,lng){ lat=+lat; lng=+lng; if(!isFinite(lat)||!isFinite(lng)) return ''; return '<div style="margin-top:6px"><a href="https://www.google.com/maps?q='+lat+','+lng+'" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600;text-decoration:none">📍 Xem trên Google Maps ↗</a></div>'; }
+function withGmap(html,lat,lng){ var i=html.lastIndexOf('</div>'); return i<0?html+gmapLinkHTML(lat,lng):html.slice(0,i)+gmapLinkHTML(lat,lng)+html.slice(i); }
 function qhmPopup(r){
   if(r.k==='qh'){ var p=r.o; return '<div class="qhbs-map-info"><b>'+mapIconHTML('qh')+' '+esc(p.qh)+'</b><br>'+esc([p.x,p.h,p.t].filter(Boolean).join(', '))+'<br>GĐV: '+esc(p.gdv||'—')+' · QLKV: '+esc(p.qlkv||'—')+(p.cq?'<br>Tình trạng: '+esc(p.cq):'')+'</div>'; }
   if(r.k==='mb'){ var m=r.o; return '<div class="qhbs-map-info"><b>'+mapIconHTML('mb')+' '+esc(m.id)+'</b>'+(m.status?' · '+esc(m.status):'')+'<br>'+esc(m.addr||'')+'<br>'+esc([m.huyen,m.tinh].filter(Boolean).join(', '))+'<br>GĐV: '+esc(r.gdv||'—')+' · QLKV: '+esc(r.qlkv||'—')+'<br>'+[m.area?'DT '+esc(m.area)+'m²':'',m.front?'MT '+esc(m.front)+'m':'',m.price?'Giá '+esc(m.price)+'tr/th':''].filter(Boolean).join(' · ')+'</div>'; }
@@ -3452,7 +3469,7 @@ function qhmApply(){
       var kind=x[0], layer=x[1]; if(!layer) return; layer.clearLayers();
       (QHM[kind]||[]).forEach(function(o){
         var r=qhmRec(kind,o); if(!qhmPass(r)) return;
-        var mk=iconPoint([r.lat,r.lng],kind,x[2]).bindPopup(function(){ return qhmPopup(r); },{maxWidth:320});
+        var mk=iconPoint([r.lat,r.lng],kind,x[2]).bindPopup(function(){ return withGmap(qhmPopup(r),r.lat,r.lng); },{maxWidth:320});
         if(kind==='ch') mk.on('popupopen',function(e){ loadStoreInfo(r.id,e.popup); });
         mk.addTo(layer); _qhmMarkers[kind+'|'+r.id]=mk;
       });
@@ -3464,17 +3481,19 @@ function qhmApply(){
 function qhmRenderList(){
   var el=document.getElementById('qhmList'); if(!el) return;
   var q=normPlace((document.getElementById('qhmSearch')||{}).value||'');
-  var rows=qhmAll().filter(qhmPass), cnt={qh:0,qhbs:0,mb:0,ch:0,bhx:0};
+  var rows=qhmAll().filter(qhmPass), cnt={qh:0,qhbs:0,qhbsp:0,mb:0,ch:0,bhx:0};
   rows.forEach(function(r){ cnt[r.k]++; });
   var sum=document.getElementById('qhmSum');
-  if(sum) sum.innerHTML=mapIconHTML('qh',12)+' QH <b>'+cnt.qh+'</b>'+' '+mapIconHTML('qhbs',12)+' QHBS <b>'+cnt.qhbs+'</b>'+' '+mapIconHTML('mb',12)+' MB <b>'+cnt.mb+'</b>'+' '+mapIconHTML('ch',12)+' CH <b>'+cnt.ch+'</b>'+' '+mapIconHTML('bhx',12)+' BHX <b>'+cnt.bhx+'</b>';
+  if(sum) sum.innerHTML=mapIconHTML('qh',12)+' QH <b>'+cnt.qh+'</b>'+' '+mapIconHTML('qhbsp',12)+' Chờ duyệt <b>'+cnt.qhbsp+'</b>'+' '+mapIconHTML('qhbs',12)+' QHBS <b>'+cnt.qhbs+'</b>'+' '+mapIconHTML('mb',12)+' MB <b>'+cnt.mb+'</b>'+' '+mapIconHTML('ch',12)+' CH <b>'+cnt.ch+'</b>'+' '+mapIconHTML('bhx',12)+' BHX <b>'+cnt.bhx+'</b>';
   if(q) rows=rows.filter(function(r){ return normPlace([r.id,r.name,r.h,r.t,r.gdv,r.qlkv].join(' ')).indexOf(q)>=0; });
-  var order={mb:0,qhbs:1,qh:2,ch:3,bhx:4};
+  var order={qhbsp:0,mb:1,qhbs:2,qh:3,ch:4,bhx:5};
   rows.sort(function(a,b){ return order[a.k]-order[b.k]||String(a.id).localeCompare(String(b.id),'vi'); });
   if(!rows.length){ el.innerHTML='<div class="qhm-more">'+(currentUser?'Không có điểm nào khớp bộ lọc':'Đăng nhập để xem dữ liệu')+'</div>'; return; }
   var LIM=400, html=rows.slice(0,LIM).map(function(r){
     return '<div class="qhm-item" data-k="'+r.k+'" data-id="'+esc(r.id)+'">'+mapIconHTML(r.k,16)+'<div style="min-width:0"><div class="t">'+esc(r.id)+(r.k==='ch'&&r.name?' — '+esc(r.name):'')+'</div>'
-      +'<div class="s">'+esc([r.k!=='ch'&&r.k!=='bhx'?r.name:'',r.h,r.t].filter(Boolean).join(', '))+'</div><div class="s">'+esc([r.gdv,r.qlkv].filter(Boolean).join(' · '))+(r.sub?' · <i>'+esc(r.sub)+'</i>':'')+'</div></div></div>';
+      +'<div class="s">'+esc([r.k!=='ch'&&r.k!=='bhx'?r.name:'',r.h,r.t].filter(Boolean).join(', '))+'</div><div class="s">'+esc([r.gdv,r.qlkv].filter(Boolean).join(' · '))+(r.sub&&r.k.indexOf('qhbs')<0?' · <i>'+esc(r.sub)+'</i>':'')+'</div>'
+      +'<div class="s"><a href="https://www.google.com/maps?q='+r.lat+','+r.lng+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none">📍 Xem trên Google Maps ↗</a></div>'
+      +(r.k.indexOf('qhbs')===0?'<div class="s">Đề xuất: '+esc(r.o.nguoiDeXuat||'—')+(r.o.ngayDeXuat?' · '+esc(String(r.o.ngayDeXuat).slice(0,10)):'')+(r.o.maCH?' · 🔗 '+esc(r.o.maCH)+(r.o.kcCH?' '+esc(r.o.kcCH)+'m':''):'')+'</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px"><span class="qhbs-badge '+qhbsBadgeClass(r.o)+'">'+qhbsStatusText(r.o)+'</span>'+qhbsActionBtns(r.o,false)+'</div>':'')+'</div></div>';
   }).join('');
   if(rows.length>LIM) html+='<div class="qhm-more">… và '+(rows.length-LIM)+' điểm khác — lọc thêm để thu hẹp</div>';
   el.innerHTML=html;
@@ -3482,7 +3501,7 @@ function qhmRenderList(){
 document.addEventListener('click',function(e){
   var it=e.target.closest&&e.target.closest('.qhm-item'); if(!it||!qhbsMap) return;
   var k=it.dataset.k, id=it.dataset.id, mk=null;
-  if(k==='qhbs'){ var d=qhbsData.find(function(x){return x.qh===id;}); if(d){ qhbsMap.setView([+d.lat,+d.lng],17); (qhbsMarkers||[]).forEach(function(m){ if(m._qh===id) mk=m; }); } }
+  if(k==='qhbs'||k==='qhbsp'){ var d=qhbsData.find(function(x){return x.qh===id;}); if(d){ qhbsMap.setView([+d.lat,+d.lng],17); (qhbsMarkers||[]).forEach(function(m){ if(m._qh===id) mk=m; }); } }
   else { mk=_qhmMarkers[k+'|'+id]; if(mk) qhbsMap.setView(mk.getLatLng(),17); }
   if(mk) setTimeout(function(){ mk.openPopup(); },250);
   if(window.innerWidth<900){ var mc=document.getElementById('qhbsMapContainer'); if(mc) mc.scrollIntoView({behavior:'smooth',block:'start'}); }
@@ -3577,6 +3596,7 @@ function renderQHBSMapMarkers(){
   if(!qhbsMap||!_qhbsRenderer) return;
   var grp=qhbsLayerQHBS||qhbsMap;
   if(qhbsLayerQHBS) qhbsLayerQHBS.clearLayers();
+  if(qhbsLayerQHBSP) qhbsLayerQHBSP.clearLayers();
   if(!currentUser||!qhbsData.length) return; // chưa đăng nhập: không hiển thị điểm QHBS
   qhbsMarkers=[];
   var f=document.getElementById('qhbsFilter')?document.getElementById('qhbsFilter').value:'all';
@@ -3597,12 +3617,9 @@ function renderQHBSMapMarkers(){
     var chp = d.maCH ? ('<br>🏪 CH gần nhất: <b>'+d.maCH+'</b>'+(d.kcCH?' · '+d.kcCH+' m':'')) : '';
     // Sao vàng; viền màu theo trạng thái: xanh dương = đã duyệt QH, đỏ = từ chối, không viền = đang chờ
     var ring = d.ttQH==='Đã duyệt' ? '#2563eb' : ((d.ttGDV==='Từ chối'||d.ttQH==='Từ chối') ? '#dc2626' : null);
-    var marker=iconPoint([parseFloat(d.lat),parseFloat(d.lng)],'qhbs',24,ring).addTo(grp); marker._qh=d.qh;
-    var canP=qhbsCanEdit(d);
-    var popBtns='';
-    if(canP) popBtns+='<button onclick="openQHBSEdit(\''+d.qh+'\')" style="margin-top:6px;padding:4px 10px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-size:11px;cursor:pointer;margin-right:4px">✏️ Sửa</button>';
-    if(canP) popBtns+='<button onclick="deleteQHBS(\''+d.qh+'\')" style="margin-top:6px;padding:4px 10px;border:none;border-radius:6px;background:#dc2626;color:#fff;font-size:11px;cursor:pointer">🗑 Xoá</button>';
-    marker.bindPopup('<div class="qhbs-map-info"><b>'+esc(d.qh)+'</b><br>'+esc(loc)+chp+'<br>'+esc(d.gdv)+' · '+esc(d.qlkv)+'<br><span class="qhbs-badge '+((d.ttQH==='Đã duyệt')?'synced':(d.ttGDV==='Từ chối')?'rejected':(d.ttGDV==='Đã duyệt')?'approved':'pending')+'">'+((d.ttQH==='Đã duyệt')?'Đã duyệt QH':(d.ttGDV==='Từ chối')?'Từ chối':(d.ttGDV==='Đã duyệt')?'Chờ QH duyệt':'Chờ GĐV duyệt')+'</span><br>'+popBtns+'</div>');
+    var pend=qhbsIsPending(d);
+    var marker=iconPoint([parseFloat(d.lat),parseFloat(d.lng)],pend?'qhbsp':'qhbs',24,pend?null:ring).addTo(pend&&qhbsLayerQHBSP?qhbsLayerQHBSP:grp); marker._qh=d.qh;
+    marker.bindPopup(function(){ return '<div class="qhbs-map-info"><b>'+mapIconHTML(pend?'qhbsp':'qhbs')+' '+esc(d.qh)+'</b><br>'+esc(loc)+chp+'<br>GĐV: '+esc(d.gdv||'—')+' · QLKV: '+esc(d.qlkv||'—')+'<br>Đề xuất: '+esc(d.nguoiDeXuat||'—')+(d.ngayDeXuat?' · '+esc(String(d.ngayDeXuat).slice(0,10)):'')+(d.note?'<br>📝 '+esc(d.note):'')+'<br><span class="qhbs-badge '+qhbsBadgeClass(d)+'">'+qhbsStatusText(d)+'</span><br>'+qhbsActionBtns(d,true)+gmapLinkHTML(d.lat,d.lng)+'</div>'; });
     marker.on('click', function(){ highlightQHBSInList(d.qh); });
     qhbsMarkers.push(marker);
   });
