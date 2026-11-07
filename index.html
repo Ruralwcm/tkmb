@@ -225,6 +225,11 @@ tr:hover{background:var(--teal-bg)}
 /* Map QHBS không dính sát header */
 #sec-qhbs{scroll-margin-top:70px}
 #sec-qhbs #qhbsMapContainer{margin-top:4px}
+/* PC: tab Map & Quy hoạch dùng toàn bộ chiều rộng + chiều cao màn hình */
+@media(min-width:900px){
+  .main:has(#sec-qhbs.active){max-width:none;padding-left:12px;padding-right:12px}
+  #sec-qhbs #qhbsMapContainer{height:calc(100vh - 175px)!important;min-height:480px!important}
+}
 /* Success overlay */
 #successOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:12000;display:none;align-items:center;justify-content:center}
 #successOverlay .sbox{background:#fff;border-radius:16px;padding:28px 34px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:spop .25s ease}
@@ -387,7 +392,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.1</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.2</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -705,7 +710,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.1</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.2</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
