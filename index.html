@@ -418,7 +418,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.9</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.10</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -755,7 +755,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.9</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.10</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -3172,6 +3172,8 @@ function loadQHBSData(){
       });
     }
     out.splice(0,out.length,...out.filter(d=>d.qh));
+    // Duyệt 1 cấp: GĐV duyệt là chốt
+    out.forEach(d=>{ if(d.ttGDV==='Đã duyệt'&&d.ttQH!=='Từ chối') d.ttQH='Đã duyệt'; });
     // Sheet là nguồn chuẩn (kể cả khi trống). Chỉ giữ thêm điểm vừa tạo trên máy mà chưa gửi được (còn trong hàng chờ)
     stepQueueLoad().forEach(it=>{ const pl=it.payload||{}; if(pl.type==='qhbs'&&pl.qh&&!out.find(d=>d.qh===pl.qh)){ const loc=qhbsData.find(d=>d.qh===pl.qh); if(loc) out.push(loc); } });
     var changed = JSON.stringify(out) !== JSON.stringify(qhbsData);
@@ -3197,13 +3199,12 @@ function qhbsCanEdit(d){
   if(currentUser.rank==='GĐV' && d.gdv===(currentUser.gdv||currentUser.name)) return true;
   return !!(d.nguoiDeXuat && currentUser.name && d.nguoiDeXuat===currentUser.name);
 }
-/* Duyệt 2 cấp: GĐV (của vùng) duyệt cấp 1 → GĐ TKMB / TN TKMB duyệt QH cấp 2 */
+/* Duyệt 1 cấp: GĐV của vùng duyệt là chốt */
 function qhbsApproveLevel(d){
   const u=currentUser; if(!u||!d) return 0;
   if(d.ttQH==='Đã duyệt'||d.ttGDV==='Từ chối'||d.ttQH==='Từ chối') return 0;
-  if(d.ttGDV!=='Đã duyệt'){ return (isAdmin(u)||(u.rank==='GĐV'&&d.gdv===(u.gdv||u.name)))?1:0; }
-  if(isAdmin(u)||u.rank==='GĐTKMB') return 2;
-  return (isTKMBRole(u)&&u.rank!=='CV TKMB'&&inUserScope(d.gdv,d.t,d.h,''))?2:0;
+  if(d.ttGDV==='Đã duyệt') return 0;
+  return (isAdmin(u)||(u.rank==='GĐV'&&d.gdv===(u.gdv||u.name)))?1:0;
 }
 function highlightQHBSInList(qh){
   var row=document.querySelector('.qhbs-row[data-qh="'+qh+'"]');
@@ -3250,7 +3251,7 @@ function renderQHBSList(){
   if(!list.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">Chưa có đề xuất QHBS nào</div>'; return; }
   el.innerHTML=list.map((d,i)=>{
     let badge='', badgeClass='pending';
-    if(d.ttQH==='Đã duyệt'){ badge='Đã duyệt QH'; badgeClass='synced'; }
+    if(d.ttQH==='Đã duyệt'){ badge='Đã duyệt'; badgeClass='synced'; }
     else if(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối'){ badge='Từ chối'; badgeClass='rejected'; }
     else if(d.ttGDV==='Đã duyệt'){ badge='Chờ QH duyệt'; badgeClass='approved'; }
     else badge='Chờ GĐV duyệt';
@@ -3406,10 +3407,10 @@ function qhmRec(kind,o){
   if(kind==='ch') return {k:'ch',id:String(o[0]),name:o[1],t:o[2],h:o[3],gdv:o[4],qlkv:o[5],lat:+o[6],lng:+o[7],sub:'',o:o};
   if(kind==='bhx') return {k:'bhx',id:o[0],name:o[1],t:o[2],h:o[3],gdv:'',qlkv:'',lat:+o[4],lng:+o[5],sub:o[6]?'KT '+o[6]:'',o:o};
   if(kind==='mb') return {k:'mb',id:o.id,name:o.addr||'',t:o.tinh,h:o.huyen,gdv:o.gdvHienTai||o.gdv,qlkv:o.qlkvHienTai||o.qlkv,lat:+o.lat,lng:+o.lng,sub:o.status||'',o:o};
-  return {k:qhbsIsPending(o)?'qhbsp':'qhbs',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:(o.ttQH==='Đã duyệt'?'Đã duyệt QH':(o.ttGDV==='Từ chối'||o.ttQH==='Từ chối')?'Từ chối':o.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'),o:o};
+  return {k:qhbsIsPending(o)?'qhbsp':'qhbs',id:o.qh,name:o.x||'',t:o.t,h:o.h,gdv:o.gdv,qlkv:o.qlkv,lat:+o.lat,lng:+o.lng,sub:(o.ttQH==='Đã duyệt'?'Đã duyệt':(o.ttGDV==='Từ chối'||o.ttQH==='Từ chối')?'Từ chối':o.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'),o:o};
 }
 function qhbsIsPending(d){ return d.ttQH!=='Đã duyệt'&&d.ttGDV!=='Từ chối'&&d.ttQH!=='Từ chối'; }
-function qhbsStatusText(d){ return d.ttQH==='Đã duyệt'?'Đã duyệt QH':(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối')?'Từ chối':d.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'; }
+function qhbsStatusText(d){ return d.ttQH==='Đã duyệt'?'Đã duyệt':(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối')?'Từ chối':d.ttGDV==='Đã duyệt'?'Chờ QH duyệt':'Chờ GĐV duyệt'; }
 function qhbsBadgeClass(d){ return d.ttQH==='Đã duyệt'?'synced':(d.ttGDV==='Từ chối'||d.ttQH==='Từ chối')?'rejected':d.ttGDV==='Đã duyệt'?'approved':'pending'; }
 function qhbsActionBtns(d,pop){
   var h='', lv=qhbsApproveLevel(d), can=qhbsCanEdit(d), st=pop?'margin:6px 4px 0 0;padding:4px 10px;border:none;border-radius:6px;font-size:11px;cursor:pointer;':'';
@@ -3970,7 +3971,7 @@ function openQHBSApprove(qh){
   if(!qhbsApproveLevel(d)){ toast('🔒 Không có quyền duyệt đề xuất này','err'); return; }
   qhbsApproveTarget=qh;
   const loc=[d.h,d.t].filter(Boolean).join(', ');
-  document.getElementById('qhbsApproveInfo').innerHTML='<b>'+esc(qh)+'</b> · <i>'+(qhbsApproveLevel(d)===1?'Cấp 1 — GĐV duyệt':'Cấp 2 — Duyệt QH')+'</i><br>'+esc(loc)+'<br>GĐV: '+esc(d.gdv)+' · QLKV: '+esc(d.qlkv)+'<br>Đề xuất: '+esc(d.nguoiDeXuat)+'<br>Ghi chú: '+esc(d.note||'—');
+  document.getElementById('qhbsApproveInfo').innerHTML='<b>'+esc(qh)+'</b> · <i>'+'GĐV duyệt'+'</i><br>'+esc(loc)+'<br>GĐV: '+esc(d.gdv)+' · QLKV: '+esc(d.qlkv)+'<br>Đề xuất: '+esc(d.nguoiDeXuat)+'<br>Ghi chú: '+esc(d.note||'—');
   document.getElementById('qhbsApproveNote').value='';
   document.getElementById('qhbsApproveModal').style.display='flex';
 }
@@ -3995,7 +3996,7 @@ async function approveQHBS(status){
     if(j.ok){
       toast('✅ Đã cập nhật','ok');
       document.getElementById('qhbsApproveModal').style.display='none';
-      if(d2){ d2[d.field]=d.value; try{ if(qhbsMap) qhbsMap.closePopup(); renderQHBSMapMarkers(); renderQHBSList(); }catch(_){} }
+      if(d2){ d2[d.field]=d.value; if(d.field==='ttGDV'&&d.value==='Đã duyệt') d2.ttQH='Đã duyệt'; try{ if(qhbsMap) qhbsMap.closePopup(); renderQHBSMapMarkers(); renderQHBSList(); }catch(_){} }
       setTimeout(loadQHBSData,1500);
     }else toast('❌ '+(j.error||'Lỗi'),'err');
   }catch(e){ toast('⚠️ Không gửi được, thử lại sau','err'); }
