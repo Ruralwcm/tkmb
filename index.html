@@ -418,7 +418,7 @@ tr:hover{background:var(--teal-bg)}
     <div class="logo-area">
       <div class="logo-icon">🏪</div>
       <div>
-        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.8</span></h1>
+        <h1>TKMB Rural Miền Bắc <span style="font-size:10px;font-weight:400;opacity:.7">v3.5.9</span></h1>
         <div class="meta">📍 Quản lý Mặt bằng Kinh doanh</div>
       </div>
     </div>
@@ -755,7 +755,7 @@ tr:hover{background:var(--teal-bg)}
 
 <!-- ═══ SECTION: SETTINGS ═══ -->
 <div class="section" id="sec-settings">
-  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.8</span></h3>
+  <div class="card"><h3>⚙️ Cài đặt <span style="font-size:10px;color:var(--muted);float:right">v3.5.9</span></h3>
   <div style="display:flex;gap:20px;flex-wrap:wrap">
   <!-- LEFT PANEL -->
   <div style="flex:2;min-width:320px;max-width:580px">
@@ -3491,9 +3491,7 @@ function qhmRenderList(){
   if(!rows.length){ el.innerHTML='<div class="qhm-more">'+(currentUser?'Không có điểm nào khớp bộ lọc':'Đăng nhập để xem dữ liệu')+'</div>'; return; }
   var LIM=400, html=rows.slice(0,LIM).map(function(r){
     return '<div class="qhm-item" data-k="'+r.k+'" data-id="'+esc(r.id)+'">'+mapIconHTML(r.k,16)+'<div style="min-width:0"><div class="t">'+esc(r.id)+(r.k==='ch'&&r.name?' — '+esc(r.name):'')+'</div>'
-      +'<div class="s">'+esc([r.k!=='ch'&&r.k!=='bhx'?r.name:'',r.h,r.t].filter(Boolean).join(', '))+'</div><div class="s">'+esc([r.gdv,r.qlkv].filter(Boolean).join(' · '))+(r.sub&&r.k.indexOf('qhbs')<0?' · <i>'+esc(r.sub)+'</i>':'')+'</div>'
-      +'<div class="s"><a href="https://www.google.com/maps?q='+r.lat+','+r.lng+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none">📍 Xem trên Google Maps ↗</a></div>'
-      +(r.k.indexOf('qhbs')===0?'<div class="s">Đề xuất: '+esc(r.o.nguoiDeXuat||'—')+(r.o.ngayDeXuat?' · '+esc(String(r.o.ngayDeXuat).slice(0,10)):'')+(r.o.maCH?' · 🔗 '+esc(r.o.maCH)+(r.o.kcCH?' '+esc(r.o.kcCH)+'m':''):'')+'</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px"><span class="qhbs-badge '+qhbsBadgeClass(r.o)+'">'+qhbsStatusText(r.o)+'</span>'+'</div>':'')+'</div></div>';
+      +'<div class="s">'+esc([r.k!=='ch'&&r.k!=='bhx'?r.name:'',r.h,r.t].filter(Boolean).join(', '))+'</div><div class="s">'+esc([r.gdv,r.qlkv].filter(Boolean).join(' · '))+(r.sub&&r.k.indexOf('qhbs')<0?' · <i>'+esc(r.sub)+'</i>':'')+'</div></div></div>';
   }).join('');
   if(rows.length>LIM) html+='<div class="qhm-more">… và '+(rows.length-LIM)+' điểm khác — lọc thêm để thu hẹp</div>';
   el.innerHTML=html;
@@ -3997,7 +3995,8 @@ async function approveQHBS(status){
     if(j.ok){
       toast('✅ Đã cập nhật','ok');
       document.getElementById('qhbsApproveModal').style.display='none';
-      loadQHBSData();
+      if(d2){ d2[d.field]=d.value; try{ if(qhbsMap) qhbsMap.closePopup(); renderQHBSMapMarkers(); renderQHBSList(); }catch(_){} }
+      setTimeout(loadQHBSData,1500);
     }else toast('❌ '+(j.error||'Lỗi'),'err');
   }catch(e){ toast('⚠️ Không gửi được, thử lại sau','err'); }
 }
