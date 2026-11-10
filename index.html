@@ -541,9 +541,9 @@ tr:hover{background:var(--teal-bg)}
   <div class="gr gr6">
    <div class="fg"><label>DT (m²)</label><input type="number" inputmode="decimal" id="mbArea" placeholder="120" min="10" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintArea">DT phải >0 m²</span></div>
    <div class="fg"><label>MT (m)</label><input type="number" inputmode="decimal" id="mbFront" placeholder="8" min="1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintFront">MT phải >0 m</span></div>
-   <div class="fg"><label>Giá (tr/th)</label><input type="number" inputmode="decimal" id="mbPrice" placeholder="15.5" min="0.1" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintPrice">Giá phải >0 tr/th</span></div>
+   <div class="fg"><label>Giá (tr/th)</label><input type="number" inputmode="decimal" id="mbPrice" placeholder="15.5" min="0.1" max="1000" step="0.1" oninput="validateNum(this)"><span class="hint" id="hintPrice">Nhập theo TRIỆU, VD: 25 (không phải 25.000.000)</span></div>
    <div class="fg"><label>Kỳ TT (Tháng)</label><input type="number" id="mbPayment" placeholder="3" min="1" max="12" oninput="validateNum(this)"><span class="hint" id="hintPayment">1-12 tháng/lần</span></div>
-   <div class="fg"><label>Cọc (tr)</label><input type="number" inputmode="decimal" id="mbDeposit" placeholder="30" min="0" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintDeposit">Cọc phải >= 0 tr</span></div>
+   <div class="fg"><label>Cọc (tr)</label><input type="number" inputmode="decimal" id="mbDeposit" placeholder="30" min="0" max="5000" step="0.5" oninput="validateNum(this)"><span class="hint" id="hintDeposit">Nhập theo TRIỆU, VD: 50 (không phải 50.000.000)</span></div>
    <div class="fg"><label>Thời hạn (Năm)</label><input type="text" id="mbDuration" placeholder="5"></div>
   </div>
 
@@ -1733,6 +1733,15 @@ function validateTKMB(){
     var el=document.getElementById(fields[i]); var v=parseFloat(el.value);
     if(!el.value||isNaN(v)){ el.classList.add("invalid"); toast("⚠️ Vui lòng nhập đầy đủ số liệu bắt buộc","err"); return false; }
   }
+  // Cận trên: chặn nhập sai đơn vị (vd nhập 25.000.000 thay vì 25 triệu)
+  var price=parseFloat(document.getElementById('mbPrice').value);
+  if(price>1000){ toast('⚠️ Giá (tr/th) vượt 1.000 — nhập theo đơn vị TRIỆU, VD: 25 (không phải 25.000.000)','err'); return false; }
+  var deposit=parseFloat(document.getElementById('mbDeposit').value);
+  if(!isNaN(deposit)&&deposit>5000){ toast('⚠️ Cọc (tr) vượt 5.000 — nhập theo đơn vị TRIỆU, VD: 50 (không phải 50.000.000)','err'); return false; }
+  var area=parseFloat(document.getElementById('mbArea').value);
+  if(area>50000){ toast('⚠️ DT (m²) vượt 50.000 — kiểm tra lại số liệu','err'); return false; }
+  var front=parseFloat(document.getElementById('mbFront').value);
+  if(front>200){ toast('⚠️ MT (m) vượt 200 — kiểm tra lại số liệu','err'); return false; }
   if(!document.getElementById('mbAddr').value.trim()){toast('⚠️ Vui lòng nhập địa chỉ','err');return false;}
   if(!document.getElementById('mbBCT').value.trim()){toast('⚠️ Vui lòng nhập tên chủ nhà','err');return false;}
   if(!document.getElementById('mbBCTPhone').value.trim()){toast('⚠️ Vui lòng nhập SĐT chủ nhà','err');return false;}
@@ -2722,8 +2731,9 @@ function normDate(s){
 function toR(st){
   if(!st)return 'None'; const s=(st+'').toLowerCase();
   if(s.includes('fail')||s.includes('từ chối')||s.includes('loại'))return 'Fail';
-  if(s.includes('đã')||s.includes('xong')||s.includes('duyệt')||s.includes('done')||s.includes('gửi')||s.includes('hoàn thành'))return 'Done';
+  // Pending phải check TRƯỚC Done vì "chờ duyệt" chứa cả "chờ" lẫn "duyệt"
   if(s.includes('chờ')||s.includes('đang')||s.includes('pending'))return 'Pending';
+  if(s.includes('đã')||s.includes('xong')||s.includes('duyệt')||s.includes('done')||s.includes('gửi')||s.includes('hoàn thành'))return 'Done';
   return 'Pending';
 }
 
