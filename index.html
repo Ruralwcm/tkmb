@@ -596,8 +596,7 @@ tr:hover{background:var(--teal-bg)}
       <button class="btn btn-sm qm-edit" style="background:var(--teal);color:#fff" onclick="openQHEdit()">+ Thêm</button>
       <button class="btn btn-sm btn-outline qm-edit" onclick="qhDownloadTemplate()">📥 Mẫu</button>
       <label class="btn btn-sm btn-outline qm-edit" style="cursor:pointer">📤 Import<input type="file" accept=".csv,.xls,.xlsx" onchange="handleQMImport(this)" style="display:none"></label>
-      <button class="btn btn-sm btn-outline qm-edit" id="qhSyncBtn" onclick="qhSyncStoreslist()">🔄 Sync Storelist</button>
-      <span id="qhSyncInfo" style="font-size:10px;color:var(--muted)"></span>
+      
     </div>
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><thead><tr><th>Mã QH</th><th>Tỉnh</th><th>Huyện</th><th>Xã</th><th>GĐV</th><th>QLKV</th><th>TT</th><th>TKMB p.trách</th><th>Đội TKMB</th><th></th></tr></thead><tbody id="qmTbody"></tbody></table></div>
   </div>
@@ -647,6 +646,10 @@ tr:hover{background:var(--teal-bg)}
     <button id="qhbsPinBtn" class="qhbs-gps-btn qhbs-pin-btn" title="Ghim vị trí: Giới thiệu MB / Bổ sung QH" onclick="qhbsStartPin()" style="display:none"><svg width="20" height="27" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="15" x2="12" y2="31" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="9" r="8" fill="#e8336d" stroke="#fff" stroke-width="1.5"/><circle cx="9.3" cy="6.3" r="2.4" fill="#fff" opacity=".55"/></svg></button>
     <button id="qhbsGpsBtn" class="qhbs-gps-btn" title="Về vị trí hiện tại" onclick="qhbsGoToMyLocation()" style="display:none"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/><circle cx="12" cy="12" r="3.2" fill="#4da3ff" stroke="none"/></svg></button>
     <div id="qhbsPinHint" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(17,24,39,.88);color:#fff;font-size:12px;padding:6px 12px;border-radius:16px;white-space:nowrap">Kéo ghim tới vị trí cần chọn · <a href="javascript:void 0" onclick="qhbsCancelPin()" style="color:#fca5a5">Hủy</a></div>
+    <div id="qhbsSearchBox" style="display:none;position:absolute;top:8px;left:50px;z-index:900;background:var(--surface);border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);overflow:hidden">
+      <input type="text" id="qhbsSearchInput" placeholder="🔍 Tọa độ hoặc tên địa điểm..." style="width:200px;border:none;outline:none;padding:6px 12px;font-size:12px;background:transparent;color:var(--ink)" onkeydown="if(event.key==='Enter')qhbsMapSearch()">
+      <button onclick="qhbsMapSearch()" style="border:none;background:var(--teal);color:#fff;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600">Tìm</button>
+    </div>
   </div>
  </div>
  <div id="qhmPanel">
@@ -2522,33 +2525,7 @@ function qhDownloadTemplate(){
   const xls='<html><head><meta charset="UTF-8"></head><body><table><tr><th>Mã QH</th><th>Tỉnh/TP</th><th>Huyện/Quận</th><th>Xã/Phường</th><th>GĐV</th><th>QLKV</th><th>Lat</th><th>Lng</th><th>Tình trạng</th></tr><tr><td>HNI_ĐA01</td><td>TP. Hà Nội</td><td>H. Đông Anh</td><td>X. Dục Tú</td><td></td><td></td><td>21.030</td><td>105.850</td><td>Chưa rà soát</td></tr></table></body></html>';
   const blob=new Blob(['\uFEFF'+xls],{type:'application/vnd.ms-excel'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='QH_Points_Template.xls'; a.click();
 }
-async function qhSyncStoreslist(){
-  if(!canEditQH()){ toast('🔒 Không có quyền','err'); return; }
-  if(!QH_DATA.length){ toast('⚠️ Chưa tải danh sách QH','err'); return; }
-  if(!confirm('Gán lại GĐV/QLKV cho '+QH_DATA.length+' điểm QH theo CH gần nhất (cùng tỉnh) và ghi lên Google Sheet?')) return;
-  const btn=document.getElementById('qhSyncBtn'); const info=document.getElementById('qhSyncInfo');
-  if(btn)btn.disabled=true; if(info)info.textContent='Đang tải danh sách CH...';
-  try{
-    const raw=await loadStores_(); // stores.json: [sap,name,tinh,huyen,gdv,qlkv,lat,lng]
-    const stores=(raw||[]).filter(r=>r[6]&&r[7]&&r[4]).map(r=>({lat:+r[6],lng:+r[7],gdv:r[4]||'',qlkv:r[5]||'',tinh:r[2]||''}));
-    if(!stores.length){ if(info)info.textContent='❌ Không có dữ liệu CH'; return; }
-    if(info)info.textContent=stores.length+' CH · Đang mapping...';
-    const short=t=>(t||'').replace(/^(T\.|TP\.)\s*/,'').trim();
-    const changedPts=[];
-    for(const qh of QH_DATA){ const la=parseFloat(qh.lat), ln=parseFloat(qh.lng); if(!la||!ln)continue;
-      const qt=short(qh.tinh); let best=null,bestD=Infinity,bestT=null,bestTD=Infinity;
-      for(const s of stores){ const d=haversine(la,ln,s.lat,s.lng); if(d<bestD){bestD=d;best=s;} if(short(s.tinh)===qt&&d<bestTD){bestTD=d;bestT=s;} }
-      const pick=bestT||best; if(!pick)continue;
-      if(qh.gdv!==pick.gdv||qh.qlkv!==pick.qlkv){ qh.gdv=pick.gdv; qh.qlkv=pick.qlkv; changedPts.push({qh:qh.qh,gdv:qh.gdv,qlkv:qh.qlkv}); }
-    }
-    renderQHManage();
-    if(!changedPts.length){ if(info)info.textContent='✅ Không có thay đổi'; return; }
-    if(info)info.textContent='Đang ghi '+changedPts.length+' điểm lên Sheet...';
-    const r=await gasPost({action:'batchImportQH',points:changedPts},60000);
-    if(info)info.textContent=(r.j&&r.j.ok)?'✅ Đã cập nhật '+changedPts.length+' điểm':'⚠️ Map '+changedPts.length+' điểm — Sheet chưa xác nhận';
-  }catch(e){ if(info)info.textContent='❌ Lỗi: '+e.message; }
-  finally{ if(btn)btn.disabled=false; }
-}
+
 
 // ═══════════════════════════════════════════════════════
 // CHECKLIST NSO
@@ -3353,6 +3330,8 @@ function initQHBSMap(){
 
     // Bấm vào bản đồ không mở form nữa — dùng nút 📌 Ghim để chọn vị trí
     var pinBtn=document.getElementById('qhbsPinBtn'); if(pinBtn) pinBtn.style.display='flex';
+    // Hiện ô tìm kiếm tọa độ / địa điểm
+    var searchBox=document.getElementById('qhbsSearchBox'); if(searchBox) searchBox.style.display='flex';
     // vẽ lại kích thước biểu tượng khi đổi zoom
     qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS,qhbsLayerQHBSP,qhbsLayerMB,qhbsLayerBHX].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
     loadQHBSData();
@@ -3757,6 +3736,33 @@ function qhbsPinGo(kind){
     _qhbsPin=null; document.getElementById('qhbsPinBtn').classList.remove('active');
     openQHBSForm();
   }
+}
+
+/* ══ Tìm kiếm tọa độ / địa điểm → map tự tới điểm ══ */
+function qhbsMapSearch(){
+  var v=document.getElementById('qhbsSearchInput')?.value?.trim(); if(!v) return;
+  // Thử parse như tọa độ "lat,lng" hoặc link Google Maps
+  var m=v.match(/@?(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{2,3}\.\d+)/)||v.match(/[?&](?:q|ll|query)=(-?\d{1,2}\.\d+),\s*(-?\d{2,3}\.\d+)/)||v.match(/^(-?\d{1,2}\.\d+)\s*[, ]\s*(-?\d{2,3}\.\d+)$/);
+  if(m){
+    var la=parseFloat(m[1]), ln=parseFloat(m[2]);
+    if(qhbsMap) qhbsMap.setView([la,ln],17);
+    // Đánh dấu vị trí tìm thấy tạm thời
+    if(window._qhbsSearchMarker) qhbsMap.removeLayer(window._qhbsSearchMarker);
+    window._qhbsSearchMarker=L.circleMarker([la,ln],{radius:8,fillColor:'#2563eb',color:'#fff',weight:2,fillOpacity:1}).addTo(qhbsMap).bindPopup('📍 '+la.toFixed(6)+', '+ln.toFixed(6)).openPopup();
+    return;
+  }
+  // Geocoding qua Nominatim (OpenStreetMap)
+  var searchUrl='https://nominatim.openstreetmap.org/search?format=json&limit=3&accept-language=vi&q='+encodeURIComponent(v);
+  fetch(searchUrl,{headers:{'Accept':'application/json'}})
+    .then(function(r){ return r.json(); })
+    .then(function(results){
+      if(!results||!results.length){ toast('⚠️ Không tìm thấy địa điểm','err'); return; }
+      var r=results[0], la=parseFloat(r.lat), ln=parseFloat(r.lon);
+      if(qhbsMap) qhbsMap.setView([la,ln],17);
+      if(window._qhbsSearchMarker) qhbsMap.removeLayer(window._qhbsSearchMarker);
+      window._qhbsSearchMarker=L.circleMarker([la,ln],{radius:8,fillColor:'#2563eb',color:'#fff',weight:2,fillOpacity:1}).addTo(qhbsMap).bindPopup('📍 '+r.display_name).openPopup();
+    })
+    .catch(function(){ toast('⚠️ Lỗi tìm kiếm, thử lại sau','err'); });
 }
 
 /* ══ GPS: về vị trí hiện tại ══ */
