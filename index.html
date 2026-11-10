@@ -78,7 +78,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1
 .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(215,25,32,.1);background:var(--surface)}
 .fg textarea{resize:vertical;min-height:60px}
 .fg input[readonly]{background:var(--line);color:var(--muted)}
-.fg input.invalid{border-color:var(--red);background:#fef2f2}
+.fg input.invalid,.fg select.invalid{border-color:var(--red);background:#fef2f2}
 .fg .hint{font-size:9px;color:var(--red);margin-top:1px;display:none}
 .fg .hint.show{display:block}
 .gr{display:grid;gap:8px 12px}
@@ -1723,28 +1723,48 @@ function mbAutoFillFrom(p){
 // ═══════════════════════════════════════════════════════
 let pendingMBData=null;
 function validateTKMB(){
-  if(!document.getElementById('mbMapLink').value.trim()){toast('⚠️ Vui lòng nhập Link Maps hoặc tọa độ','err');return false;}
-  if(!document.getElementById('mbGDV').value){toast('⚠️ Vui lòng chọn GĐV','err');return false;}
-  if(!document.getElementById('mbQLKV').value){toast('⚠️ Vui lòng chọn QLKV','err');return false;}
-  if(!document.getElementById('mbTinh').value){toast('⚠️ Vui lòng chọn Tỉnh/TP','err');return false;}
-  if(!document.getElementById('mbHuyen').value){toast('⚠️ Vui lòng chọn Huyện/Quận','err');return false;}
-  var fields=["mbArea","mbFront","mbPrice"];
-  for(var i=0;i<fields.length;i++){
-    var el=document.getElementById(fields[i]); var v=parseFloat(el.value);
-    if(!el.value||isNaN(v)){ el.classList.add("invalid"); toast("⚠️ Vui lòng nhập đầy đủ số liệu bắt buộc","err"); return false; }
+  var required=[
+    {id:'mbMapLink',label:'Link Maps / tọa độ'},
+    {id:'mbGDV',label:'GĐV'},
+    {id:'mbQLKV',label:'QLKV'},
+    {id:'mbTinh',label:'Tỉnh/TP'},
+    {id:'mbHuyen',label:'Huyện/Quận'},
+    {id:'mbAddr',label:'Địa chỉ cụ thể'},
+    {id:'mbArea',label:'DT (m²)'},
+    {id:'mbFront',label:'MT (m)'},
+    {id:'mbPrice',label:'Giá (tr/th)'},
+    {id:'mbPayment',label:'Kỳ TT (Tháng)'},
+    {id:'mbDeposit',label:'Cọc (tr)'},
+    {id:'mbDuration',label:'Thời hạn (Năm)'},
+    {id:'mbLegal',label:'Pháp lý'},
+    {id:'mbCondition',label:'Hiện trạng'},
+    {id:'mbHandover',label:'TG bàn giao'},
+    {id:'mbGTName',label:'Người GT'},
+    {id:'mbGTMNV',label:'MNV'},
+    {id:'mbBCT',label:'BCT - Tên chủ nhà'},
+    {id:'mbBCTPhone',label:'BCT - SĐT'}
+  ];
+  for(var i=0;i<required.length;i++){
+    var el=document.getElementById(required[i].id); if(!el) continue;
+    var v=(el.value||'').toString().trim();
+    if(!v){ el.classList.add('invalid'); toast('⚠️ Vui lòng nhập đầy đủ: '+required[i].label,'err'); return false; }
+    el.classList.remove('invalid');
+  }
+  // Số liệu phải là số hợp lệ
+  var numFields=[['mbArea','DT (m²)'],['mbFront','MT (m)'],['mbPrice','Giá (tr/th)'],['mbPayment','Kỳ TT (Tháng)'],['mbDeposit','Cọc (tr)']];
+  for(var j=0;j<numFields.length;j++){
+    var n=document.getElementById(numFields[j][0]); var nv=parseFloat(n.value);
+    if(isNaN(nv)){ n.classList.add('invalid'); toast('⚠️ '+numFields[j][1]+' phải là số hợp lệ','err'); return false; }
   }
   // Cận trên: chặn nhập sai đơn vị (vd nhập 25.000.000 thay vì 25 triệu)
   var price=parseFloat(document.getElementById('mbPrice').value);
   if(price>1000){ toast('⚠️ Giá (tr/th) vượt 1.000 — nhập theo đơn vị TRIỆU, VD: 25 (không phải 25.000.000)','err'); return false; }
   var deposit=parseFloat(document.getElementById('mbDeposit').value);
-  if(!isNaN(deposit)&&deposit>5000){ toast('⚠️ Cọc (tr) vượt 5.000 — nhập theo đơn vị TRIỆU, VD: 50 (không phải 50.000.000)','err'); return false; }
+  if(deposit>5000){ toast('⚠️ Cọc (tr) vượt 5.000 — nhập theo đơn vị TRIỆU, VD: 50 (không phải 50.000.000)','err'); return false; }
   var area=parseFloat(document.getElementById('mbArea').value);
   if(area>50000){ toast('⚠️ DT (m²) vượt 50.000 — kiểm tra lại số liệu','err'); return false; }
   var front=parseFloat(document.getElementById('mbFront').value);
   if(front>200){ toast('⚠️ MT (m) vượt 200 — kiểm tra lại số liệu','err'); return false; }
-  if(!document.getElementById('mbAddr').value.trim()){toast('⚠️ Vui lòng nhập địa chỉ','err');return false;}
-  if(!document.getElementById('mbBCT').value.trim()){toast('⚠️ Vui lòng nhập tên chủ nhà','err');return false;}
-  if(!document.getElementById('mbBCTPhone').value.trim()){toast('⚠️ Vui lòng nhập SĐT chủ nhà','err');return false;}
   return true;
 }
 function validateNum(el){
