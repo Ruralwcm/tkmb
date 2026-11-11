@@ -1493,22 +1493,10 @@ let tripSeq = parseInt(localStorage.getItem('tkmb_field_trip_seq')||'0');
 let _qhLoading=null;
 /* Nạp điểm QHBS (quy hoạch bổ sung) từ tab QHBS → chuẩn hoá cùng format với qhPoints */
 function loadQHBSPoints(){
-  return sheetText('QHBS').then(csv=>{
-    const rows=csvParse(csv);
-    if(!rows.length||!sheetHasCols(rows,['Mã QHBS'])) return [];
-    const idx={}; rows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
-    const g=(r,k)=>idx[k]!==undefined?(r[idx[k]]||''):'';
-    const out=[];
-    for(let i=1;i<rows.length;i++){
-      const r=rows[i];
-      const qh=g(r,'Mã QHBS'); if(!qh) continue;
-      out.push({
-        qh:qh, t:g(r,'Tỉnh/TP'), h:g(r,'Huyện/Quận'), x:g(r,'Xã/Phường'),
-        lat:parseFloat(g(r,'Lat'))||0, lng:parseFloat(g(r,'Lng'))||0,
-        gdv:g(r,'GĐV'), qlkv:g(r,'QLKV'), loai:'QHBS'
-      });
-    }
-    return out.filter(p=>p.lat&&p.lng);
+  // Máy chủ trả QHBS (trừ Từ chối) theo phạm vi user — không cần quyền tab Map
+  return gasData('QHBS_SCAN').then(d=>{
+    const j=d&&d['QHBS_SCAN']; if(!Array.isArray(j)) return [];
+    return j.map(p=>Object.assign({},p,{lat:+p.lat||0,lng:+p.lng||0,loai:'QHBS'})).filter(p=>p.qh&&p.lat&&p.lng);
   }).catch(e=>{ console.warn('loadQHBSPoints',e); return []; });
 }
 function loadQHData(){
@@ -2764,7 +2752,7 @@ async function saveQHPoint(){
 async function deleteQHPoint(){
   if(!editingQh)return; if(!isAdmin()&&currentUser.rank!=='GĐTKMB'){ toast('🔒 Chỉ GĐM/GĐ TKMB được xoá điểm QH','err'); return; } if(!confirm('Xóa điểm QH '+editingQh+'?'))return;
   try{ const r=await fetch(GAS_URL,{method:'POST',body:gasBody({action:'deleteQHPoint',qh:editingQh}),headers:{'Content-Type':'text/plain'}}); const j=await r.json();
-    if(j.ok){closeQHEdit();loadQHManageData();showSuccess('Thành công','Đã xóa điểm QH '+editingQh);} else toast('⚠️ '+(j.error||'Lỗi xóa'),'err');
+    if(j.ok){ const del=editingQh; closeQHEdit();loadQHManageData(); try{ qhPoints=qhPoints.filter(p=>p.qh!==del); if(window.QHM&&QHM.qh) QHM.qh=QHM.qh.filter(p=>p.qh!==del); if(typeof qhmApply==='function') qhmApply(); }catch(_){} showSuccess('Thành công','Đã xóa điểm QH '+del+' (cả Quản lý QH và Map/Scan)');} else toast('⚠️ '+(j.error||'Lỗi xóa'),'err');
   }catch(e){ toast('⚠️ Lỗi kết nối','err'); }
 }
 function parseQHImportRows(rows){
@@ -4289,6 +4277,7 @@ async function saveQHBS(){
       closeQHBSModal();
       showSuccess('Thành công','Đã gửi đề xuất '+maQHBS+' — chờ GĐV duyệt');
       loadQHBSData();
+      try{ mergeQHPoints([{qh:maQHBS,t:tinh,h:huyen,x:'',lat:+lat,lng:+lng,gdv:d.gdv,qlkv:d.qlkv,loai:'QHBS'}]); }catch(_){}
     } else toast('❌ '+(j.error||'Lỗi lưu'),'err');
   }catch(e){
     if(!existing) qhbsData.push(d); try{ localStorage.setItem(QHBS_CACHE_KEY,JSON.stringify(qhbsData)); }catch(err){}
