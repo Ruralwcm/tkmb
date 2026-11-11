@@ -288,12 +288,11 @@ tr:hover{background:rgba(26,60,110,.03)}
 
 /* ─── QHBS PC LAYOUT ─── */
 @media(min-width:900px){
-  .main:has(#sec-qhbs.active){padding-left:12px;padding-right:12px}
-  .qhm-wrap{flex-direction:row;align-items:stretch}
-  .qhm-left{flex:0 0 80%;max-width:80%}
-  #qhbsMapContainer{margin-bottom:0!important}
-  #sec-qhbs #qhbsMapContainer{height:calc(100vh - 175px)!important;min-height:480px!important}
-  #qhmPanel{flex:1 1 auto;height:calc(100vh - 171px);min-height:480px}
+  .main:has(#sec-qhbs.active){padding:0;margin:0}
+  .qhm-wrap{flex-direction:row;align-items:stretch;gap:0}
+  .qhm-left{flex:1 1 auto;min-width:0}
+  #sec-qhbs #qhbsMapContainer{height:calc(100vh - 54px)!important;min-height:480px!important;border-radius:0;margin-top:0}
+  #qhmPanel{flex:0 0 320px;width:320px;height:calc(100vh - 54px);min-height:480px;border-radius:0;border-top:0;border-bottom:0}
   #qhmList{max-height:none}
 }
 
@@ -1387,7 +1386,7 @@ document.querySelectorAll('.nav button[data-tab]').forEach(b => {
       if (!scanGPS.watchId) startScanGPS();
     }
     if (this.dataset.tab === 'qhmanage') { if (!qmLoaded) loadQHManageData(); else renderQHManage(); }
-    if (this.dataset.tab === 'qhbs') { if (!qhbsMap) initQHBSMap(); else setTimeout(()=>qhbsMap.invalidateSize(),50); loadQHBSData(); }
+    if (this.dataset.tab === 'qhbs') { if (!qhbsMap) initQHBSMap(); else setTimeout(()=>qhbsMap.invalidateSize(),50); loadQHBSData(); fitQHBSMapHeight(); }
     if (this.dataset.tab === 'tkmb' && !qhDataLoaded) loadQHData();
     if (this.dataset.tab === 'tkmb' && !currentUser && scanGPS.lat) guestLoadArea(scanGPS.lat,scanGPS.lng);
   });
@@ -3371,6 +3370,17 @@ function renderQHBSList(){
   }).join('');
 }
 
+function fitQHBSMapHeight(){
+  if(!window.matchMedia('(min-width:900px)').matches) return;
+  const hdr=document.querySelector('header');
+  const hh=hdr?hdr.offsetHeight:54;
+  const mapC=document.getElementById('qhbsMapContainer');
+  const panel=document.getElementById('qhmPanel');
+  if(mapC) mapC.style.height='calc(100vh - '+(hh+4)+'px)';
+  if(panel) panel.style.height='calc(100vh - '+(hh+4)+'px)';
+  if(qhbsMap) setTimeout(()=>qhbsMap.invalidateSize(),50);
+}
+window.addEventListener('resize',fitQHBSMapHeight);
 function initQHBSMap(){
   const overlay=document.getElementById('qhbsMapOverlay');
   if(overlay) overlay.style.display='none';
@@ -3432,6 +3442,7 @@ function initQHBSMap(){
     // vẽ lại kích thước biểu tượng khi đổi zoom
     qhbsMap.on('zoomend',function(){ [qhbsLayerStores,qhbsLayerQH,qhbsLayerQHBS,qhbsLayerQHBSP,qhbsLayerMB,qhbsLayerBHX].forEach(function(g){ g.eachLayer(function(l){ if(l._project){ l._project(); } }); }); if(_qhbsRenderer&&_qhbsRenderer._redraw) _qhbsRenderer._redraw(); });
     loadQHBSData();
+    fitQHBSMapHeight();
     _mapIconsReady.then(loadQHBSMapBase);
   }
 
