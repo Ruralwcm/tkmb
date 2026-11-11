@@ -79,6 +79,36 @@ nav.nav button.admin-only{display:none}
 .kpi-num.b{color:var(--orange)}
 .kpi-label{font-size:10.5px;color:var(--mut);text-transform:uppercase;font-weight:700;letter-spacing:.5px;margin-top:2px}
 
+/* ─── SCAN PROGRESS DASHBOARD (SU XD style) ─── */
+.scanprog-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:14px;overflow:hidden}
+.scanprog-header{background:linear-gradient(135deg,var(--navy),#2c4a8a);color:#fff;padding:14px 18px}
+.scanprog-title{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.scanprog-sub{font-size:11px;opacity:.78;margin-top:2px}
+.scanprog-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 16px}
+.sp-stat{background:#fafbfd;border-radius:var(--radius-sm);padding:11px 13px;position:relative;overflow:hidden;border:1px solid var(--line)}
+.sp-stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--navy);border-radius:0 3px 3px 0}
+.sp-stat .n{font-size:21px;font-weight:800;font-family:var(--font-cond);letter-spacing:-.4px;color:var(--navy)}
+.sp-stat .n.g{color:var(--green)}.sp-stat .n.r{color:var(--red)}.sp-stat .n.gold{color:var(--gold)}
+.sp-stat .l{font-size:10px;color:var(--mut);text-transform:uppercase;font-weight:700;letter-spacing:.4px;margin-top:2px}
+.scanprog-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.scanprog-card{background:#fafbfd;border-radius:var(--radius-sm);border:1px solid var(--line);padding:12px;position:relative;overflow:hidden}
+.scanprog-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--navy);border-radius:0 3px 3px 0}
+.scanprog-card-head{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;padding-left:4px}
+.scanprog-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.scanprog-tbl th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--mut);font-weight:700;letter-spacing:.3px;padding:5px 6px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+.scanprog-tbl td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.scanprog-tbl tbody tr:last-child td{border-bottom:none}
+.scanprog-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.sp-bar{height:8px;border-radius:5px;background:#e5e9f2;overflow:hidden;min-width:70px}
+.sp-bar>i{display:block;height:100%;border-radius:5px;transition:width .4s}
+.sp-bar>i.hi{background:var(--green)}.sp-bar>i.mid{background:var(--orange)}.sp-bar>i.lo{background:var(--red)}.sp-bar>i.zero{background:#cbd2dd}
+.sp-pct{font-weight:700;font-variant-numeric:tabular-nums}
+.sp-pct.hi{color:var(--green)}.sp-pct.mid{color:var(--orange)}.sp-pct.lo{color:var(--red)}.sp-pct.zero{color:var(--mut)}
+@media (max-width:720px){
+  .scanprog-overview{grid-template-columns:repeat(2,1fr)}
+  .scanprog-grid{grid-template-columns:1fr}
+}
+
 /* ─── FORM ─── */
 .fg{margin-bottom:8px}
 .fg label{display:block;font-size:10.5px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
@@ -415,6 +445,26 @@ tr:hover{background:rgba(26,60,110,.03)}
 <!-- ═══ SECTION: DASHBOARD ═══ -->
 <div class="section" id="sec-dash">
   <div class="kpi-row" id="kpiMB"></div>
+
+  <!-- ═══ DASHBOARD: TIẾN ĐỘ SCAN ĐIỂM QH ═══ -->
+  <div class="scanprog-wrap" id="scanProgSection">
+    <div class="scanprog-header">
+      <div class="scanprog-title">📡 Tiến độ Scan điểm QH</div>
+      <div class="scanprog-sub">Theo dõi tiến độ khảo sát điểm QH &amp; QHBS</div>
+    </div>
+    <div class="scanprog-overview" id="scanProgOverview"></div>
+    <div class="scanprog-grid">
+      <div class="scanprog-card">
+        <div class="scanprog-card-head">👤 Theo GĐV</div>
+        <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgGDV"><thead><tr><th>GĐV</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="scanprog-card">
+        <div class="scanprog-card-head">📍 Theo Tỉnh</div>
+        <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgTinh"><thead><tr><th>Tỉnh</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="sec-header" onclick="toggleSection(this)"><span class="arr">▼</span><h3>📊 MB Gần đây</h3></div>
     <div class="sec-body">
@@ -424,7 +474,7 @@ tr:hover{background:rgba(26,60,110,.03)}
         <select id="dashGDV" onchange="onDashGDVChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả GĐV</option></select>
         <select id="dashQLKV" onchange="renderDash()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dashMB"><thead><tr><th>MB ID</th><th>Nguồn</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dashMB"><thead><tr><th>MB ID</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody id="dashMBBody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -1297,7 +1347,7 @@ function doLogout(expired) {
   setSessionToken(''); purgeLocalData(); try{ MB_DATA=MB_DATA.filter(m=>m._local); }catch(e){} try{ Object.keys(STORE_INFO).forEach(k=>delete STORE_INFO[k]); }catch(e){}
   currentUser = null; sessionPh=''; USERS=[]; AUTH_PERMS=null; pendingFirstLogin=null;
   document.body.classList.add('guest');
-  qhPoints=[]; qhDataLoaded=false; _qhLoading=null; STORES=null; qhbsData=[]; try{ QHM.qh=[]; QHM.mb=[]; QHM.ch=[]; QHM.bhx=[]; qhmRenderList(); }catch(e){} _cascadeBuilt=false; _guestAreaKey=''; Object.keys(CASCADE_DATA).forEach(k=>delete CASCADE_DATA[k]); populateGDV(true);
+  qhPoints=[]; qhDataLoaded=false; _qhLoading=null; STORES=null; qhbsData=[]; window._qhCheckinLoaded=false; window._qhCheckinRows=null; try{ QHM.qh=[]; QHM.mb=[]; QHM.ch=[]; QHM.bhx=[]; qhmRenderList(); }catch(e){} _cascadeBuilt=false; _guestAreaKey=''; Object.keys(CASCADE_DATA).forEach(k=>delete CASCADE_DATA[k]); populateGDV(true);
   isDashboardMode = false;
   document.getElementById('userDisplay').textContent = 'Chưa đăng nhập';
   document.getElementById('btnChangePass').style.display = 'none';
@@ -1588,7 +1638,7 @@ function openScanDetail(maQH){
   if(!scanSelectedQH) return;
   document.getElementById('scanQHDetail').style.display='block';
   const p=scanSelectedQH;
-  document.getElementById('scanQHInfo').innerHTML='<h3>'+p.qh+'</h3><div style="font-size:12px;color:var(--muted)">📍 '+[p.x,p.h,p.t].filter(Boolean).join(', ')+'</div>';
+  document.getElementById('scanQHInfo').innerHTML='<h3>'+p.qh+(p.loai==='QHBS'?' <span style="color:var(--gold);font-size:13px">(QHBS)</span>':'')+'</h3><div style="font-size:12px;color:var(--muted)">📍 '+[p.x,p.h,p.t].filter(Boolean).join(', ')+'</div>';
   document.getElementById('scanNgayKS').value=new Date().toISOString().split('T')[0];
   loadScanHistory(maQH);
 }
@@ -1940,8 +1990,62 @@ function renderDash(){
     const curStep=currentStep(m);
     const slaCls=curStep?getSLAColor(m,curStep.s):'sla-ok';
     const slaText=curStep?STEP_SLA[curStep.s-1].slaLabel:'—';
-    return '<tr><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr||'')+'"><strong>'+m.id+'</strong> <span style="font-size:11px;color:var(--muted)">'+esc(m.addr||'')+'</span></td><td><span class="tag tag-p">'+esc(m.nguon)+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
+    return '<tr><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr||'')+'"><strong>'+m.id+'</strong> <span style="font-size:11px;color:var(--muted)">'+esc(m.addr||'')+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
   }).join('');
+  renderScanProgress();
+}
+
+// ═══ DASHBOARD: TIẾN ĐỘ SCAN ĐIỂM QH ═══
+function _spBarClass(pct){ return pct>=50?'hi':pct>=20?'mid':pct>0?'lo':'zero'; }
+function renderScanProgress(){
+  const wrap=document.getElementById('scanProgSection'); if(!wrap) return;
+  // Đảm bảo qhPoints (đã merge QHBS) đã nạp — nếu chưa thì nạp rồi vẽ lại
+  if(!qhDataLoaded && typeof loadQHData==='function' && SESSION_TOKEN){ loadQHData().then(()=>renderScanProgress()); }
+  // Danh sách tổng = qhPoints đã merge QHBS (lọc theo phạm vi user nếu là TKMB)
+  let pts=(typeof getUserQHPoints==='function')?getUserQHPoints():qhPoints;
+  pts=(pts||[]).filter(p=>p&&p.qh);
+  // Tập mã QH đã scan (có ≥1 check-in) — từ checkinLocal (localStorage) + tab QH_Checkin nếu đã nạp
+  const scanned=new Set();
+  (checkinLocal||[]).forEach(c=>{ if(c&&c.qh){ scanned.add(String(c.qh).replace(/\s*\(QHBS\)\s*$/,'').trim()); } });
+  if(Array.isArray(window._qhCheckinRows)) window._qhCheckinRows.forEach(q=>{ if(q) scanned.add(String(q).trim()); });
+  const isScanned=p=>scanned.has(String(p.qh).trim());
+
+  const totalPts=pts.length;
+  const doneCnt=pts.filter(isScanned).length;
+  const remain=totalPts-doneCnt;
+  const pctAll=totalPts?Math.round(doneCnt/totalPts*100):0;
+
+  // Tổng quan
+  document.getElementById('scanProgOverview').innerHTML=
+    '<div class="sp-stat"><div class="n">'+totalPts+'</div><div class="l">Tổng điểm QH</div></div>'+
+    '<div class="sp-stat"><div class="n g">'+doneCnt+'</div><div class="l">✅ Đã scan</div></div>'+
+    '<div class="sp-stat"><div class="n r">'+remain+'</div><div class="l">⏳ Chưa scan</div></div>'+
+    '<div class="sp-stat"><div class="n '+(pctAll>=50?'g':pctAll>=20?'gold':'r')+'">'+pctAll+'%</div><div class="l">Tỷ lệ hoàn thành</div></div>';
+
+  // Gom nhóm theo khoá → {total,done}
+  const agg=(keyFn)=>{
+    const m={};
+    pts.forEach(p=>{ const k=(keyFn(p)||'(Chưa rõ)').trim()||'(Chưa rõ)'; if(!m[k])m[k]={total:0,done:0}; m[k].total++; if(isScanned(p))m[k].done++; });
+    return Object.keys(m).map(k=>({name:k,total:m[k].total,done:m[k].done,pct:m[k].total?Math.round(m[k].done/m[k].total*100):0}))
+      .sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name,'vi'));
+  };
+  const rowHtml=r=>{ const c=_spBarClass(r.pct); return '<tr><td>'+esc(r.name)+'</td><td class="num">'+r.total+'</td><td class="num">'+r.done+'</td><td class="num"><span class="sp-pct '+c+'">'+r.pct+'%</span></td><td><div class="sp-bar"><i class="'+c+'" style="width:'+r.pct+'%"></i></div></td></tr>'; };
+
+  const gdvRows=agg(p=>p.gdv);
+  const tinhRows=agg(p=>p.t);
+  const gtb=document.querySelector('#scanProgGDV tbody'); if(gtb) gtb.innerHTML=gdvRows.length?gdvRows.map(rowHtml).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+  const ttb=document.querySelector('#scanProgTinh tbody'); if(ttb) ttb.innerHTML=tinhRows.length?tinhRows.map(rowHtml).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+
+  // Nạp thêm check-in từ tab QH_Checkin (1 lần) để bổ sung các điểm đã scan ở máy khác
+  if(!window._qhCheckinLoaded && SESSION_TOKEN){
+    window._qhCheckinLoaded=true;
+    gasData('QH_Checkin').then(d=>{
+      const j=d['QH_Checkin']; let rows=[];
+      if(Array.isArray(j)) rows=j.map(x=>x&&(x.qh||x['Mã QH']||x['Ma QH']||x['QH'])).filter(Boolean);
+      else if(typeof j==='string'&&j){ const cr=csvParse(j); if(cr.length){ const hi=cr[0].findIndex(h=>/m[ãa]\s*qh|^qh$/i.test(String(h).replace(/^\uFEFF/,''))); const ci=hi<0?0:hi; for(let i=1;i<cr.length;i++){ if(cr[i][ci]) rows.push(cr[i][ci]); } } }
+      if(rows.length){ window._qhCheckinRows=rows.map(x=>String(x).replace(/\s*\(QHBS\)\s*$/,'').trim()); renderScanProgress(); }
+    }).catch(()=>{});
+  }
 }
 function toggleSection(el){
   const body=el.nextElementSibling; const isCollapsed=el.classList.contains('collapsed');
@@ -2045,7 +2149,7 @@ function renderTienDo(){
     let slaText='Vừa tạo', slaCls='sla-ok';
     const ps=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None');
     if(ps){ const st=slaState(m,ps.s); if(st==='over'){slaText='Đã quá hạn';slaCls='sla-over';}else if(st==='warn'){slaText='Sắp quá hạn';slaCls='sla-warn';} }
-    return '<tr><td><strong>'+m.id+'</strong><div class="qh-info-mini">'+m.nguon+'</div></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'<div class="qh-info-mini">'+esc(m.huyen||'')+' · '+(recTKMB(m.tinh,m.huyen,m.tkmb)?'TN: '+esc(recTKMB(m.tinh,m.huyen,m.tkmb)):'<b style="color:var(--red)">⚠️ chưa gán TN</b>')+'</div></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
+    return '<tr><td><strong>'+m.id+'</strong></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
   }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
 }
 
