@@ -471,6 +471,14 @@ tr:hover{background:rgba(26,60,110,.03)}
 .db-empty{text-align:center!important;color:var(--mut);padding:18px!important}
 .db-more{text-align:center!important;color:var(--mut);font-size:11px}
 .db-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.db-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;align-items:start}
+.db-main,.db-side{min-width:0}
+@media(min-width:1101px){.db-grid{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}.db-side{order:-1}}
+.db-side .db-card-head{padding:10px 14px}
+.db-side .db-title{font-size:13px}
+.db-main .db-scroll{max-height:560px}
+.db-nomb .sub{font-size:10.5px;color:var(--mut)}
+@media(max-width:1100px){.db-grid{grid-template-columns:1fr}}
 .db-trend{padding:12px 16px}
 .db-slow{list-style:none;margin:0;padding:6px 16px 12px}
 .db-slow li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer}
@@ -563,28 +571,31 @@ tr:hover{background:rgba(26,60,110,.03)}
   <!-- Thẻ chỉ số (bấm để lọc danh sách) -->
   <div class="db-kpis" id="dbKpis"></div>
 
-  <!-- Bảng drill-down -->
-  <div class="db-card">
-    <div class="db-card-head">
-      <div class="db-tabs">
-        <button type="button" id="dbModeArea" onclick="dbSet('mode','area')">🗺️ Theo địa bàn</button>
-        <button type="button" id="dbModePeople" onclick="dbSet('mode','people')">👤 Theo nhân sự</button>
+  <div class="db-grid">
+   <div class="db-main">
+    <!-- Bảng drill-down -->
+    <div class="db-card">
+      <div class="db-card-head">
+        <div class="db-tabs">
+          <button type="button" id="dbModeArea" onclick="dbSet('mode','area')">🗺️ Theo địa bàn</button>
+          <button type="button" id="dbModePeople" onclick="dbSet('mode','people')">👤 Theo nhân sự</button>
+        </div>
+        <div class="db-hint" id="dbLevelHint"></div>
       </div>
-      <div class="db-hint" id="dbLevelHint"></div>
+      <div class="db-scroll"><table class="db-tbl" id="dbTable"><thead></thead><tbody></tbody></table></div>
     </div>
-    <div class="db-scroll"><table class="db-tbl" id="dbTable"><thead></thead><tbody></tbody></table></div>
-  </div>
-
-  <!-- Danh sách cần xử lý (cấp chi tiết) -->
-  <div class="db-card">
-    <div class="db-card-head"><div class="db-title" id="dbListTitle">📋 Danh sách cần xử lý</div><div class="db-hint" id="dbListHint"></div></div>
-    <div class="db-scroll db-list"><table class="db-tbl" id="dbList"><thead></thead><tbody></tbody></table></div>
-  </div>
-
-  <!-- Xu hướng + chậm nhất -->
-  <div class="db-two">
-    <div class="db-card"><div class="db-card-head"><div class="db-title">📈 Số điểm scan theo tuần (8 tuần)</div></div><div id="dbTrend" class="db-trend"></div></div>
-    <div class="db-card"><div class="db-card-head"><div class="db-title" id="dbSlowTitle">🐢 5 chậm nhất</div></div><div id="dbSlow"></div></div>
+    <!-- Danh sách cần xử lý -->
+    <div class="db-card">
+      <div class="db-card-head"><div class="db-title" id="dbListTitle">📋 Danh sách cần xử lý</div><div class="db-hint" id="dbListHint"></div></div>
+      <div class="db-scroll db-list"><table class="db-tbl" id="dbList"><thead></thead><tbody></tbody></table></div>
+    </div>
+   </div>
+   <div class="db-side">
+    <div class="db-card"><div class="db-card-head"><div class="db-title">🏢 Số MB về theo tuần</div></div><div id="dbMBTrend" class="db-trend"></div></div>
+    <div class="db-card"><div class="db-card-head"><div class="db-title">📡 Số điểm scan theo tuần</div></div><div id="dbTrend" class="db-trend"></div></div>
+    <div class="db-card"><div class="db-card-head"><div class="db-title" id="dbNoMBTitle">🚫 Địa bàn không có MB (30 ngày)</div></div><div id="dbNoMB"></div></div>
+    <div class="db-card"><div class="db-card-head"><div class="db-title" id="dbSlowTitle">🐢 Scan chậm nhất</div></div><div id="dbSlow"></div></div>
+   </div>
   </div>
 </div>
 
@@ -1473,7 +1484,7 @@ function doLogout(expired) {
   // Xoá dữ liệu nội bộ khỏi giao diện
   MB_DATA=[]; QH_DATA=[]; KYHD_DATA=[]; DP_DATA=[]; chkNSOList=[]; qmLoaded=false;
   ['#dashMB tbody','#tdTbody','#qmTbody','#chkTbody','#dpTable tbody','#dsTable tbody','#cfgUserTable'].forEach(q=>{const el=document.querySelector(q); if(el) el.innerHTML='';});
-  ['kpiMB','chkKPI','dbKpis','dbTrend','dbSlow'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML='';});
+  ['kpiMB','chkKPI','dbKpis','dbTrend','dbSlow','dbMBTrend','dbNoMB'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML='';});
   ['#dbTable thead','#dbTable tbody','#dbList thead','#dbList tbody'].forEach(q=>{const el=document.querySelector(q); if(el) el.innerHTML='';});
   try{ window._dbCI=null; window._dbCITok=null; window._dbBSReq=0; DB.mien=DB.tinh=DB.huyen=DB.gdv=DB.qlkv=''; DB.kpi='unscan'; }catch(e){}
   switchTab('scan');
@@ -2186,11 +2197,12 @@ function dbData(){
     var cs=currentStep(m), done=m.steps&&m.steps[5]&&m.steps[5].r==='Done', fail=(m.steps||[]).some(function(s){return s.r==='Fail';});
     return dbRec({k:'mb',m:m,t:m.tinh,h:m.huyen,gdv:m.gdv,qlkv:m.qlkv,created:dbParseTime(m.createdAt),
       done:done,fail:fail,proc:!done&&!fail,over:!!(cs&&slaState(m,cs.s)==='over')});
-  }).filter(function(r){ return !st||!r.created||r.created>=st; });
+  });
+  var mbsAll=mbs; mbs=mbs.filter(function(r){ return !st||!r.created||r.created>=st; });
   var bsp=(typeof qhbsData!=='undefined'?qhbsData:[]).filter(function(d){ return d&&d.qh&&qhbsIsPending(d); }).map(function(d){
     return dbRec({k:'bsp',code:d.qh,t:d.t,h:d.h,x:d.x,gdv:d.gdv,qlkv:d.qlkv,lat:+d.lat,lng:+d.lng,nguoi:d.nguoiDeXuat,ngay:d.ngayDeXuat});
   });
-  return {pts:pts,mbs:mbs,bsp:bsp};
+  return {pts:pts,mbs:mbs,bsp:bsp,mbsAll:mbsAll};
 }
 function dbPass(r,skip){
   skip=skip||{};
@@ -2366,21 +2378,14 @@ function dbList(f){
 /* ── Xu hướng scan theo tuần + 5 chậm nhất ── */
 function dbTrend(f){
   var el=document.getElementById('dbTrend'); if(!el) return;
-  var mon=function(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var w=(x.getDay()+6)%7; x.setDate(x.getDate()-w); return x; };
-  var W=[], m0=mon(new Date()); for(var i=7;i>=0;i--){ var s=new Date(m0); s.setDate(s.getDate()-7*i); W.push({s:s,e:new Date(s.getTime()+7*864e5),set:{}}); }
+  var W=dbWeeks(); W.forEach(function(w){ w.set={}; });
   f.pts.forEach(function(p){ p.ci.forEach(function(c){ if(!c.ts) return; W.forEach(function(w){ if(c.ts>=w.s&&c.ts<w.e) w.set[p.code]=1; }); }); });
-  var vals=W.map(function(w){ return Object.keys(w.set).length; }), mx=Math.max.apply(null,vals.concat([1]));
-  var bw=50, gap=18, H=150, left=9, svgW=left+W.length*(bw+gap);
-  var bars=W.map(function(w,i){ var v=vals[i], h=Math.round(v/mx*(H-40)), x=left+i*(bw+gap), y=H-18-h, last=i===W.length-1;
-    return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(h,1)+'" rx="4" fill="'+(last?'var(--red)':'var(--navy)')+'" fill-opacity="'+(last?1:.55)+'"><title>Tuần từ '+dbFmt(w.s).slice(0,5)+': '+v+' điểm</title></rect>'
-      +'<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#1a3c6e">'+v+'</text>'
-      +'<text x="'+(x+bw/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="10" fill="#6b7280">'+dbFmt(w.s).slice(0,5)+'</text>'; }).join('');
-  var tot=vals.reduce(function(a,b){return a+b;},0);
-  el.innerHTML='<svg viewBox="0 0 '+svgW+' '+H+'" style="width:100%;max-width:560px;height:auto;display:block">'+bars+'</svg><div class="db-hint" style="margin-top:4px">Số điểm khác nhau được scan mỗi tuần (tuần bắt đầu Thứ 2) · 8 tuần: '+tot+' lượt-điểm · theo bộ lọc hiện tại</div>';
+  var vals=W.map(function(w){ return Object.keys(w.set).length; });
+  dbBars(el,W,vals,'Số điểm khác nhau được scan mỗi tuần · 8 tuần: '+vals.reduce(function(a,b){return a+b;},0)+' lượt-điểm');
   var sl=document.getElementById('dbSlow'), st=document.getElementById('dbSlowTitle');
   var lv=_dbLevel, dim=DB_LV[lv]?DB_LV[lv].dim:'';
   var cand=(_dbLastRows||[]).filter(function(g){ return g.qh>=3; }).slice().sort(function(a,b){ return a.pct-b.pct||b.qh-a.qh; }).slice(0,5);
-  if(st) st.textContent='🐢 5 '+(DB_LV[lv]&&DB_LV[lv].lbl?DB_LV[lv].lbl:'nhóm')+' scan chậm nhất';
+  if(st) st.textContent='🐢 '+(DB_LV[lv]&&DB_LV[lv].lbl?DB_LV[lv].lbl:'Nhóm')+' scan chậm nhất';
   if(sl) sl.innerHTML=cand.length?'<ul class="db-slow">'+cand.map(function(g){ var c=dbCls(g.pct); return '<li onclick="dbDrill(\''+dim+'\',\''+escJS(g.key)+'\')"><span class="nm" title="'+esc(g.name)+'">'+esc(g.name)+'</span><span style="color:var(--mut);font-size:11px">'+g.scan+'/'+g.qh+'</span><span class="db-pct '+c+'">'+g.pct+'%</span><span class="db-bar-c"><i class="'+c+'" style="width:'+g.pct+'%"></i></span></li>'; }).join('')+'</ul>'
     :'<div class="db-hint" style="padding:14px 12px">Không có nhóm nào đủ ≥3 điểm QH ở cấp này.</div>';
 }
@@ -2423,16 +2428,44 @@ function dbOpenMapPoint(kind,i){
 /* ── Vẽ toàn bộ ── */
 function renderDash(){
   var sec=document.getElementById('sec-dash'); if(!sec) return;
-  if(!currentUser){ ['dbKpis','dbTrend','dbSlow'].forEach(function(id){ var e=document.getElementById(id); if(e) e.innerHTML=''; }); return; }
+  if(!currentUser){ ['dbKpis','dbTrend','dbSlow','dbMBTrend','dbNoMB'].forEach(function(id){ var e=document.getElementById(id); if(e) e.innerHTML=''; }); return; }
   if(!qhDataLoaded&&typeof loadQHData==='function'&&SESSION_TOKEN&&!window._dbQHReq){ window._dbQHReq=1; loadQHData().then(function(){ window._dbQHReq=0; renderDash(); }); }
   if((typeof qhbsData==='undefined'||!qhbsData.length)&&!window._dbBSReq&&typeof canTab==='function'&&canTab('qhbs')&&typeof loadQHBSData==='function'){ window._dbBSReq=1; try{ loadQHBSData(); }catch(e){} setTimeout(renderDash,3500); }
   dbLoadCheckins();
   _dbLbl={tinh:{},huyen:{}};
   var all=dbData();
-  var f={pts:all.pts.filter(function(r){return dbPass(r);}),mbs:all.mbs.filter(function(r){return dbPass(r);}),bsp:all.bsp.filter(function(r){return dbPass(r);})};
-  dbFillSelects(all); dbCrumb(); dbKpis(f); dbTable(f); dbList(f); dbTrend(f);
+  var f={pts:all.pts.filter(function(r){return dbPass(r);}),mbs:all.mbs.filter(function(r){return dbPass(r);}),bsp:all.bsp.filter(function(r){return dbPass(r);}),mbsAll:all.mbsAll.filter(function(r){return dbPass(r);})};
+  dbFillSelects(all); dbCrumb(); dbKpis(f); dbTable(f); dbList(f); dbTrend(f); dbMBTrend(f); dbNoMB(f);
 }
 function renderScanProgress(){ renderDash(); }
+/* Biểu đồ cột 8 tuần (dùng chung) */
+function dbWeeks(){ var mon=function(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+  var W=[], m0=mon(new Date()); for(var i=7;i>=0;i--){ var s0=new Date(m0); s0.setDate(s0.getDate()-7*i); W.push({s:s0,e:new Date(s0.getTime()+7*864e5)}); } return W; }
+function dbBars(el,W,vals,note){
+  var mx=Math.max.apply(null,vals.concat([1])), bw=50, gap=18, H=150, left=9, svgW=left+W.length*(bw+gap);
+  var bars=W.map(function(w,i){ var v=vals[i], h=Math.round(v/mx*(H-40)), x=left+i*(bw+gap), y=H-18-h, last=i===W.length-1;
+    return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(h,1)+'" rx="4" fill="'+(last?'var(--red)':'var(--navy)')+'" fill-opacity="'+(last?1:.55)+'"><title>Tuần từ '+dbFmt(w.s).slice(0,5)+': '+v+'</title></rect>'
+      +'<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#1a3c6e">'+v+'</text>'
+      +'<text x="'+(x+bw/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="11" fill="#6b7280">'+dbFmt(w.s).slice(0,5)+'</text>'; }).join('');
+  el.innerHTML='<svg viewBox="0 0 '+svgW+' '+H+'" style="width:100%;height:auto;display:block">'+bars+'</svg><div class="db-hint" style="margin-top:4px">'+note+'</div>';
+}
+function dbMBTrend(f){
+  var el=document.getElementById('dbMBTrend'); if(!el) return;
+  var W=dbWeeks(), vals=W.map(function(w){ return f.mbsAll.filter(function(r){ return r.created&&r.created>=w.s&&r.created<w.e; }).length; });
+  dbBars(el,W,vals,'MB giới thiệu mới mỗi tuần (tuần bắt đầu Thứ 2) · 8 tuần: '+vals.reduce(function(a,b){return a+b;},0)+' MB');
+}
+/* Địa bàn có điểm QH nhưng không có MB mới trong 30 ngày */
+function dbNoMB(f){
+  var el=document.getElementById('dbNoMB'), tt=document.getElementById('dbNoMBTitle'); if(!el) return;
+  var lv=DB.tinh?'huyen':DB.mien?'tinh':'tinh', since=new Date(Date.now()-30*864e5), G={};
+  f.pts.forEach(function(r){ var k=dbKey(r,lv); if(!k) return; var g=G[k]||(G[k]={key:k,name:dbKeyLabel(k,lv),qh:0,un:0,mb30:0,last:null}); g.qh++; if(!r.scanned) g.un++; });
+  f.mbsAll.forEach(function(r){ var g=G[dbKey(r,lv)]; if(!g) return; if(r.created&&(!g.last||r.created>g.last)) g.last=r.created; if(r.created&&r.created>=since) g.mb30++; });
+  var rows=Object.keys(G).map(function(k){ return G[k]; }).filter(function(g){ return !g.mb30; }).sort(function(a,b){ return b.qh-a.qh||String(a.name).localeCompare(String(b.name),'vi'); });
+  if(tt) tt.textContent='🚫 '+(lv==='huyen'?'Huyện':'Tỉnh')+' không có MB 30 ngày ('+rows.length+')';
+  var dim=lv==='huyen'?'huyen':'tinh';
+  el.innerHTML=rows.length?'<ul class="db-slow db-nomb">'+rows.slice(0,8).map(function(g){ return '<li onclick="dbDrill(\''+dim+'\',\''+escJS(g.key)+'\')"><span class="nm" title="'+esc(g.name)+'">'+esc(g.name)+'<div class="sub">MB gần nhất: '+(g.last?dbFmt(g.last).slice(0,5)+'/'+g.last.getFullYear():'chưa có')+'</div></span><span style="text-align:right;font-size:11px;color:var(--mut)"><b style="color:var(--navy)">'+g.qh+'</b> điểm QH<br>'+g.un+' chưa scan</span></li>'; }).join('')+'</ul>'+(rows.length>8?'<div class="db-hint" style="padding:0 16px 10px">… và '+(rows.length-8)+' địa bàn khác</div>':'')
+    :'<div class="db-hint" style="padding:14px">Mọi địa bàn đều có MB mới trong 30 ngày 👍</div>';
+}
 
 function toggleSection(el){
   const body=el.nextElementSibling; const isCollapsed=el.classList.contains('collapsed');
