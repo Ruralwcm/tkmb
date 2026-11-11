@@ -1358,12 +1358,39 @@ let qhbsLocal = JSON.parse(localStorage.getItem('tkmb_field_qhbs')||'[]');
 let checkinLocal = JSON.parse(localStorage.getItem('tkmb_field_checkins')||'[]');
 let tripSeq = parseInt(localStorage.getItem('tkmb_field_trip_seq')||'0');
 let _qhLoading=null;
+/* Nạp điểm QHBS (quy hoạch bổ sung) từ tab QHBS → chuẩn hoá cùng format với qhPoints */
+function loadQHBSPoints(){
+  return sheetText('QHBS').then(csv=>{
+    const rows=csvParse(csv);
+    if(!rows.length||!sheetHasCols(rows,['Mã QHBS'])) return [];
+    const idx={}; rows[0].forEach((h,i)=>idx[h.replace(/^\uFEFF/,'')]=i);
+    const g=(r,k)=>idx[k]!==undefined?(r[idx[k]]||''):'';
+    const out=[];
+    for(let i=1;i<rows.length;i++){
+      const r=rows[i];
+      const qh=g(r,'Mã QHBS'); if(!qh) continue;
+      out.push({
+        qh:qh, t:g(r,'Tỉnh/TP'), h:g(r,'Huyện/Quận'), x:g(r,'Xã/Phường'),
+        lat:parseFloat(g(r,'Lat'))||0, lng:parseFloat(g(r,'Lng'))||0,
+        gdv:g(r,'GĐV'), qlkv:g(r,'QLKV'), loai:'QHBS'
+      });
+    }
+    return out.filter(p=>p.lat&&p.lng);
+  }).catch(e=>{ console.warn('loadQHBSPoints',e); return []; });
+}
 function loadQHData(){
   if(qhDataLoaded) return Promise.resolve(qhPoints);
   if(_qhLoading) return _qhLoading;
   if(!SESSION_TOKEN) return Promise.resolve(qhPoints);
-  _qhLoading=gasData('QH_MAP').then(d=>{ const j=d['QH_MAP']; qhPoints=Array.isArray(j)?j:[]; qhDataLoaded=Array.isArray(j); _qhLoading=null; return qhPoints; })
-    .catch(e=>{ _qhLoading=null; console.warn('loadQHData',e); return qhPoints; });
+  _qhLoading=Promise.all([
+    gasData('QH_MAP').then(d=>{ const j=d['QH_MAP']; return Array.isArray(j)?j:null; }).catch(()=>null),
+    loadQHBSPoints()
+  ]).then(([qh,qhbs])=>{
+    const base=Array.isArray(qh)?qh.map(p=>Object.assign({loai:'QH'},p)):[];
+    // Merge QHBS, tránh trùng mã với QH thường
+    (qhbs||[]).forEach(p=>{ if(!base.find(x=>x.qh===p.qh)) base.push(p); });
+    qhPoints=base; qhDataLoaded=Array.isArray(qh); _qhLoading=null; return qhPoints;
+  }).catch(e=>{ _qhLoading=null; console.warn('loadQHData',e); return qhPoints; });
   return _qhLoading;
 }
 function startScanGPS(){
@@ -2016,7 +2043,7 @@ function renderTienDo(){
     let slaText='Vừa tạo', slaCls='sla-ok';
     const ps=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None');
     if(ps){ const st=slaState(m,ps.s); if(st==='over'){slaText='Đã quá hạn';slaCls='sla-over';}else if(st==='warn'){slaText='Sắp quá hạn';slaCls='sla-warn';} }
-    return '<tr><td><strong>'+m.id+'</strong><div class="qh-info-mini">'+m.nguon+'</div></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'<div class="qh-info-mini">'+esc(m.huyen||'')+' · '+(recTKMB(m.tinh,m.huyen,m.tkmb)?'TN: '+esc(recTKMB(m.tinh,m.huyen,m.tkmb)):'<b style="color:var(--red)">⚠️ chưa gán TN</b>')+'</div></td><td style="white-space:normal;word-break:break-word;min-width:160px" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
+    return '<tr><td><strong>'+m.id+'</strong><div class="qh-info-mini">'+m.nguon+'</div></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'<div class="qh-info-mini">'+esc(m.huyen||'')+' · '+(recTKMB(m.tinh,m.huyen,m.tkmb)?'TN: '+esc(recTKMB(m.tinh,m.huyen,m.tkmb)):'<b style="color:var(--red)">⚠️ chưa gán TN</b>')+'</div></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
   }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
 }
 
