@@ -371,9 +371,7 @@ tr:hover{background:rgba(26,60,110,.03)}
   .hl img{height:24px}
   .hl h1{font-size:13px}
   .hl .sub{font-size:8.5px}
-  nav.nav{order:3;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding-top:4px}
-  nav.nav::-webkit-scrollbar{display:none}
-  nav.nav button{padding:5px 8px;font-size:10px}
+  nav.nav{display:none}
   .user-area{font-size:10px;gap:4px}
   .user-area .btn-xs{padding:3px 6px;font-size:9px}
 
@@ -404,6 +402,21 @@ tr:hover{background:rgba(26,60,110,.03)}
   #cfgUserTable code{font-size:10px}
   #cfgUserTable td:last-child{display:flex;gap:2px;align-items:center}
 }
+
+/* ─── Hamburger + Drawer (mobile) ─── */
+.nav-hamburger{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0}
+@media(max-width:768px){.nav-hamburger{display:block}}
+.nav-drawer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:1000;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.nav-drawer-overlay.open{opacity:1;visibility:visible}
+.nav-drawer{position:fixed;top:0;right:0;width:270px;max-width:80vw;height:100%;height:100dvh;background:#fff;z-index:1001;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-4px 0 24px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.nav-drawer.open{transform:translateX(0)}
+.nav-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #e5e9f2;background:linear-gradient(135deg,#1a3c6e,#2c4a8a);color:#fff;flex-shrink:0}
+.nav-drawer-head h3{margin:0;font-size:14px;font-weight:700}
+.nav-drawer-close{background:none;border:none;color:rgba(255,255,255,.75);font-size:24px;cursor:pointer;padding:0 4px;line-height:1}
+.nav-drawer-body{padding:8px;flex:1;overflow-y:auto}
+.nav-drawer-body button{display:block;width:100%;text-align:left;padding:11px 14px;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--txt);border-radius:8px;cursor:pointer;font-family:var(--font);margin-bottom:2px;transition:background .12s}
+.nav-drawer-body button:hover{background:#f0f4ff;color:var(--navy)}
+.nav-drawer-body button.active{background:#e8f0fe;color:var(--navy);font-weight:700}
 </style>
 
 </head>
@@ -444,6 +457,7 @@ tr:hover{background:rgba(26,60,110,.03)}
     <button data-tab="dsmb" class="admin-only">📑 Danh sách MB</button>
     <button data-tab="settings" class="admin-only" id="navSettings">⚙️</button>
   </nav>
+  <button class="nav-hamburger" onclick="toggleNavDrawer()" aria-label="Menu">☰</button>
   <div class="user-area">
     <span id="userDisplay">Chưa đăng nhập</span>
     <button id="btnDashboard" class="btn-xs btn-outline" onclick="openDashboardLogin()">📊 Dashboard</button>
@@ -451,6 +465,13 @@ tr:hover{background:rgba(26,60,110,.03)}
     <button id="btnLogout" class="btn-xs btn-outline" style="display:none" onclick="doLogout()">🚪</button>
   </div>
 </header>
+
+<!-- ═══ NAV DRAWER (mobile) ═══ -->
+<div class="nav-drawer-overlay" id="navDrawerOverlay" onclick="closeNavDrawer()"></div>
+<div class="nav-drawer" id="navDrawer">
+  <div class="nav-drawer-head"><h3>📋 Menu</h3><button class="nav-drawer-close" onclick="closeNavDrawer()">✕</button></div>
+  <div class="nav-drawer-body" id="navDrawerBody"></div>
+</div>
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <div class="main" id="appMain">
@@ -1253,6 +1274,10 @@ function applyTabPerms(){
   document.querySelectorAll('.nav button[data-tab]').forEach(b=>{
     b.style.display = canTab(b.dataset.tab) ? 'inline-block' : 'none';
   });
+  // Đồng bộ drawer buttons
+  document.querySelectorAll('#navDrawerBody button').forEach(b=>{
+    b.style.display = canTab(b.dataset.tab) ? 'block' : 'none';
+  });
   qhbsApplyAuth();
   // đang đứng ở tab không còn quyền (vd. vừa đăng xuất ở Map & Quy hoạch) → về Scan QH, ẩn nội dung tab cũ
   const act=document.querySelector('.nav button[data-tab].active');
@@ -1345,7 +1370,10 @@ function setCurrentUser(u) {
 }
 function switchTab(tab){
   const btn=document.querySelector('.nav button[data-tab="'+tab+'"]');
-  if(btn) btn.click();
+  if(btn){ btn.click(); }
+  // Đồng bộ drawer active
+  document.querySelectorAll('#navDrawerBody button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  closeNavDrawer();
 }
 function enterDashboardMode() {
   isDashboardMode = true;
@@ -1409,6 +1437,44 @@ document.querySelectorAll('.nav button[data-tab]').forEach(b => {
     if (this.dataset.tab === 'tkmb' && !currentUser && scanGPS.lat) guestLoadArea(scanGPS.lat,scanGPS.lng);
   });
 });
+
+/* ─── Nav drawer (mobile hamburger) ─── */
+function openNavDrawer(){
+  document.getElementById('navDrawer').classList.add('open');
+  document.getElementById('navDrawerOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  // Đồng bộ trạng thái active
+  const act=document.querySelector('.nav button[data-tab].active');
+  document.querySelectorAll('#navDrawerBody button').forEach(b=>{
+    b.classList.toggle('active',act&&b.dataset.tab===act.dataset.tab);
+  });
+}
+function closeNavDrawer(){
+  document.getElementById('navDrawer').classList.remove('open');
+  document.getElementById('navDrawerOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function toggleNavDrawer(){
+  var d=document.getElementById('navDrawer');
+  d.classList.contains('open')?closeNavDrawer():openNavDrawer();
+}
+// Populate drawer từ nav desktop
+(function(){
+  var nav=document.getElementById('appNav'), body=document.getElementById('navDrawerBody');
+  if(!nav||!body) return;
+  var btns=nav.querySelectorAll('button[data-tab]');
+  btns.forEach(function(b){
+    var clone=document.createElement('button');
+    clone.textContent=b.textContent; clone.dataset.tab=b.dataset.tab;
+    clone.className=b.className;
+    clone.addEventListener('click',function(){
+      closeNavDrawer();
+      var src=nav.querySelector('button[data-tab="'+this.dataset.tab+'"]');
+      if(src) src.click();
+    });
+    body.appendChild(clone);
+  });
+})();
 
 // ═══════════════════════════════════════════════════════
 // SCAN QH / GPS (Field app logic)
