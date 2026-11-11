@@ -2752,7 +2752,7 @@ async function saveQHPoint(){
 async function deleteQHPoint(){
   if(!editingQh)return; if(!isAdmin()&&currentUser.rank!=='GĐTKMB'){ toast('🔒 Chỉ GĐM/GĐ TKMB được xoá điểm QH','err'); return; } if(!confirm('Xóa điểm QH '+editingQh+'?'))return;
   try{ const r=await fetch(GAS_URL,{method:'POST',body:gasBody({action:'deleteQHPoint',qh:editingQh}),headers:{'Content-Type':'text/plain'}}); const j=await r.json();
-    if(j.ok){ const del=editingQh; closeQHEdit();loadQHManageData(); try{ qhPoints=qhPoints.filter(p=>p.qh!==del); if(window.QHM&&QHM.qh) QHM.qh=QHM.qh.filter(p=>p.qh!==del); if(typeof qhmApply==='function') qhmApply(); }catch(_){} showSuccess('Thành công','Đã xóa điểm QH '+del+' (cả Quản lý QH và Map/Scan)');} else toast('⚠️ '+(j.error||'Lỗi xóa'),'err');
+    if(j.ok){ const del=editingQh; closeQHEdit();loadQHManageData(); try{ qhPoints=qhPoints.filter(p=>p.qh!==del); if(typeof QHM!=='undefined'&&QHM.qh) QHM.qh=QHM.qh.filter(p=>p.qh!==del); if(typeof qhmApply==='function') qhmApply(); }catch(_){} showSuccess('Thành công','Đã xóa điểm QH '+del+' (cả Quản lý QH và Map/Scan)');} else toast('⚠️ '+(j.error||'Lỗi xóa'),'err');
   }catch(e){ toast('⚠️ Lỗi kết nối','err'); }
 }
 function parseQHImportRows(rows){
