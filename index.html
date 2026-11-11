@@ -1911,7 +1911,7 @@ function renderDash(){
     const curStep=currentStep(m);
     const slaCls=curStep?getSLAColor(m,curStep.s):'sla-ok';
     const slaText=curStep?STEP_SLA[curStep.s-1].slaLabel:'—';
-    return '<tr><td><strong>'+m.id+'</strong><div style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(m.addr||'')+'</div></td><td><span class="tag tag-p">'+esc(m.nguon)+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
+    return '<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr||'')+'"><strong>'+m.id+'</strong> <span style="font-size:11px;color:var(--muted)">'+esc(m.addr||'')+'</span></td><td><span class="tag tag-p">'+esc(m.nguon)+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
   }).join('');
 }
 function toggleSection(el){
