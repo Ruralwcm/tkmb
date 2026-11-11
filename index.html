@@ -2057,12 +2057,30 @@ function renderScanProgress(){
   // Nạp thêm check-in từ tab QH_Checkin (1 lần) để bổ sung các điểm đã scan ở máy khác
   if(!window._qhCheckinLoaded && SESSION_TOKEN){
     window._qhCheckinLoaded=true;
-    gasData('QH_Checkin').then(d=>{
-      const j=d['QH_Checkin']; let rows=[];
-      if(Array.isArray(j)) rows=j.map(x=>x&&(x.qh||x['Mã QH']||x['Ma QH']||x['QH'])).filter(Boolean);
-      else if(typeof j==='string'&&j){ const cr=csvParse(j); if(cr.length){ const hi=cr[0].findIndex(h=>/m[ãa]\s*qh|^qh$/i.test(String(h).replace(/^\uFEFF/,''))); const ci=hi<0?0:hi; for(let i=1;i<cr.length;i++){ if(cr[i][ci]) rows.push(cr[i][ci]); } } }
-      if(rows.length){ window._qhCheckinRows=rows.map(x=>String(x).replace(/\s*\(QHBS\)\s*$/,'').trim()); renderScanProgress(); }
-    }).catch(()=>{});
+    const applyRows=rows=>{ if(rows&&rows.length){ window._qhCheckinRows=rows.map(x=>String(x).replace(/\s*\(QHBS\)\s*$/,'').trim()); renderScanProgress(); } };
+    const qhColIdx=hdr=>{ if(!hdr||!hdr.length) return -1; for(let i=0;i<hdr.length;i++){ const h=String(hdr[i]||'').replace(/^\uFEFF/,'').normalize('NFC').toLowerCase(); if(h.indexOf('mã qh')===0||h.indexOf('ma qh')===0||h==='qh'||h==='mã') return i; } return -1; };
+    const extractFromRows=(grid,skipFirst)=>{ if(!grid||!grid.length) return []; const ci=qhColIdx(grid[0]); const start=skipFirst?1:0; const out=[]; for(let i=start;i<grid.length;i++){ const row=grid[i]; if(!row) continue; let v=null; if(ci>=0) v=row[ci]; else if(Array.isArray(row)) v=row[1]!==undefined?row[1]:row[0]; if(v){ v=String(v).trim(); if(v) out.push(v); } } return out; };
+    // 1) CSV string (chuẩn cho tab header tiếng Việt — như QHBS)
+    sheetText('QH_Checkin').then(txt=>{
+      if(txt){ const cr=csvParse(txt); const rows=extractFromRows(cr,true); if(rows.length) return applyRows(rows); }
+      // 2) Fallback: gasData trả mảng (array of objects / array of arrays)
+      return gasData('QH_Checkin').then(d=>{
+        const j=d&&d['QH_Checkin']; if(!Array.isArray(j)||!j.length) return;
+        let rows=[];
+        if(j[0]&&typeof j[0]==='object'&&!Array.isArray(j[0])){
+          rows=j.map(x=>x&&(x.qh||x['Mã QH']||x['Ma QH']||x['QH']||x['mã qh'])).filter(Boolean);
+        }else{
+          rows=extractFromRows(j,false);
+        }
+        applyRows(rows);
+      }).catch(()=>{});
+    }).catch(()=>{
+      gasData('QH_Checkin').then(d=>{
+        const j=d&&d['QH_Checkin']; if(!Array.isArray(j)||!j.length) return;
+        let rows=(j[0]&&typeof j[0]==='object'&&!Array.isArray(j[0]))?j.map(x=>x&&(x.qh||x['Mã QH']||x['Ma QH']||x['QH'])).filter(Boolean):extractFromRows(j,false);
+        applyRows(rows);
+      }).catch(()=>{});
+    });
   }
 }
 function toggleSection(el){
