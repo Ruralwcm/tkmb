@@ -2041,13 +2041,16 @@ function renderScanProgress(){
   if(Array.isArray(window._qhCheckinRows)) window._qhCheckinRows.forEach(q=>{ if(q) scanned.add(String(q).trim()); });
   const isScanned=p=>scanned.has(String(p.qh).trim());
 
-  // Áp dụng crosslink filter (GĐV ↔ QLKV)
+  // Áp dụng crosslink filter (GĐV ↔ QLKV ↔ Miền/Tỉnh)
+  const mienOf=p=>{ const m=(typeof getMien==='function')?getMien(p.t):'Khác'; return m||'Khác'; };
   let fpts=pts;
   const filterTag=document.getElementById('spFilterTag');
   if(_spFilter){
     const {type,value}=_spFilter;
     if(type==='gdv') fpts=pts.filter(p=>normName(p.gdv)===value);
     else if(type==='qlkv') fpts=pts.filter(p=>normName(p.qlkv)===value);
+    else if(type==='mien') fpts=pts.filter(p=>mienOf(p)===value);
+    else if(type==='tinh') fpts=pts.filter(p=>normName(p.t)===value);
     if(filterTag){ filterTag.style.display='inline-flex'; filterTag.innerHTML='🔗 '+esc(value)+' <a href="javascript:void 0" onclick="spClearFilter()">✕</a>'; }
   } else if(filterTag){ filterTag.style.display='none'; }
 
@@ -2088,7 +2091,6 @@ function renderScanProgress(){
   }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
 
   // ── 3) Theo Miền → Tỉnh → Huyện (drill-down) ──
-  const mienOf=p=>{ const m=(typeof getMien==='function')?getMien(p.t):'Khác'; return m||'Khác'; };
   const byMien={};
   fpts.forEach(p=>{
     const m=mienOf(p), t=normName(p.t)||'(Chưa rõ)', h=normName(p.h)||'(Chưa rõ)';
@@ -2109,12 +2111,12 @@ function renderScanProgress(){
     const mPct=mTot?Math.round(mDon/mTot*100):0;
     const mC=_spBarClass(mPct);
     const openM=!!_spExpanded['mien:'+m];
-    mienHtml+='<tr class="sp-drill-mien" onclick="spToggleExpand(\'mien:'+escJS(m)+'\')"><td><span class="caret">'+(openM?'▾':'▸')+'</span> <b>'+esc(m)+'</b></td><td class="num">'+mTot+'</td><td class="num">'+mDon+'</td><td class="num"><span class="sp-pct '+mC+'">'+mPct+'%</span></td><td><div class="sp-bar"><i class="'+mC+'" style="width:'+mPct+'%"></i></div></td></tr>';
+    mienHtml+='<tr class="sp-drill-mien"><td><span class="caret" style="cursor:pointer" onclick="spToggleExpand(\'mien:'+escJS(m)+'\')">'+(openM?'▾':'▸')+'</span> <b style="cursor:pointer" onclick="spToggleFilter(\'mien\',\''+escJS(m)+'\')">'+esc(m)+'</b></td><td class="num">'+mTot+'</td><td class="num">'+mDon+'</td><td class="num"><span class="sp-pct '+mC+'">'+mPct+'%</span></td><td><div class="sp-bar"><i class="'+mC+'" style="width:'+mPct+'%"></i></div></td></tr>';
     if(openM){
       tinhNames.forEach(t=>{
         const th=mt.tinh[t].huyen; const tSum=sum(Object.values(th)); const tC=_spBarClass(tSum.pct);
         const openT=!!_spExpanded['tinh:'+m+'|'+t];
-        mienHtml+='<tr class="sp-drill-tinh" onclick="event.stopPropagation();spToggleExpand(\'tinh:'+escJS(m+'|'+t)+'\')"><td><span class="caret" style="color:var(--mut)">'+(openT?'▾':'▸')+'</span> '+esc(t)+'</td><td class="num">'+tSum.total+'</td><td class="num">'+tSum.done+'</td><td class="num"><span class="sp-pct '+tC+'">'+tSum.pct+'%</span></td><td><div class="sp-bar"><i class="'+tC+'" style="width:'+tSum.pct+'%"></i></div></td></tr>';
+        mienHtml+='<tr class="sp-drill-tinh"><td><span class="caret" style="cursor:pointer;color:var(--mut)" onclick="spToggleExpand(\'tinh:'+escJS(m+'|'+t)+'\')">'+(openT?'▾':'▸')+'</span> <span style="cursor:pointer" onclick="spToggleFilter(\'tinh\',\''+escJS(t)+'\')">'+esc(t)+'</span></td><td class="num">'+tSum.total+'</td><td class="num">'+tSum.done+'</td><td class="num"><span class="sp-pct '+tC+'">'+tSum.pct+'%</span></td><td><div class="sp-bar"><i class="'+tC+'" style="width:'+tSum.pct+'%"></i></div></td></tr>';
         if(openT){
           Object.keys(th).sort((a,b)=>th[b].total-th[a].total||a.localeCompare(b,'vi')).forEach(h=>{
             const hh=th[h]; const hC=_spBarClass(hh.pct===undefined?0:hh.total?Math.round(hh.done/hh.total*100):0);
