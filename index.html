@@ -99,6 +99,8 @@ nav.nav button.admin-only{display:none}
 .scanprog-tbl td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
 .scanprog-tbl tbody tr:last-child td{border-bottom:none}
 .scanprog-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.scanprog-tbl tr.sp-mien td{background:var(--navy);color:#fff;font-size:11px;padding:5px 8px;border-bottom:none;text-align:left}
+.scanprog-tbl tr.sp-mien td b{font-weight:800}
 .sp-bar{height:8px;border-radius:5px;background:#e5e9f2;overflow:hidden;min-width:70px}
 .sp-bar>i{display:block;height:100%;border-radius:5px;transition:width .4s}
 .sp-bar>i.hi{background:var(--green)}.sp-bar>i.mid{background:var(--orange)}.sp-bar>i.lo{background:var(--red)}.sp-bar>i.zero{background:#cbd2dd}
@@ -445,6 +447,19 @@ tr:hover{background:rgba(26,60,110,.03)}
 <div class="section" id="sec-dash">
   <div class="kpi-row" id="kpiMB"></div>
 
+  <div class="card">
+    <div class="sec-header" onclick="toggleSection(this)"><span class="arr">▼</span><h3>📊 MB Gần đây</h3></div>
+    <div class="sec-body">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <select id="dashMien" onchange="onDashMienChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả Miền</option></select>
+        <select id="dashTinh" onchange="onDashTinhChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả Tỉnh</option></select>
+        <select id="dashGDV" onchange="onDashGDVChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả GĐV</option></select>
+        <select id="dashQLKV" onchange="renderDash()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dashMB"><thead><tr><th>MB ID</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody id="dashMBBody"></tbody></table></div>
+    </div>
+  </div>
+
   <!-- ═══ DASHBOARD: TIẾN ĐỘ SCAN ĐIỂM QH ═══ -->
   <div class="scanprog-wrap" id="scanProgSection">
     <div class="scanprog-header">
@@ -458,22 +473,9 @@ tr:hover{background:rgba(26,60,110,.03)}
         <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgGDV"><thead><tr><th>GĐV</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
       </div>
       <div class="scanprog-card">
-        <div class="scanprog-card-head">📍 Theo Tỉnh</div>
+        <div class="scanprog-card-head">📍 Theo Tỉnh (nhóm theo Miền)</div>
         <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgTinh"><thead><tr><th>Tỉnh</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
       </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="sec-header" onclick="toggleSection(this)"><span class="arr">▼</span><h3>📊 MB Gần đây</h3></div>
-    <div class="sec-body">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <select id="dashMien" onchange="onDashMienChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả Miền</option></select>
-        <select id="dashTinh" onchange="onDashTinhChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả Tỉnh</option></select>
-        <select id="dashGDV" onchange="onDashGDVChange()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả GĐV</option></select>
-        <select id="dashQLKV" onchange="renderDash()" style="font-size:11px;padding:4px 8px;border-radius:4px"><option value="">Tất cả QLKV</option></select>
-      </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="dashMB"><thead><tr><th>MB ID</th><th>GĐV</th><th>Tỉnh</th><th>Trạng thái</th><th>Tiến độ</th><th>SLA</th><th></th></tr></thead><tbody id="dashMBBody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -2033,7 +2035,22 @@ function renderScanProgress(){
   const gdvRows=agg(p=>p.gdv);
   const tinhRows=agg(p=>p.t);
   const gtb=document.querySelector('#scanProgGDV tbody'); if(gtb) gtb.innerHTML=gdvRows.length?gdvRows.map(rowHtml).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
-  const ttb=document.querySelector('#scanProgTinh tbody'); if(ttb) ttb.innerHTML=tinhRows.length?tinhRows.map(rowHtml).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+
+  // Theo Tỉnh — nhóm theo Miền địa lý
+  tinhRows.forEach(r=>{ r.mien=(typeof getMien==='function')?getMien(r.name):'Khác'; });
+  const mienOrder=(Array.isArray(MIEN_LIST)?MIEN_LIST:[]).concat(['Khác']);
+  const tinhByMien={};
+  tinhRows.forEach(r=>{ const m=r.mien||'Khác'; if(!tinhByMien[m])tinhByMien[m]=[]; tinhByMien[m].push(r); });
+  let tinhHtml='';
+  mienOrder.forEach(m=>{
+    const grp=tinhByMien[m]; if(!grp||!grp.length) return;
+    const tot=grp.reduce((s,r)=>s+r.total,0);
+    const don=grp.reduce((s,r)=>s+r.done,0);
+    const pctM=tot?Math.round(don/tot*100):0;
+    tinhHtml+='<tr class="sp-mien"><td colspan="5"><b>'+esc(m)+'</b> <span style="color:var(--mut);font-size:11px">· '+tot+' điểm · đã scan '+don+' ('+pctM+'%)</span></td></tr>';
+    grp.forEach(r=>{ tinhHtml+=rowHtml(r); });
+  });
+  const ttb=document.querySelector('#scanProgTinh tbody'); if(ttb) ttb.innerHTML=tinhHtml||'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
 
   // Nạp thêm check-in từ tab QH_Checkin (1 lần) để bổ sung các điểm đã scan ở máy khác
   if(!window._qhCheckinLoaded && SESSION_TOKEN){
