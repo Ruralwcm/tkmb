@@ -1998,6 +1998,7 @@ function renderDash(){
 
 // ═══ DASHBOARD: TIẾN ĐỘ SCAN ĐIỂM QH ═══
 function _spBarClass(pct){ return pct>=50?'hi':pct>=20?'mid':pct>0?'lo':'zero'; }
+var GDV_ALIAS={'Nhận TC':'Tạ Công Nhận','Nhận':'Tạ Công Nhận'};
 function renderScanProgress(){
   const wrap=document.getElementById('scanProgSection'); if(!wrap) return;
   // Đảm bảo qhPoints (đã merge QHBS) đã nạp — nếu chưa thì nạp rồi vẽ lại
@@ -2024,9 +2025,10 @@ function renderScanProgress(){
     '<div class="sp-stat"><div class="n '+(pctAll>=50?'g':pctAll>=20?'gold':'r')+'">'+pctAll+'%</div><div class="l">Tỷ lệ hoàn thành</div></div>';
 
   // Gom nhóm theo khoá → {total,done}
+  const normName=s=>{ try{ s=(s||'').normalize('NFC'); }catch(e){} s=s.replace(/^(T\.|TP\.)\s*/,'').trim(); return (GDV_ALIAS&&GDV_ALIAS[s])?GDV_ALIAS[s]:s; };
   const agg=(keyFn)=>{
     const m={};
-    pts.forEach(p=>{ const k=(keyFn(p)||'(Chưa rõ)').trim()||'(Chưa rõ)'; if(!m[k])m[k]={total:0,done:0}; m[k].total++; if(isScanned(p))m[k].done++; });
+    pts.forEach(p=>{ const k=normName(keyFn(p))||'(Chưa rõ)'; if(!m[k])m[k]={total:0,done:0}; m[k].total++; if(isScanned(p))m[k].done++; });
     return Object.keys(m).map(k=>({name:k,total:m[k].total,done:m[k].done,pct:m[k].total?Math.round(m[k].done/m[k].total*100):0}))
       .sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name,'vi'));
   };
