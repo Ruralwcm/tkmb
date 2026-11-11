@@ -1479,14 +1479,16 @@ function renderScanResults(nearby,nearest,nd,errMsg){
       document.getElementById('scanQHResults').innerHTML='<div style="font-weight:600;font-size:12px;color:var(--teal);margin-bottom:6px">✅ Tìm thấy '+nearby.length+' điểm QH trong '+SCAN_RADIUS+'m</div>'+
         nearby.map(p=>{
           const info=[p.x,p.h,p.t].filter(Boolean).join(', ');
-          return '<div class="qh-card" onclick="openCheckin(\''+escJS(p.qh)+'\')"><div class="qh-code">'+esc(p.qh)+'</div><div class="qh-addr">📍 '+esc(info)+'</div><div class="qh-tags"><span class="qh-tag near">📏 '+Math.round(p.dist)+'m</span><span class="qh-tag gdv">👤 '+esc(p.gdv||'')+'</span></div></div>';
+          const qhbsTag=p.loai==='QHBS'?' <span style="color:var(--gold);font-weight:700">(QHBS)</span>':'';
+          return '<div class="qh-card" onclick="openCheckin(\''+escJS(p.qh)+'\')"><div class="qh-code">'+esc(p.qh)+qhbsTag+'</div><div class="qh-addr">📍 '+esc(info)+'</div><div class="qh-tags"><span class="qh-tag near">📏 '+Math.round(p.dist)+'m</span><span class="qh-tag gdv">👤 '+esc(p.gdv||'')+'</span></div></div>';
         }).join('');
       if(navigator.vibrate)navigator.vibrate(200);
     } else if(nearest){
       const d=Math.round(nd);
+      const nTag=nearest.loai==='QHBS'?' <span style="color:var(--gold)">(QHBS)</span>':'';
       document.getElementById('scanQHResults').innerHTML='<div class="no-result"><div style="font-size:48px;margin-bottom:8px">📭</div>'+
         '<div style="font-weight:600">Không có điểm QH trong '+SCAN_RADIUS+'m</div>'+
-        '<div style="margin-top:4px;font-size:12px">Gần nhất: <b>'+esc(nearest.qh)+'</b> cách <b>'+d+'m</b></div>'+
+        '<div style="margin-top:4px;font-size:12px">Gần nhất: <b>'+esc(nearest.qh)+nTag+'</b> cách <b>'+d+'m</b></div>'+
         '<div style="font-size:11px;color:var(--muted)">'+esc(nearest.t||'')+' · '+esc(nearest.h||'')+'</div></div>';
     } else {
       document.getElementById('scanQHResults').innerHTML='<div class="no-result"><div style="font-size:48px;margin-bottom:8px">📭</div><div>Không có điểm QH nào trong dữ liệu</div></div>';
@@ -1500,7 +1502,7 @@ function openCheckin(qh){
   checkinQHRef = qh;
   document.getElementById('scanHero').style.display='none';
   document.getElementById('checkinView').style.display='block';
-  document.getElementById('ciQH').value = scanSel.qh;
+  document.getElementById('ciQH').value = scanSel.qh + (scanSel.loai==='QHBS'?' (QHBS)':'');
   document.getElementById('ciTime').value = new Date().toLocaleString('vi-VN');
   document.getElementById('ciUser').value = currentUser?.name||'';
   document.getElementById('ciGPS').value = scanGPS.lat ? scanGPS.lat.toFixed(6)+', '+scanGPS.lng.toFixed(6) : '—';
@@ -1938,7 +1940,7 @@ function renderDash(){
     const curStep=currentStep(m);
     const slaCls=curStep?getSLAColor(m,curStep.s):'sla-ok';
     const slaText=curStep?STEP_SLA[curStep.s-1].slaLabel:'—';
-    return '<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr||'')+'"><strong>'+m.id+'</strong> <span style="font-size:11px;color:var(--muted)">'+esc(m.addr||'')+'</span></td><td><span class="tag tag-p">'+esc(m.nguon)+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
+    return '<tr><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr||'')+'"><strong>'+m.id+'</strong> <span style="font-size:11px;color:var(--muted)">'+esc(m.addr||'')+'</span></td><td><span class="tag tag-p">'+esc(m.nguon)+'</span></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'</td><td>'+statusTagHtml(m)+'</td><td><div class="mini-bar"><div class="mini-fill '+(hasFail?'fail':p.pct<50?'partial':'')+'" style="width:'+p.pct+'%"></div></div></td><td><span class="sla-badge '+slaCls+'">⏱ '+slaText+'</span></td><td style="white-space:nowrap">\n                <button class="btn btn-xs btn-outline" onclick="event.stopPropagation();openTracklog(\''+m.id+'\')" title="Xem & sửa tiến độ">👁</button>\n      </td></tr>';
   }).join('');
 }
 function toggleSection(el){
@@ -2043,7 +2045,7 @@ function renderTienDo(){
     let slaText='Vừa tạo', slaCls='sla-ok';
     const ps=m.steps.find(s=>s.r==='Fail')||m.steps.find(s=>s.r==='Pending'||s.r==='None');
     if(ps){ const st=slaState(m,ps.s); if(st==='over'){slaText='Đã quá hạn';slaCls='sla-over';}else if(st==='warn'){slaText='Sắp quá hạn';slaCls='sla-warn';} }
-    return '<tr><td><strong>'+m.id+'</strong><div class="qh-info-mini">'+m.nguon+'</div></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'<div class="qh-info-mini">'+esc(m.huyen||'')+' · '+(recTKMB(m.tinh,m.huyen,m.tkmb)?'TN: '+esc(recTKMB(m.tinh,m.huyen,m.tkmb)):'<b style="color:var(--red)">⚠️ chưa gán TN</b>')+'</div></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
+    return '<tr><td><strong>'+m.id+'</strong><div class="qh-info-mini">'+m.nguon+'</div></td><td>'+esc(m.gdv)+'</td><td>'+esc(m.tinh)+'<div class="qh-info-mini">'+esc(m.huyen||'')+' · '+(recTKMB(m.tinh,m.huyen,m.tkmb)?'TN: '+esc(recTKMB(m.tinh,m.huyen,m.tkmb)):'<b style="color:var(--red)">⚠️ chưa gán TN</b>')+'</div></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(m.addr)+'">'+esc(m.addr)+'</td><td>'+strip+'</td><td style="white-space:nowrap;font-size:12px"><span style="cursor:pointer" onclick="openStepModal(\''+m.id+'\','+curStep.s+')">'+(curStep.appr||'—')+'</span></td><td><span class="tag '+stCls+'">'+stShort+'</span></td><td><span class="sla-badge '+slaCls+'">'+slaText+'</span></td><td><button class="btn btn-xs btn-outline" onclick="openTracklog(\''+m.id+'\')">👁</button></td></tr>';
   }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Không có MB nào</td></tr>';
 }
 
