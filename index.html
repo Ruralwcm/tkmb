@@ -90,10 +90,22 @@ nav.nav button.admin-only{display:none}
 .sp-stat .n{font-size:21px;font-weight:800;font-family:var(--font-cond);letter-spacing:-.4px;color:var(--navy)}
 .sp-stat .n.g{color:var(--green)}.sp-stat .n.r{color:var(--red)}.sp-stat .n.gold{color:var(--gold)}
 .sp-stat .l{font-size:10px;color:var(--mut);text-transform:uppercase;font-weight:700;letter-spacing:.4px;margin-top:2px}
-.scanprog-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.scanprog-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:0 16px 16px}
 .scanprog-card{background:#fafbfd;border-radius:var(--radius-sm);border:1px solid var(--line);padding:12px;position:relative;overflow:hidden}
 .scanprog-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--navy);border-radius:0 3px 3px 0}
 .scanprog-card-head{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:8px;padding-left:4px}
+.scanprog-scroll{max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:6px;background:#fff}
+.sp-filter-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#fff;background:var(--red);border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.sp-filter-tag a{color:#fff;text-decoration:none;font-weight:800;cursor:pointer}
+.scanprog-tbl tr.sp-drill-mien{cursor:pointer}
+.scanprog-tbl tr.sp-drill-mien td{background:var(--navy);color:#fff;font-size:12px;padding:6px 8px;border-bottom:none;text-align:left}
+.scanprog-tbl tr.sp-drill-mien td b{font-weight:800}
+.scanprog-tbl tr.sp-drill-mien .caret{display:inline-block;width:14px;font-size:11px;color:rgba(255,255,255,.85)}
+.scanprog-tbl tr.sp-drill-tinh{cursor:pointer}
+.scanprog-tbl tr.sp-drill-tinh td{background:#eef2fa;font-size:11.5px;padding:4px 8px 4px 22px;border-bottom:1px solid #e2e8f2}
+.scanprog-tbl tr.sp-drill-tinh td:first-child{font-weight:600;color:#243b5e}
+.scanprog-tbl tr.sp-drill-huyen td{padding:3px 8px 3px 38px;font-size:11px;color:var(--mut);border-bottom:1px solid #f1f5f9}
+.scanprog-tbl tr.sp-drill-huyen td:first-child{color:#5b6b85}
 .scanprog-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .scanprog-tbl th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--mut);font-weight:700;letter-spacing:.3px;padding:5px 6px;border-bottom:1.5px solid var(--line);white-space:nowrap}
 .scanprog-tbl td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -469,12 +481,16 @@ tr:hover{background:rgba(26,60,110,.03)}
     <div class="scanprog-overview" id="scanProgOverview"></div>
     <div class="scanprog-grid">
       <div class="scanprog-card">
-        <div class="scanprog-card-head">👤 Theo GĐV</div>
-        <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgGDV"><thead><tr><th>GĐV</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
+        <div class="scanprog-card-head">👤 Theo GĐV <span class="sp-filter-tag" id="spFilterTag" style="display:none"></span></div>
+        <div class="scanprog-scroll"><table class="scanprog-tbl" id="scanProgGDV"><thead><tr><th>GĐV</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
       </div>
       <div class="scanprog-card">
-        <div class="scanprog-card-head">📍 Theo Tỉnh (nhóm theo Miền)</div>
-        <div style="overflow-x:auto"><table class="scanprog-tbl" id="scanProgTinh"><thead><tr><th>Tỉnh</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
+        <div class="scanprog-card-head">📍 Theo QLKV</div>
+        <div class="scanprog-scroll"><table class="scanprog-tbl" id="scanProgQLKV"><thead><tr><th>QLKV</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="scanprog-card">
+        <div class="scanprog-card-head">🗺️ Theo Miền địa lý <span style="font-weight:400;font-size:10px;color:var(--mut)">(bấm mở Tỉnh → Huyện)</span></div>
+        <div class="scanprog-scroll"><table class="scanprog-tbl" id="scanProgMien"><thead><tr><th>Miền / Tỉnh / Huyện</th><th>Tổng</th><th>Đã scan</th><th>%</th><th style="min-width:110px">Tiến độ</th></tr></thead><tbody></tbody></table></div>
       </div>
     </div>
   </div>
@@ -1999,6 +2015,15 @@ function renderDash(){
 // ═══ DASHBOARD: TIẾN ĐỘ SCAN ĐIỂM QH ═══
 function _spBarClass(pct){ return pct>=50?'hi':pct>=20?'mid':pct>0?'lo':'zero'; }
 var GDV_ALIAS={'Nhận TC':'Tạ Công Nhận','Nhận':'Tạ Công Nhận'};
+var _spFilter=null;       // {type:'gdv'|'qlkv', value:'...'}
+var _spExpanded={};       // { 'mien:X':true, 'tinh:Y':true }
+function spToggleFilter(type,val){
+  if(_spFilter && _spFilter.type===type && _spFilter.value===val){ _spFilter=null; }
+  else { _spFilter={type:type,value:val}; }
+  renderScanProgress();
+}
+function spClearFilter(){ _spFilter=null; renderScanProgress(); }
+function spToggleExpand(key){ _spExpanded[key]=!_spExpanded[key]; renderScanProgress(); }
 function renderScanProgress(){
   const wrap=document.getElementById('scanProgSection'); if(!wrap) return;
   // Đảm bảo qhPoints (đã merge QHBS) đã nạp — nếu chưa thì nạp rồi vẽ lại
@@ -2006,18 +2031,31 @@ function renderScanProgress(){
   // Danh sách tổng = qhPoints đã merge QHBS (lọc theo phạm vi user nếu là TKMB)
   let pts=(typeof getUserQHPoints==='function')?getUserQHPoints():qhPoints;
   pts=(pts||[]).filter(p=>p&&p.qh);
+
+  // Chuẩn hoá tên (NFC + alias GĐV)
+  const normName=s=>{ try{ s=(s||'').normalize('NFC'); }catch(e){} s=s.replace(/^(T\.|TP\.)\s*/,'').trim(); return (GDV_ALIAS&&GDV_ALIAS[s])?GDV_ALIAS[s]:s; };
+
   // Tập mã QH đã scan (có ≥1 check-in) — từ checkinLocal (localStorage) + tab QH_Checkin nếu đã nạp
   const scanned=new Set();
   (checkinLocal||[]).forEach(c=>{ if(c&&c.qh){ scanned.add(String(c.qh).replace(/\s*\(QHBS\)\s*$/,'').trim()); } });
   if(Array.isArray(window._qhCheckinRows)) window._qhCheckinRows.forEach(q=>{ if(q) scanned.add(String(q).trim()); });
   const isScanned=p=>scanned.has(String(p.qh).trim());
 
+  // Áp dụng crosslink filter (GĐV ↔ QLKV)
+  let fpts=pts;
+  const filterTag=document.getElementById('spFilterTag');
+  if(_spFilter){
+    const {type,value}=_spFilter;
+    if(type==='gdv') fpts=pts.filter(p=>normName(p.gdv)===value);
+    else if(type==='qlkv') fpts=pts.filter(p=>normName(p.qlkv)===value);
+    if(filterTag){ filterTag.style.display='inline-flex'; filterTag.innerHTML='🔗 '+esc(value)+' <a href="javascript:void 0" onclick="spClearFilter()">✕</a>'; }
+  } else if(filterTag){ filterTag.style.display='none'; }
+
+  // Tổng quan (luôn theo toàn bộ dữ liệu, không theo filter)
   const totalPts=pts.length;
   const doneCnt=pts.filter(isScanned).length;
   const remain=totalPts-doneCnt;
   const pctAll=totalPts?Math.round(doneCnt/totalPts*100):0;
-
-  // Tổng quan
   document.getElementById('scanProgOverview').innerHTML=
     '<div class="sp-stat"><div class="n">'+totalPts+'</div><div class="l">Tổng điểm QH</div></div>'+
     '<div class="sp-stat"><div class="n g">'+doneCnt+'</div><div class="l">✅ Đã scan</div></div>'+
@@ -2025,34 +2063,69 @@ function renderScanProgress(){
     '<div class="sp-stat"><div class="n '+(pctAll>=50?'g':pctAll>=20?'gold':'r')+'">'+pctAll+'%</div><div class="l">Tỷ lệ hoàn thành</div></div>';
 
   // Gom nhóm theo khoá → {total,done}
-  const normName=s=>{ try{ s=(s||'').normalize('NFC'); }catch(e){} s=s.replace(/^(T\.|TP\.)\s*/,'').trim(); return (GDV_ALIAS&&GDV_ALIAS[s])?GDV_ALIAS[s]:s; };
-  const agg=(keyFn)=>{
+  const agg=(keyFn, list)=>{
     const m={};
-    pts.forEach(p=>{ const k=normName(keyFn(p))||'(Chưa rõ)'; if(!m[k])m[k]={total:0,done:0}; m[k].total++; if(isScanned(p))m[k].done++; });
+    (list||fpts).forEach(p=>{ const k=normName(keyFn(p))||'(Chưa rõ)'; if(!m[k])m[k]={total:0,done:0}; m[k].total++; if(isScanned(p))m[k].done++; });
     return Object.keys(m).map(k=>({name:k,total:m[k].total,done:m[k].done,pct:m[k].total?Math.round(m[k].done/m[k].total*100):0}))
       .sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name,'vi'));
   };
-  const rowHtml=r=>{ const c=_spBarClass(r.pct); return '<tr><td>'+esc(r.name)+'</td><td class="num">'+r.total+'</td><td class="num">'+r.done+'</td><td class="num"><span class="sp-pct '+c+'">'+r.pct+'%</span></td><td><div class="sp-bar"><i class="'+c+'" style="width:'+r.pct+'%"></i></div></td></tr>'; };
+  const barCell=r=>{ const c=_spBarClass(r.pct); return '<td class="num">'+r.total+'</td><td class="num">'+r.done+'</td><td class="num"><span class="sp-pct '+c+'">'+r.pct+'%</span></td><td><div class="sp-bar"><i class="'+c+'" style="width:'+r.pct+'%"></i></div></td>'; };
 
+  // ── 1) Theo GĐV (click → crosslink) ──
   const gdvRows=agg(p=>p.gdv);
-  const tinhRows=agg(p=>p.t);
-  const gtb=document.querySelector('#scanProgGDV tbody'); if(gtb) gtb.innerHTML=gdvRows.length?gdvRows.map(rowHtml).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+  const gtb=document.querySelector('#scanProgGDV tbody');
+  if(gtb) gtb.innerHTML=gdvRows.length?gdvRows.map(r=>{
+    const active=_spFilter&&_spFilter.type==='gdv'&&_spFilter.value===r.name;
+    return '<tr style="cursor:pointer'+(active?';background:#fef2f2':'')+'" onclick="spToggleFilter(\'gdv\',\''+escJS(r.name)+'\')"><td>'+esc(r.name)+'</td>'+barCell(r)+'</tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
 
-  // Theo Tỉnh — nhóm theo Miền địa lý
-  tinhRows.forEach(r=>{ r.mien=(typeof getMien==='function')?getMien(r.name):'Khác'; });
-  const mienOrder=(Array.isArray(MIEN_LIST)?MIEN_LIST:[]).concat(['Khác']);
-  const tinhByMien={};
-  tinhRows.forEach(r=>{ const m=r.mien||'Khác'; if(!tinhByMien[m])tinhByMien[m]=[]; tinhByMien[m].push(r); });
-  let tinhHtml='';
-  mienOrder.forEach(m=>{
-    const grp=tinhByMien[m]; if(!grp||!grp.length) return;
-    const tot=grp.reduce((s,r)=>s+r.total,0);
-    const don=grp.reduce((s,r)=>s+r.done,0);
-    const pctM=tot?Math.round(don/tot*100):0;
-    tinhHtml+='<tr class="sp-mien"><td colspan="5"><b>'+esc(m)+'</b> <span style="color:var(--mut);font-size:11px">· '+tot+' điểm · đã scan '+don+' ('+pctM+'%)</span></td></tr>';
-    grp.forEach(r=>{ tinhHtml+=rowHtml(r); });
+  // ── 2) Theo QLKV (click → crosslink) ──
+  const qlkvRows=agg(p=>p.qlkv);
+  const qtb=document.querySelector('#scanProgQLKV tbody');
+  if(qtb) qtb.innerHTML=qlkvRows.length?qlkvRows.map(r=>{
+    const active=_spFilter&&_spFilter.type==='qlkv'&&_spFilter.value===r.name;
+    return '<tr style="cursor:pointer'+(active?';background:#fef2f2':'')+'" onclick="spToggleFilter(\'qlkv\',\''+escJS(r.name)+'\')"><td>'+esc(r.name)+'</td>'+barCell(r)+'</tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+
+  // ── 3) Theo Miền → Tỉnh → Huyện (drill-down) ──
+  const mienOf=p=>{ const m=(typeof getMien==='function')?getMien(p.t):'Khác'; return m||'Khác'; };
+  const byMien={};
+  fpts.forEach(p=>{
+    const m=mienOf(p), t=normName(p.t)||'(Chưa rõ)', h=normName(p.h)||'(Chưa rõ)';
+    if(!byMien[m]) byMien[m]={tinh:{}};
+    if(!byMien[m].tinh[t]) byMien[m].tinh[t]={huyen:{}};
+    if(!byMien[m].tinh[t].huyen[h]) byMien[m].tinh[t].huyen[h]={total:0,done:0};
+    byMien[m].tinh[t].huyen[h].total++;
+    if(isScanned(p)) byMien[m].tinh[t].huyen[h].done++;
   });
-  const ttb=document.querySelector('#scanProgTinh tbody'); if(ttb) ttb.innerHTML=tinhHtml||'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
+  const mienOrder=(Array.isArray(MIEN_LIST)?MIEN_LIST.slice():[]).concat(Object.keys(byMien).filter(m=>!(Array.isArray(MIEN_LIST)&&MIEN_LIST.includes(m))).sort());
+  const sum=(objs)=>{ let t=0,d=0; objs.forEach(o=>{t+=o.total;d+=o.done;}); return {total:t,done:d,pct:t?Math.round(d/t*100):0}; };
+  let mienHtml='';
+  mienOrder.forEach(m=>{
+    const mt=byMien[m]; if(!mt) return;
+    const tinhNames=Object.keys(mt.tinh).sort((a,b)=>mt.tinh[b].huyen&&mt.tinh[a].huyen?(sum(Object.values(mt.tinh[b].huyen)).total-sum(Object.values(mt.tinh[a].huyen)).total):0);
+    const mTot=tinhNames.reduce((s,t)=>s+sum(Object.values(mt.tinh[t].huyen)).total,0);
+    const mDon=tinhNames.reduce((s,t)=>s+sum(Object.values(mt.tinh[t].huyen)).done,0);
+    const mPct=mTot?Math.round(mDon/mTot*100):0;
+    const mC=_spBarClass(mPct);
+    const openM=!!_spExpanded['mien:'+m];
+    mienHtml+='<tr class="sp-drill-mien" onclick="spToggleExpand(\'mien:'+escJS(m)+'\')"><td><span class="caret">'+(openM?'▾':'▸')+'</span> <b>'+esc(m)+'</b></td><td class="num">'+mTot+'</td><td class="num">'+mDon+'</td><td class="num"><span class="sp-pct '+mC+'">'+mPct+'%</span></td><td><div class="sp-bar"><i class="'+mC+'" style="width:'+mPct+'%"></i></div></td></tr>';
+    if(openM){
+      tinhNames.forEach(t=>{
+        const th=mt.tinh[t].huyen; const tSum=sum(Object.values(th)); const tC=_spBarClass(tSum.pct);
+        const openT=!!_spExpanded['tinh:'+m+'|'+t];
+        mienHtml+='<tr class="sp-drill-tinh" onclick="event.stopPropagation();spToggleExpand(\'tinh:'+escJS(m+'|'+t)+'\')"><td><span class="caret" style="color:var(--mut)">'+(openT?'▾':'▸')+'</span> '+esc(t)+'</td><td class="num">'+tSum.total+'</td><td class="num">'+tSum.done+'</td><td class="num"><span class="sp-pct '+tC+'">'+tSum.pct+'%</span></td><td><div class="sp-bar"><i class="'+tC+'" style="width:'+tSum.pct+'%"></i></div></td></tr>';
+        if(openT){
+          Object.keys(th).sort((a,b)=>th[b].total-th[a].total||a.localeCompare(b,'vi')).forEach(h=>{
+            const hh=th[h]; const hC=_spBarClass(hh.pct===undefined?0:hh.total?Math.round(hh.done/hh.total*100):0);
+            mienHtml+='<tr class="sp-drill-huyen"><td>'+esc(h)+'</td><td class="num">'+hh.total+'</td><td class="num">'+hh.done+'</td><td class="num"><span class="sp-pct '+hC+'">'+(hh.total?Math.round(hh.done/hh.total*100):0)+'%</span></td><td><div class="sp-bar"><i class="'+hC+'" style="width:'+(hh.total?Math.round(hh.done/hh.total*100):0)+'%"></i></div></td></tr>';
+          });
+        }
+      });
+    }
+  });
+  const mtb=document.querySelector('#scanProgMien tbody');
+  if(mtb) mtb.innerHTML=mienHtml||'<tr><td colspan="5" style="text-align:center;color:var(--mut);padding:12px">Chưa có dữ liệu</td></tr>';
 
   // Nạp thêm check-in từ tab QH_Checkin (1 lần) để bổ sung các điểm đã scan ở máy khác
   if(!window._qhCheckinLoaded && SESSION_TOKEN){
