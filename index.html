@@ -4151,7 +4151,9 @@ function storeInfoHTML(sap){
   if(B){
     const aff=B.affect, col=aff==null?'':(aff>=0?'#16a34a':'#dc2626');
     L.push('🟢 <b>BHX:</b> '+fmtNum(B.kc)+' m · KT '+esc(B.ngayKT||'—')+' · Affect DT: '+(aff!=null?'<span style="color:'+col+';font-weight:700">'+(aff>=0?'+':'')+aff.toFixed(1)+'%</span>':'chưa đủ dữ liệu')
-      +(B.spdTruoc!=null&&B.spdSau!=null?' <span style="font-size:11px;color:var(--muted)">(SPD 4 tuần trước→sau KT: '+fmtNum(B.spdTruoc,1)+'→'+fmtNum(B.spdSau,1)+'tr)</span>':'')
+      +(B.w1!==undefined
+        ? '<br><span style="font-size:11.5px">SPD <b>8W trước</b>: '+(B.spd8W!=null?fmtNum(B.spd8W,1)+'tr':'—')+[B.w1,B.w2,B.w3,B.w4].map(function(v,i){ return ' | <b>4W'+(i+1)+'</b>: '+(v!=null?fmtNum(v,1)+'tr'+pctTag(v,B.spd8W):'<span style="color:var(--muted)">chưa đủ</span>'); }).join('')+'</span>'
+        : (B.spdTruoc!=null&&B.spdSau!=null?' <span style="font-size:11px;color:var(--muted)">(SPD 4 tuần trước→sau KT: '+fmtNum(B.spdTruoc,1)+'→'+fmtNum(B.spdSau,1)+'tr)</span>':''))
       +(d.bhxCount>1?' <span style="font-size:11px;color:var(--muted)">· +'+(d.bhxCount-1)+' BHX khác</span>':''));
   } else L.push('🟢 BHX: không có BHX trong bán kính rà soát');
   if(d.capNhat) L.push('<span style="font-size:10.5px;color:var(--muted)">Nguồn Bigdata · cập nhật '+esc(d.capNhat)+'</span>');
