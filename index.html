@@ -564,7 +564,7 @@ tr:hover{background:rgba(26,60,110,.03)}
   <div class="hl">
     <img src="logo.png" alt="WinMart+">
     <div>
-      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8</span></h1>
+      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8.1</span></h1>
       <div class="sub">📊 Tiến độ Mặt bằng — Rural Miền Bắc</div>
     </div>
   </div>
@@ -703,7 +703,7 @@ tr:hover{background:rgba(26,60,110,.03)}
   <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">🗺 Định vị Map</div>
   <div class="map-box">
    <div style="font-size:24px;flex-shrink:0">📍</div>
-   <div style="flex:1;min-width:0"><div class="fg"><label>Link Google Maps hoặc Tọa độ (lat, lng)</label><input type="text" id="mbMapLink" placeholder="VD: 21.0179, 105.9650" oninput="onMapInput()"></div></div>
+   <div style="flex:1;min-width:0"><div class="fg"><label>Link Google Maps hoặc Tọa độ (lat, lng)</label><input type="text" id="mbMapLink" placeholder="VD: 21.0179, 105.9650" oninput="onMapInput()" onblur="mbNormLL()"><div id="mbLLHint" style="font-size:11px;color:var(--muted);margin-top:3px"></div></div></div>
   </div>
   <div id="mapResult" style="display:none"><div class="qh-result-cards" style="flex-wrap:wrap">
    <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1"><div style="font-size:8px;color:var(--muted)">📍 Điểm QH gần nhất</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhName">—</div><div style="font-size:9px;color:var(--muted)" id="qhDetail"></div></div>
@@ -711,7 +711,7 @@ tr:hover{background:rgba(26,60,110,.03)}
    <div style="background:#fff;border-radius:8px;padding:8px 10px;text-align:center;flex:1" id="qhGDVBox"><div style="font-size:8px;color:var(--muted)">👤 GĐV</div><div style="font-weight:700;color:var(--primary);font-size:11px" id="qhDetectedGDV">—</div></div>
   </div></div>
 
-  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">👥 GĐV → QLKV → Tỉnh → Huyện</div>
+  <div style="font-weight:600;font-size:11px;color:var(--primary);text-transform:uppercase;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--teal-border)">👥 GĐV → QLKV → Tỉnh → Huyện <span style="text-transform:none;font-weight:500;color:var(--muted)">· tự gợi ý theo vị trí, có thể sửa</span></div>
   <div class="gr gr2">
    <div class="fg"><label>GĐV</label><select id="mbGDV" onchange="onGDVChange()"><option value="">-- Chọn GĐV --</option></select></div>
    <div class="fg"><label>QLKV</label><select id="mbQLKV" onchange="onQLKVChange()" disabled><option value="">-- Chọn QLKV --</option></select></div>
@@ -1697,6 +1697,16 @@ function getUserQHPoints(){
 function guestCid(){ let c=''; try{ c=localStorage.getItem('tkmb_cid')||''; if(!c){ c=Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('tkmb_cid',c); } }catch(e){} return c; }
 function mergeQHPoints(list){ (list||[]).forEach(p=>{ if(!p||!p.qh) return; const o=qhPoints.find(x=>x.qh===p.qh); if(!o) qhPoints.push(p); else Object.keys(p).forEach(k=>{ if(p[k]!==''&&p[k]!=null&&(o[k]===''||o[k]==null)) o[k]=p[k]; }); }); }
 let _guestAreaKey='';
+function mbLoadArea(lat,lng){
+  if(!lat||!lng) return Promise.resolve(null);
+  return gasPost({action:'guestArea',lat,lng,cid:guestCid()},20000).then(r=>{
+    const j=r.j; if(!(j&&j.ok)) return null;
+    const C=j.cascade||{}; Object.keys(C).forEach(g=>Object.keys(C[g]).forEach(q=>Object.keys(C[g][q]).forEach(t=>{ const hs=C[g][q][t]; if(!hs.length) cascadeAdd(g,q,t,''); hs.forEach(h=>cascadeAdd(g,q,t,h)); })));
+    const cur=document.getElementById('mbGDV').value; populateGDV(true); if(cur) document.getElementById('mbGDV').value=cur;
+    if(j.nearest){ const had=qhPoints.some(p=>p.qh===j.nearest.qh); mergeQHPoints([j.nearest]); return had?null:j.nearest; }
+    return null;
+  }).catch(()=>null);
+}
 function guestLoadArea(lat,lng){
   if(currentUser||!lat||!lng) return Promise.resolve(null);
   const key=lat.toFixed(2)+','+lng.toFixed(2);
@@ -1940,28 +1950,60 @@ function onQLKVChange(){
   ['mbTinh','mbHuyen'].forEach(id=>{document.getElementById(id).innerHTML='<option value="">-- Chọn --</option>';document.getElementById(id).disabled=true;});
   if(!gdv||!qlkv||!CASCADE_DATA[gdv]||!CASCADE_DATA[gdv][qlkv])return;
   const tinh=document.getElementById('mbTinh');
-  Object.keys(CASCADE_DATA[gdv][qlkv]).sort((a,b)=>a.replace(/^(T|TP)\.\s*/,'').localeCompare(b.replace(/^(T|TP)\.\s*/,''),'vi')).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tinh.appendChild(o);});
+  mbAllTinh(Object.keys(CASCADE_DATA[gdv][qlkv])).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;tinh.appendChild(o);});
   tinh.disabled=false;
 }
 function onTinhChange(){
   const gdv=document.getElementById('mbGDV').value,qlkv=document.getElementById('mbQLKV').value,tinh=document.getElementById('mbTinh').value;
   document.getElementById('mbHuyen').innerHTML='<option value="">-- Chọn --</option>';
   document.getElementById('mbHuyen').disabled=true;
-  if(!gdv||!qlkv||!tinh||!CASCADE_DATA[gdv]||!CASCADE_DATA[gdv][qlkv]||!CASCADE_DATA[gdv][qlkv][tinh])return;
+  if(!tinh)return;
   const huyen=document.getElementById('mbHuyen');
-  CASCADE_DATA[gdv][qlkv][tinh].forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;huyen.appendChild(o);});
+  const own=(CASCADE_DATA[gdv]&&CASCADE_DATA[gdv][qlkv]&&CASCADE_DATA[gdv][qlkv][tinh])||[];
+  mbAllHuyen(tinh,own).forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;huyen.appendChild(o);});
   huyen.disabled=false;
 }
+/* Đọc tọa độ từ ô nhập: link Google Maps (@lat,lng · q= · !3d!4d), "21.15, 105.41",
+   kiểu dấu phẩy thập phân "21,1576057, 105,4121416", hoặc đảo thứ tự lng,lat */
+function parseLatLngText(v){
+  v=String(v||'').trim(); if(!v) return null;
+  const ok=(a,b)=>{ a=+a; b=+b; if(a>100&&b<30){ const t=a; a=b; b=t; } return (a>8&&a<24&&b>100&&b<110)?{lat:a,lng:b}:null; };
+  let m=v.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)||v.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)||v.match(/[?&](?:q|query|center|ll|destination)=(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+  if(m) return ok(m[1],m[2]);
+  m=v.match(/(-?\d{1,3}),(\d{3,})\s*[,;]?\s+(-?\d{1,3}),(\d{3,})/)||v.match(/(-?\d{1,3}),(\d{3,})\s*;\s*(-?\d{1,3}),(\d{3,})/);
+  if(m) return ok(m[1]+'.'+m[2],m[3]+'.'+m[4]);
+  m=v.match(/(-?\d{1,3}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)/);
+  if(m) return ok(m[1],m[2]);
+  return null;
+}
+let _mbAreaKey='';
+/* Danh sách đầy đủ (không khoá theo user): mục của GĐV/QLKV đang chọn xếp trước */
+function mbAllTinh(first){
+  const all={}; Object.values(CASCADE_DATA).forEach(G=>Object.values(G).forEach(Q=>Object.keys(Q).forEach(t=>{ const k=normPlace(t); if(!all[k]) all[k]=t; })));
+  (qhPoints||[]).forEach(p=>{ if(p.t){ const k=normPlace(p.t); if(!all[k]) all[k]=p.t; } });
+  const f=(first||[]).map(t=>{ const k=normPlace(t); const v=all[k]||t; delete all[k]; return v; });
+  const st=x=>x.replace(/^(T|TP)\.\s*/,'');
+  return f.sort((a,b)=>st(a).localeCompare(st(b),'vi')).concat(Object.values(all).sort((a,b)=>st(a).localeCompare(st(b),'vi')));
+}
+function mbAllHuyen(tinh,first){
+  const tk=normPlace(tinh), all={};
+  Object.values(CASCADE_DATA).forEach(G=>Object.values(G).forEach(Q=>Object.keys(Q).forEach(t=>{ if(normPlace(t)===tk) Q[t].forEach(h=>{ const k=normPlace(h); if(!all[k]) all[k]=h; }); })));
+  (qhPoints||[]).forEach(p=>{ if(p.h&&normPlace(p.t)===tk){ const k=normPlace(p.h); if(!all[k]) all[k]=p.h; } });
+  const f=(first||[]).map(h=>{ const k=normPlace(h); const v=all[k]||h; delete all[k]; return v; });
+  const st=x=>x.replace(/^(H|TP|TX|Q)\.\s*/,'');
+  return f.sort((a,b)=>st(a).localeCompare(st(b),'vi')).concat(Object.values(all).sort((a,b)=>st(a).localeCompare(st(b),'vi')));
+}
+function mbNormLL(){ const el=document.getElementById('mbMapLink'); const v=el.value.trim(); if(!v||/^https?:/i.test(v)) return; const P=parseLatLngText(v); if(P){ el.value=P.lat.toFixed(7)+', '+P.lng.toFixed(7); onMapInput(); } }
 function onMapInput(){
   const v=document.getElementById('mbMapLink').value.trim();
-  let lat,lng;
-  const coordMatch=v.match(/([\d.]+)\s*[,;\s]\s*([\d.]+)/);
-  if(coordMatch){lat=parseFloat(coordMatch[1]);lng=parseFloat(coordMatch[2]);}
-  else{ const m=v.match(/[?&](?:q|center)=([\d.-]+),([\d.-]+)/); if(m){lat=parseFloat(m[1]);lng=parseFloat(m[2]);} }
-  if(lat&&lng&&!currentUser){ clearTimeout(window._gaT); window._gaT=setTimeout(()=>{ _guestAreaKey=''; guestLoadArea(lat,lng).then(p=>{ if(p) onMapInput(); }); },600); }
+  const P=parseLatLngText(v); const lat=P&&P.lat, lng=P&&P.lng;
+  const hint=document.getElementById('mbLLHint');
+  if(hint) hint.textContent=v&&!P?'⚠️ Không đọc được tọa độ — nhập dạng 21.1576, 105.4121 hoặc dán link Google Maps':(P?'📍 '+lat.toFixed(6)+', '+lng.toFixed(6):'');
+  // Lấy danh sách GĐV/QLKV/Tỉnh/Huyện quanh vị trí (không giới hạn theo user) + điểm QH gần nhất
+  if(lat&&lng){ const k=lat.toFixed(2)+','+lng.toFixed(2); if(k!==_mbAreaKey){ clearTimeout(window._gaT); window._gaT=setTimeout(()=>{ _mbAreaKey=k; mbLoadArea(lat,lng).then(p=>{ if(p) onMapInput(); }); },600); } }
   if(!lat||!lng||!qhPoints.length){document.getElementById('mapResult').style.display='none';return;}
   let nearest=null,nd=Infinity;
-  for(const p of qhPoints){const d=haversine(lat,lng,p.lat,p.lng);if(d<nd){nd=d;nearest=p;}}
+  for(const p of qhPoints){ if(!p.lat||!p.lng) continue; const d=haversine(lat,lng,p.lat,p.lng);if(d<nd){nd=d;nearest=p;}}
   if(!nearest){document.getElementById('mapResult').style.display='none';return;}
   document.getElementById('qhName').textContent=nearest.qh;
   document.getElementById('qhDetail').textContent=[nearest.x,nearest.h,nearest.t].filter(Boolean).join(', ');
@@ -2050,7 +2092,8 @@ function submitMB(){
   const addr=document.getElementById('mbAddr').value;
   const data={
     nguon:'TKMB', gdv,qlkv,tinh,huyen,addr,
-    mapLink:document.getElementById('mbMapLink').value,
+    mapLink:(function(){ const v=document.getElementById('mbMapLink').value.trim(), P=parseLatLngText(v); return (P&&!/^https?:/i.test(v))?('https://www.google.com/maps?q='+P.lat.toFixed(7)+','+P.lng.toFixed(7)):v; })(),
+    lat:(parseLatLngText(document.getElementById('mbMapLink').value)||{}).lat||'', lng:(parseLatLngText(document.getElementById('mbMapLink').value)||{}).lng||'',
     area:document.getElementById('mbArea').value, front:document.getElementById('mbFront').value,
     price:document.getElementById('mbPrice').value, payment:document.getElementById('mbPayment').value,
     deposit:document.getElementById('mbDeposit').value, duration:document.getElementById('mbDuration').value,
