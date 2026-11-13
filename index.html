@@ -564,7 +564,7 @@ tr:hover{background:rgba(26,60,110,.03)}
   <div class="hl">
     <img src="logo.png" alt="WinMart+">
     <div>
-      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8.1</span></h1>
+      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8.2</span></h1>
       <div class="sub">📊 Tiến độ Mặt bằng — Rural Miền Bắc</div>
     </div>
   </div>
@@ -4519,11 +4519,9 @@ function openQHBSForm(){
   var sel=document.getElementById('qhbsTinh');
   sel.innerHTML='<option value="">-- Chọn --</option>'+tinhs.map(function(t){return '<option>'+t+'</option>';}).join('');
 
-  // 2) GĐV/QLKV mặc định theo user
-  if(currentUser){
-    document.getElementById('qhbsGdv').value=currentUser.gdv||'';
-    document.getElementById('qhbsQlkv').value=currentUser.rank==='QLKV'?(String(currentUser.qlkv||currentUser.name).split('|')[0]):'';
-  }
+  // 2) GĐV/QLKV: không khoá theo user — gợi ý theo vị trí (điểm QH gần nhất), server gán lại theo Bigdata khi lưu
+  document.getElementById('qhbsGdv').value='';
+  document.getElementById('qhbsQlkv').value='';
   document.getElementById('qhbsNote').value='';
   document.getElementById('qhbsHuyen').innerHTML='<option value="">-- Chọn --</option>';
   qhbsSyncLatLngView();
@@ -4562,13 +4560,11 @@ function qhbsAutoFill(lat,lng){
   // A0) CH gần nhất → Mã CH + KC + gợi ý GĐV/QLKV/Tỉnh/Huyện
   qhbsUpdateNearestCH(lat,lng);
 
-  // A) Tỉnh/Huyện + GĐV/QLKV theo điểm QH gần nhất (dữ liệu nội bộ, không cần mạng)
+  // A) Tỉnh/Huyện + GĐV/QLKV theo điểm QH gần nhất trong dữ liệu đã tải (chỉ tin nếu ≤ 3km — ngoài phạm vi user sẽ xa)
   var near=qhbsFindNearest(lat,lng);
-  if(near){
-    qhbsSetPlace(near.t,near.h);
-    if(near.gdv) document.getElementById('qhbsGdv').value=near.gdv;
-    if(near.qlkv) document.getElementById('qhbsQlkv').value=near.qlkv;
-  }
+  if(near && near.dist<=3000) qhbsApplyNear(near);
+  // A2) Tra cứu toàn mạng (không giới hạn phạm vi user): danh sách địa bàn + điểm QH gần nhất
+  qhbsLoadArea(lat,lng,near);
 
   // B) Mã QHBS
   qhbsRefreshCode();
@@ -4584,6 +4580,28 @@ function qhbsAutoFill(lat,lng){
   });
 }
 
+function qhbsApplyNear(n,force){
+  if(force){ document.getElementById('qhbsTinh').value=''; document.getElementById('qhbsHuyen').value=''; }
+  qhbsSetPlace(n.t,n.h);
+  if(n.gdv) document.getElementById('qhbsGdv').value=n.gdv;
+  if(n.qlkv) document.getElementById('qhbsQlkv').value=String(n.qlkv).replace(/\s+\d+$/,'');
+}
+var _qhbsAreaSeq=0;
+function qhbsLoadArea(lat,lng,localNear){
+  var seq=++_qhbsAreaSeq;
+  return gasPost({action:'guestArea',lat:lat,lng:lng,cid:guestCid()},20000).then(function(r){
+    var j=r.j; if(seq!==_qhbsAreaSeq||!(j&&j.ok)) return;
+    var C=j.cascade||{}; Object.keys(C).forEach(function(g){ Object.keys(C[g]).forEach(function(q){ Object.keys(C[g][q]).forEach(function(t){ var hs=C[g][q][t]; if(!hs.length) cascadeAdd(g,q,t,''); hs.forEach(function(h){ cascadeAdd(g,q,t,h); }); }); }); });
+    // làm mới danh sách tỉnh (giữ lựa chọn)
+    var st=document.getElementById('qhbsTinh'), cur=st.value, ch=document.getElementById('qhbsHuyen').value;
+    st.innerHTML='<option value="">-- Chọn --</option>'+qhbsAllTinhs().map(function(t){return '<option>'+t+'</option>';}).join('');
+    if(cur){ st.value=cur; onQHBSTinhChange(); if(ch) qhbsPickOption(document.getElementById('qhbsHuyen'),ch,true); }
+    var n=j.nearest; if(!n) return;
+    n.lat=+n.lat; n.lng=+n.lng; var dn=haversine(lat,lng,n.lat,n.lng);
+    var useSrv=!(localNear&&localNear.dist<=3000&&localNear.dist<=dn+1);
+    if(useSrv){ qhbsApplyNear(n,true); qhbsRefreshCode(); }
+  }).catch(function(){});
+}
 function closeQHBSModal(){ document.getElementById('qhbsModal').style.display='none'; if(qhbsMarkerRef&&qhbsMap){ qhbsMap.removeLayer(qhbsMarkerRef); qhbsMarkerRef=null; } ['qhbsLat','qhbsLng','qhbsLatLng','qhbsMaCH','qhbsKcCH','qhbsName','qhbsNote'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';}); const ni=document.getElementById('qhbsNearCH'); if(ni) ni.textContent=''; }
 
 function showSuccess(main,sub){
@@ -4642,7 +4660,8 @@ async function saveQHBS(){
     maCH:document.getElementById('qhbsMaCH').value, kcCH:document.getElementById('qhbsKcCH').value,
     nguoiDeXuat:(existing&&existing.nguoiDeXuat)||(currentUser&&currentUser.name)||'',
     ngayDeXuat:(existing&&existing.ngayDeXuat)||new Date().toISOString(), nguon:'QHBS',
-    ttGDV:(existing&&existing.ttGDV)||'Chờ duyệt', ttQH:(existing&&existing.ttQH)||''
+    ttGDV:(existing&&existing.ttGDV)||'Chờ duyệt', ttQH:(existing&&existing.ttQH)||'',
+    isNew:!qhbsEditTarget
   };
 
   if(!qhbsEditTarget && (qhbsData||[]).some(p=>p.qh===maQHBS)){ document.getElementById('qhbsName').value=qhbsNextCode(tinh); toast('⚠️ Mã '+maQHBS+' đã có — đã đổi sang mã mới, bấm Lưu lại','err'); return; }
@@ -4651,10 +4670,11 @@ async function saveQHBS(){
     const r=await gasPost(d,20000);
     const j=r.j||{};
     if(j.ok){
+      const code=j.qh||maQHBS, g2=j.gdv||d.gdv, q2=j.qlkv||d.qlkv;
       closeQHBSModal();
-      showSuccess('Thành công','Đã gửi đề xuất '+maQHBS+' — chờ GĐV duyệt');
+      showSuccess('Thành công','Đã gửi đề xuất '+code+(g2?' — chờ GĐV '+g2+' duyệt':' — chờ GĐV duyệt'));
       loadQHBSData();
-      try{ mergeQHPoints([{qh:maQHBS,t:tinh,h:huyen,x:'',lat:+lat,lng:+lng,gdv:d.gdv,qlkv:d.qlkv,loai:'QHBS'}]); }catch(_){}
+      try{ mergeQHPoints([{qh:code,t:tinh,h:huyen,x:'',lat:+lat,lng:+lng,gdv:g2,qlkv:q2,loai:'QHBS'}]); }catch(_){}
     } else toast('❌ '+(j.error||'Lỗi lưu'),'err');
   }catch(e){
     if(!existing) qhbsData.push(d); try{ localStorage.setItem(QHBS_CACHE_KEY,JSON.stringify(qhbsData)); }catch(err){}
