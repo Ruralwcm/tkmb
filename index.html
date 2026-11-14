@@ -564,7 +564,7 @@ tr:hover{background:rgba(26,60,110,.03)}
   <div class="hl">
     <img src="logo.png" alt="WinMart+">
     <div>
-      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8.3</span></h1>
+      <h1>TKMB <span style="font-size:10px;opacity:.75;font-weight:400">v3.8.4</span></h1>
       <div class="sub">📊 Tiến độ Mặt bằng — Rural Miền Bắc</div>
     </div>
   </div>
@@ -3771,8 +3771,12 @@ function nearestStore_(lat,lng){
 function qhbsUpdateNearestCH(lat,lng){
   var elMa=document.getElementById('qhbsMaCH'), elKc=document.getElementById('qhbsKcCH'), elInfo=document.getElementById('qhbsNearCH');
   if(!elMa) return;
-  loadStores_().then(function(){
-    var s=nearestStore_(lat,lng);
+  // CH gần nhất tính trên TOÀN BỘ CH (server); danh sách STORES ở máy chỉ có CH trong phạm vi user → chỉ dùng khi server lỗi
+  var seq=(qhbsUpdateNearestCH._s=(qhbsUpdateNearestCH._s||0)+1);
+  gasPost({action:'nearStore',lat:lat,lng:lng},15000).then(function(r){ var j=r.j; if(j&&j.ok&&j.store) return j.store; throw 0; })
+  .catch(function(){ return loadStores_().then(function(){ return nearestStore_(lat,lng); }); })
+  .then(function(s){
+    if(seq!==qhbsUpdateNearestCH._s) return;
     if(!s){ elMa.value=''; elKc.value=''; if(elInfo) elInfo.textContent=''; return; }
     elMa.value=s.sap;
     elKc.value=Math.round(s.dist);
